@@ -11,6 +11,7 @@ func main() {
 	r := &api.Router{}
 
 	r.AddRoute("GET", "/posts", http.HandlerFunc(handlers.HandlePosts))
+	r.AddRoute("GET", "/", http.HandlerFunc(handlers.HomeHandler))
 
 	fmt.Println("starting go server")
 	err := http.ListenAndServe(":8080", r)
