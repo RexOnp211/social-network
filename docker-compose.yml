@@ -1,0 +1,33 @@
+services:
+  api:
+    container_name: go_api
+    restart: unless-stopped
+    image: go_api:1.0
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      - FE_URL=http://app:3000
+    networks:
+      - shared-network
+  app:
+    depends_on:
+      - api
+    container_name: next_client
+    restart: unless-stopped
+    image: next_client:1.0
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - API_URL=http://api:8080
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    driver: bridge
