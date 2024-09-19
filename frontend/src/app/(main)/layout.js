@@ -3,10 +3,14 @@ import TopBar from "@/components/topbar";
 
 export default function DefaultLayout({ children }) {
   return (
-    <div>
+    <>
       <TopBar />
-      <SideBar />
-      <div>{children}</div>
-    </div>
+      <div className="flex w-auto">
+        <SideBar />
+        <div className="m-3 w-[90vw] bg-primary rounded-lg shadow-lg p-6">
+          <div>{children}</div>
+        </div>
+      </div>
+    </>
   );
 }

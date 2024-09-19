@@ -7,9 +7,13 @@ export default async function Home() {
   return (
     <>
       <TopBar />
-      <SideBar />
-      <h1>Home Page </h1>
-      <p>{res.message}</p>
+      <div className="flex w-auto">
+        <SideBar />
+        <div className="m-3 w-[90vw] text-txtColor bg-primary rounded-lg shadow-lg p-6">
+          <h1>Home Page </h1>
+          <p>{res.message}</p>
+        </div>
+      </div>
     </>
   );
 }
