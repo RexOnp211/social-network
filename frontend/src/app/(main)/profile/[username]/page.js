@@ -6,7 +6,7 @@ import { useState } from "react";
 
 export default function Profile({ params }) {
   const alt = "Profile Image";
-  const img = "/image/sunset.jpg";
+  const img = "/image/profile-default.png";
   const [option, setOption] = useState("public");
   const OnChange = (e) => {
     setOption(e.target.value);
