@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"regexp"
 )
 
 type Route struct {
@@ -34,8 +34,10 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 func (r *Router) getHandler(method, path string) http.Handler {
 	for _, route := range r.routes {
-		re := regexp.MustCompile(route.Pattern)
-		if route.Method == method && re.MatchString(path) {
+		fmt.Println("route pattern", route.Pattern)
+		fmt.Println("path", path)
+		if route.Method == method && route.Pattern == path {
+			fmt.Println(route)
 			return route.Handler
 		}
 	}
@@ -45,11 +47,14 @@ func (r *Router) getHandler(method, path string) http.Handler {
 func corsHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		w.Header().Set("Access-Control-Allow-Methods", "Get, Post, Put, Delete")
-		if r.Method == "OPTIONS" {
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
+
 		next.ServeHTTP(w, r)
 	})
 }
