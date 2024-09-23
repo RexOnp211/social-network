@@ -1,18 +1,18 @@
 "use client";
 
+import FetchFromBackend from "@/lib/fetch";
+
+
 export default function Register() {
   const OnSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const nickname = formData.get("nickname");
-    const email = formData.get("email");
-    const password = formData.get("password");
-    const firstname = formData.get("firstname");
-    const lastname = formData.get("lastname");
-    const dob = formData.get("dob");
-    const avatar = formData.get("avatar");
-    const aboutMe = formData.get("aboutme");
-  };
+    FetchFromBackend("/register", {
+      method: "POST",
+      headers: {},
+      body: formData,
+    });
+  }
   return (
     <div className="flex w-screen h-screen justify-center items-center">
       <div className="p-6 bg-primary rounded-lg w-96 h-auto">

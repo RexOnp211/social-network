@@ -16,7 +16,7 @@ func RegisterUserDB(data []interface{}) error {
 		return nil
 	}
 
-	stmt, err := DB.Prepare("INSERT INTO users (nickname, email, password, firstname, lastname, dob, aboutme) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO users (nickname, email, password, firstname, lastname, dob, aboutme, avatar) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Prepare statement error:", err)
 		return err
