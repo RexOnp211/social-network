@@ -14,6 +14,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var DB *sql.DB
+
 func main() {
 
 	// Ensure the database file exists
@@ -28,6 +30,7 @@ func main() {
 		fmt.Println("DB Open Error:", err)
 		return
 	}
+	DB = db
 
 	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
 	if err != nil {
@@ -52,6 +55,7 @@ func main() {
 	r.AddRoute("GET", "/posts", http.HandlerFunc(handlers.HandlePosts))
 	r.AddRoute("GET", "/", http.HandlerFunc(handlers.HomeHandler))
 	r.AddRoute("POST", "/", http.HandlerFunc(handlers.CreatePostHandler))
+	r.AddRoute("POST", "/register", http.HandlerFunc(handlers.RegisterUser))
 
 	fmt.Println("Starting Go server")
 	err = http.ListenAndServe(":8080", r)

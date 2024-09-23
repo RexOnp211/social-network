@@ -3,14 +3,14 @@ CREATE TABLE IF NOT EXISTS categories (
     category TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS users (
-    user_id UUID PRIMARY KEY NOT NULL,
-    username TEXT NOT NULL UNIQUE,
-    age INTEGER,
-    gender TEXT,
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    nickname TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    password TEXT DEFAULT NULL,
     firstname TEXT NOT NULL,
     lastname TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    password TEXT DEFAULT NULL
+    dob DATE NOT NULL,
+    aboutme TEXT NOT NULL       
 );
 CREATE TABLE IF NOT EXISTS posts (
     post_id UUID PRIMARY KEY NOT NULL,
