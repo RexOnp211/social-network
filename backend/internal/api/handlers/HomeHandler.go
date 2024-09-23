@@ -188,12 +188,30 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-	var post pkg.Post
-	err := json.NewDecoder(r.Body).Decode(&post)
+	err := r.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
+		fmt.Println("Error parsing form", err)
 		return
 	}
-	fmt.Println(post)
+
+	file, header, err := r.FormFile("image")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println("Error getting file", err)
+		return
+	}
+	title := r.FormValue("title")
+	postBody := r.FormValue("postBody")
+	fmt.Println(title, postBody)
+
+	defer file.Close()
+
+	filepath, err := pkg.SaveFile(file, header, "post")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error saving file", err)
+		return
+	}
+	fmt.Println(filepath)
 }

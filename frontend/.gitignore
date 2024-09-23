@@ -34,3 +34,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/public/image/upload/*
+!/public/image/upload/.gitkeep
+
+/public/image/avatar/*
+!/public/image/avatar/.gitkeep

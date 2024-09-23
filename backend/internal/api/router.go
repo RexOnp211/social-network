@@ -34,8 +34,6 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 func (r *Router) getHandler(method, path string) http.Handler {
 	for _, route := range r.routes {
-		fmt.Println("route pattern", route.Pattern)
-		fmt.Println("path", path)
 		if route.Method == method && route.Pattern == path {
 			fmt.Println(route)
 			return route.Handler

@@ -4,7 +4,6 @@ import TopBar from "@/components/topbar";
 import SideBar from "@/components/sidebar";
 import CreatePost from "@/components/createPost";
 import FetchFromBackend from "@/lib/fetch";
-import { Select } from "@headlessui/react";
 import { useEffect, useState } from "react";
 
 export default function Home() {

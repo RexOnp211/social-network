@@ -1,39 +1,28 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Select } from "@headlessui/react";
 import FetchFromBackend from "@/lib/fetch";
 
 export default function CreatePost(type) {
   const [option, setOption] = useState("public");
-  const [isCollapsed, setIsCollapsed] = useState(true);
 
   function OnChange(e) {
     setOption(e.target.value);
   }
 
-  function toggleCollapse() {
-    setIsCollapsed(!isCollapsed);
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
-    const form = new FormData(e.target);
-    const title = form.get("postTitle");
-    const postBody = form.get("postBody");
-    // const image = form.get("image");
-    // will have to make a function for image storage
-    const privacy = form.get("privacy");
-    FetchFromBackend("/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: title,
-        postBody: postBody,
-        privacy: privacy,
-      }),
-    });
+    try {
+      const form = new FormData(e.target);
+      FetchFromBackend("/", {
+        method: "POST",
+        headers: {},
+        body: form,
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
@@ -105,6 +94,7 @@ export default function CreatePost(type) {
             <option value="private">Private</option>
             <option value="friends">Friends</option>
           </Select>
+          {option === "friends" ? <div>choose what friends see this</div> : ""}
 
           <button
             type="submit"

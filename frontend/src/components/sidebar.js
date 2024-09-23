@@ -40,25 +40,30 @@ export default function SideBar() {
       <nav className="flex flex-col space-y-4 overflow-y-auto">
         <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
           <h1 className="text-lg text-accent font-bold">Followers</h1>
-          {renderList(
-            followers,
-            showMoreFollowers,
-            setShowMoreFollowers,
-            "follower",
-          )}
+          <RenderList
+            items={followers}
+            showMoreState={showMoreFollowers}
+            setShowMoreState={setShowMoreFollowers}
+            type="follower"
+          />
         </div>
         <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
           <h1 className="text-lg text-accent font-bold">Following</h1>
-          {renderList(
-            following,
-            showMoreFollowing,
-            setShowMoreFollowing,
-            "following",
-          )}
+          <RenderList
+            items={following}
+            showMoreState={showMoreFollowing}
+            setShowMoreState={setShowMoreFollowing}
+            type="following"
+          />
         </div>
         <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
           <h1 className="text-lg text-accent font-bold">Browse Groups</h1>
-          {renderList(groups, showMoreGroups, setShowMoreGroups, "group")}
+          <RenderList
+            items={groups}
+            showMoreState={showMoreGroups}
+            setShowMoreState={setShowMoreGroups}
+            type="group"
+          />
         </div>
         <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
           <a href="/createGroup" className="text-txtColor hover:underline">
@@ -67,14 +72,19 @@ export default function SideBar() {
         </div>
         <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
           <h1 className="text-lg text-accent font-bold">Upcoming Events</h1>
-          {renderList(events, showMoreEvents, setShowMoreEvents, "event")}
+          <RenderList
+            items={events}
+            showMoreState={showMoreEvents}
+            setShowMoreState={setShowMoreEvents}
+            type="event"
+          />
         </div>
       </nav>
     </div>
   );
 }
 
-const renderList = (items, showMoreState, setShowMoreState, type) => {
+const RenderList = ({ items, showMoreState, setShowMoreState, type }) => {
   return (
     <>
       <ul className="list-disc pl-5 marker:text-txtColor">
