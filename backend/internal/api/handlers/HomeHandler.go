@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"social-network/pkg"
+	db "social-network/pkg/db/sqlite"
+
+	"github.com/gofrs/uuid"
 )
 
 // gets posts from the database for the home page
@@ -201,11 +204,10 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error getting file", err)
 		return
 	}
-	title := r.FormValue("title")
-	postBody := r.FormValue("postBody")
-	fmt.Println(title, postBody)
-
 	defer file.Close()
+	subject := r.FormValue("postTitle")
+	content := r.FormValue("postBody")
+	privacy := r.FormValue("privacy")
 
 	filepath, err := pkg.SaveFile(file, header, "post")
 	if err != nil {
@@ -213,5 +215,23 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error saving file", err)
 		return
 	}
+
+	post_id, err := uuid.NewV4()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error generating uuid", err)
+		return
+	}
+
+	userId := 1
+
+	data := []interface{}{post_id, userId, subject, content, privacy, filepath}
+	err = db.AddPostToDb(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error adding post to db", err)
+		return
+	}
+
 	fmt.Println(filepath)
 }
