@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
@@ -11,6 +12,7 @@ import (
 func SaveFile(file multipart.File, header *multipart.FileHeader, imgtype string) (string, error) {
 	defer file.Close()
 	var uploadDir string
+	fmt.Println(header.Header)
 	if imgtype == "post" {
 		uploadDir = "./../../../frontend/public/image/upload"
 	} else if imgtype == "avatar" {
@@ -21,7 +23,7 @@ func SaveFile(file multipart.File, header *multipart.FileHeader, imgtype string)
 	}
 
 	// TODO: add user id to filename
-	userFileName := "userName-" + header.Filename
+	userFileName := "userName" + "-" + header.Filename // userName is a placeholder
 	filename := filepath.Join(uploadDir, userFileName)
 	outFile, err := os.Create(filename)
 	if err != nil {

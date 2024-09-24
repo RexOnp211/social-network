@@ -4,7 +4,9 @@ import TopBar from "@/components/topbar";
 import SideBar from "@/components/sidebar";
 import CreatePost from "@/components/createPost";
 import FetchFromBackend from "@/lib/fetch";
+import Image from "next/image";
 import { useEffect, useState } from "react";
+import ProfileImage from "@/components/profileImage";
 
 export default function Home() {
   const [post, setPost] = useState(0);
@@ -13,6 +15,7 @@ export default function Home() {
       try {
         const res = await FetchFromBackend("/");
         const jsonData = await res.json();
+        console.log(jsonData);
         setPost(jsonData);
       } catch (error) {
         console.error(error);
@@ -30,9 +33,36 @@ export default function Home() {
           <CreatePost />
           {post.length > 0 ? (
             post.map((post) => (
-              <div key={post.id} className="bg-secondary p-4 rounded-lg m-4">
-                <h1 className="text-xl font-bold">{post.title}</h1>
-                <p>{post.postBody}</p>
+              <div
+                key={post.postId}
+                className="bg-secondary p-4 rounded-lg m-4"
+              >
+                <a
+                  className="flex flex-row items-center"
+                  href={`/profile/${post.userId}`}
+                >
+                  <ProfileImage
+                    alt={post.subject}
+                    width={100}
+                    height={100}
+                    size={40}
+                    userId={post.userId}
+                  />
+                  {post.userId}
+                </a>
+                <h1 className="text-xl font-bold">{post.subject}</h1>
+                <p>{post.content}</p>
+                {post.image ? (
+                  <Image
+                    src={post.image}
+                    alt="post image"
+                    width={500}
+                    height={500}
+                    className="w-auto h-48"
+                  />
+                ) : (
+                  ""
+                )}
               </div>
             ))
           ) : (

@@ -30,22 +30,20 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	lastname := r.FormValue("lastname")
 	dob := r.FormValue("dob")
 	file, header, err := r.FormFile("avatar")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Println("Error getting file", err)
-		return
+	filepath := "/image/profile.default.png"
+	if err == nil {
+		defer file.Close()
+		filepath, err = pkg.SaveFile(file, header, "avatar")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			fmt.Println("Error saving file", err)
+			return
+		}
 	}
 	aboutMe := r.FormValue("aboutme")
 	encryptedPassword, err2 := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err2 != nil {
 		http.Error(w, "Error hashing password", http.StatusInternalServerError)
-		return
-	}
-
-	filepath, err := pkg.SaveFile(file, header, "avatar")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Error saving file", err)
 		return
 	}
 

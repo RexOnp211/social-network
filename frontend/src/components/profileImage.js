@@ -1,6 +1,10 @@
 import Image from "next/image";
 
-export default function ProfileImage({ src, alt, width, height, size }) {
+// width and height are the quality of the image and size is the size of the image in html
+export default function ProfileImage({ alt, width, height, size, userId }) {
+  // TODO: Fetch user profile image from images using userId
+  const username = "userName"; // placeholder
+  const src = "/image/avatar/" + username;
   return (
     <div className="overflow-hidden">
       <div style={{ width: size, height: size }}>
