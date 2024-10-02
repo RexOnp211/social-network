@@ -18,3 +18,8 @@ type User struct {
 	Dob       string `json:"dob"`
 	AboutMe   string `json:"aboutMe"`
 }
+
+type Login struct {
+	Username string `json:"email"`
+	Password string `json:"password"`
+}
