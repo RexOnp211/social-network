@@ -2,9 +2,13 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
-	"social-network/pkg"
+
+	"social-network/pkg/helpers"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var DB *sql.DB
@@ -32,6 +36,33 @@ func RegisterUserDB(data []interface{}) error {
 	return nil
 }
 
+func LoginUserDB(username string, password string) (helpers.Login, error) {
+	var login helpers.Login
+	var fieldname string
+
+	err := DB.QueryRow("SELECT username, password FROM users WHERE "+fieldname+" = ?", username).Scan(&login.Username, &login.Password)
+	if err != nil {
+		return login, errors.New("can't find username")
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(login.Password), []byte(password))
+	if err != nil {
+		return login, errors.New("wrong Password")
+	}
+	return login, nil
+}
+
+// GetUserIDByUsernameOrEmail retrieves a user ID based on their username or email.
+func GetUserIDByUsernameOrEmail(username string) (int, error) {
+	var userID int
+	var fieldname string
+
+	err := DB.QueryRow("SELECT user_id FROM users WHERE "+fieldname+" = ?", username).Scan(&userID)
+	if err != nil {
+		return 0, err
+	}
+	return userID, nil
+}
+
 func AddPostToDb(data []interface{}) error {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
@@ -54,7 +85,7 @@ func AddPostToDb(data []interface{}) error {
 	return nil
 }
 
-func GetPostsFromDb() ([]pkg.Post, error) {
+func GetPostsFromDb() ([]helpers.Post, error) {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
 		fmt.Println("DB Open Error:", err)
@@ -67,9 +98,9 @@ func GetPostsFromDb() ([]pkg.Post, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	posts := []pkg.Post{}
+	posts := []helpers.Post{}
 	for rows.Next() {
-		post := pkg.Post{}
+		post := helpers.Post{}
 		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.CreationDate, &post.Image, &post.Privacy)
 		if err != nil {
 			log.Println("Scan error:", err)

@@ -1,4 +1,8 @@
-package pkg
+package helpers
+
+import (
+	"time"
+)
 
 type Post struct {
 	PostId       string `json:"postId"`
@@ -19,4 +23,16 @@ type User struct {
 	Lastname  string `json:"lastname"`
 	Dob       string `json:"dob"`
 	AboutMe   string `json:"aboutMe"`
+}
+
+type Login struct {
+	Username string `json:"email"`
+	Password string `json:"password"`
+}
+
+type Session struct {
+	Username     string    `json:"username"`
+	SessionToken string    `json:"session_token"`
+	ExpireTime   time.Time `json:"expire_time"`
+	UserID       int       `json:"user_id"`
 }
