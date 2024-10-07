@@ -1,11 +1,13 @@
 package pkg
 
 type Post struct {
-	Id       int    `json:"id"`
-	Title    string `json:"title"`
-	PostBody string `json:"postBody"`
-	Image    string `json:"image"`
-	Privacy  string `json:"privacy"`
+	PostId       string `json:"postId"`
+	UserId       string `json:"userId"`
+	Subject      string `json:"subject"`
+	Content      string `json:"content"`
+	Privacy      string `json:"privacy"`
+	CreationDate string `json:"creationDate"`
+	Image        string `json:"image"`
 }
 
 type User struct {
