@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"social-network/internal/api/handlers"
+	"strings"
 )
 
 type Route struct {
@@ -24,12 +26,25 @@ func NewRouter() *Router {
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
-	method := req.Method
+    method := req.Method
 
-	handler := r.getHandler(method, path)
-	newHandler := corsHandler(handler)
+    // process all requests with /profile/...
+    if strings.HasPrefix(path, "/profile/") {
+        corsHandler(http.HandlerFunc(handlers.ProfileHandler)).ServeHTTP(w, req)
+        return
+    }
 
-	newHandler.ServeHTTP(w, req)
+	 // process all requests with /group/...
+	 if strings.HasPrefix(path, "/group/") {
+        corsHandler(http.HandlerFunc(handlers.GroupHandler)).ServeHTTP(w, req)
+        return
+    }
+
+    // process other requests
+    handler := r.getHandler(method, path)
+    newHandler := corsHandler(handler)
+
+    newHandler.ServeHTTP(w, req)
 }
 
 func (r *Router) getHandler(method, path string) http.Handler {

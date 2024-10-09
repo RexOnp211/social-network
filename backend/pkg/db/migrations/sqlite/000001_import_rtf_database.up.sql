@@ -9,14 +9,36 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT DEFAULT NULL,
     firstname TEXT NOT NULL,
     lastname TEXT NOT NULL,
-    dob DATE NOT NULL,
-    aboutme TEXT NOT NULL       
+    dob DATE NOT NULL, -- date of birth
+    aboutme TEXT NOT NULL,
+    public INTEGER DEFAULT 1, -- profile public status: 1 = public, 0 = private
+    avatar TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS groups (
+    group_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    creator_id UUID NOT NULL,
+    title TEXT NOT NULL UNIQUE,
+    description TEXT NOT NULL,
+    FOREIGN KEY(creator_id) REFERENCES users(user_id)
+);
+CREATE TABLE IF NOT EXISTS group_posts (
+    post_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    group_id INTEGER NOT NULL,
+    user_id UUID NOT NULL,
+    subject TEXT NOT NULL,
+    content TEXT NOT NULL,
+    image TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(group_id) REFERENCES users(group_id)
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
 CREATE TABLE IF NOT EXISTS posts (
     post_id UUID PRIMARY KEY NOT NULL,
     user_id UUID NOT NULL,
     subject TEXT NOT NULL,
     content TEXT NOT NULL,
+    image TEXT DEFAULT NULL,
+    privacy TEXT DEFAULT 'public',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
