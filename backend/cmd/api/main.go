@@ -18,14 +18,16 @@ var DB *sql.DB
 
 func main() {
 
-	// Ensure the database file exists
-	if _, err := os.Stat("../../pkg/db/database.db"); os.IsNotExist(err) {
-		fmt.Println("Database file does not exist:", err)
-		return
-	}
-
+	dbPath := "../../pkg/db/database.db"
 	// Correct database path
-	db, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		_, err := os.Create(dbPath)
+		if err != nil {
+			fmt.Println("Error creating db file:", err)
+			return
+		}
+	}
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		fmt.Println("DB Open Error:", err)
 		return
@@ -38,9 +40,11 @@ func main() {
 		return
 	}
 
+	migrationPath := "file://../../pkg/db/migrations/sqlite"
+
 	// Correct migration path
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://../../pkg/db/migrations/sqlite", "sqlite3", driver)
+		migrationPath, "sqlite3", driver)
 	if err != nil {
 		fmt.Println("Migration Instance Error:", err)
 		return
@@ -56,6 +60,7 @@ func main() {
 	r.AddRoute("GET", "/", http.HandlerFunc(handlers.HomeHandler))
 	r.AddRoute("POST", "/", http.HandlerFunc(handlers.CreatePostHandler))
 	r.AddRoute("POST", "/register", http.HandlerFunc(handlers.RegisterUser))
+	r.AddRoute("GET", "/image/", http.HandlerFunc(handlers.GetImageHandler))
 
 	fmt.Println("Starting Go server")
 	err = http.ListenAndServe(":8080", r)
