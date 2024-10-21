@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type Route struct {
@@ -34,8 +35,13 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 func (r *Router) getHandler(method, path string) http.Handler {
 	for _, route := range r.routes {
+		fmt.Println("Method", method, "Path", path, "Pattern", route.Pattern)
+		fmt.Println("last char:", route.Pattern[len(route.Pattern)-1], "char printed:", '/')
 		if route.Method == method && route.Pattern == path {
-			fmt.Println(route)
+			fmt.Println("Route mathed")
+			return route.Handler
+		} else if route.Pattern[len(route.Pattern)-1] == '/' && route.Pattern != "/" && strings.Contains(path, route.Pattern) && route.Method == method {
+			fmt.Println("dynamic Route mathed")
 			return route.Handler
 		}
 	}

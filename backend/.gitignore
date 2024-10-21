@@ -1,1 +1,4 @@
 /pkg/db/database.db
+
+/assets/image/upload/*
+!/assets/image/upload/.gitkeep

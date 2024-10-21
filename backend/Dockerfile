@@ -1,17 +1,13 @@
-FROM golang:1.22 AS builder
+FROM golang:1.22-bookworm
 
 WORKDIR /app
 
-COPY go.mod ./
+COPY go.mod go.sum ./
 RUN go mod download
-COPY . ./
+COPY . .
 
 WORKDIR /app/cmd/api
-RUN go build -o /bin/myapp .
 
-FROM debian:bookworm AS run
-WORKDIR /app
-COPY --from=builder /bin/myapp /bin/myapp
-EXPOSE 8080
+RUN go build -o main .
 
-CMD ["/bin/myapp"]
+CMD ["/app/cmd/api/main"]
