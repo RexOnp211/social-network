@@ -58,6 +58,8 @@ func main() {
 	r := &api.Router{}
 	r.AddRoute("GET", "/posts", http.HandlerFunc(handlers.HandlePosts))
 	r.AddRoute("GET", "/", http.HandlerFunc(handlers.HomeHandler))
+	r.AddRoute("GET", "/profile/", http.HandlerFunc(handlers.ProfileHandler))
+	r.AddRoute("GET", "/group/", http.HandlerFunc(handlers.GroupHandler))
 	r.AddRoute("POST", "/", http.HandlerFunc(handlers.CreatePostHandler))
 	r.AddRoute("POST", "/register", http.HandlerFunc(handlers.RegisterUser))
 	r.AddRoute("GET", "/image/", http.HandlerFunc(handlers.GetImageHandler))

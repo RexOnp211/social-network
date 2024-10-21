@@ -5,13 +5,13 @@ import (
 )
 
 type Post struct {
-	PostId       string `json:"postId"`
-	UserId       string `json:"userId"`
-	Subject      string `json:"subject"`
-	Content      string `json:"content"`
-	Privacy      string `json:"privacy"`
-	CreationDate string `json:"creationDate"`
-	Image        string `json:"image"`
+	PostId       string  `json:"postId"`
+	UserId       string  `json:"userId"`
+	Subject      string  `json:"subject"`
+	Content      string  `json:"content"`
+	Privacy      string  `json:"privacy"`
+	CreationDate string  `json:"creationDate"`
+	Image        *string `json:"image"`
 }
 
 type User struct {
@@ -23,8 +23,16 @@ type User struct {
 	Lastname  string `json:"lastname"`
 	Dob       string `json:"dob"`
 	AboutMe   string `json:"aboutMe"`
+	Public    bool   `json:"public"`
+	Avatar    string `json:"avatar"`
 }
 
+type Group struct {
+	Id          string `json:"groupId"`
+	CreatorId   string `json:"creatorId"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
 type Login struct {
 	Username string `json:"email"`
 	Password string `json:"password"`
