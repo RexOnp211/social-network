@@ -18,13 +18,13 @@ export default function Login() {
           className="flex flex-col justify-center items-center"
         >
           <div className="mb-4 w-full">
-            <label htmlFor="email" className="block ">
-              Email/Username:
+            <label htmlFor="username" className="block ">
+              Username:
             </label>
             <input
               type="text"
-              id="email"
-              name="email"
+              id="username"
+              name="username"
               required
               className="w-full p-2 rounded-lg"
             />

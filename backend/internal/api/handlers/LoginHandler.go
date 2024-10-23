@@ -16,7 +16,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username := r.FormValue("email")
+	username := r.FormValue("username")
 	password := r.FormValue("password")
 	login, err := db.LoginUserDB(username, password)
 	if err != nil {
