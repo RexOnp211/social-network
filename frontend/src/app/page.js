@@ -54,7 +54,7 @@ export default function Home() {
                 <p>{post.content}</p>
                 {post.image ? (
                   <Image
-                    src={"http://localhost:8080/image/" + post.image}
+                    src={"http://localhost:8080" + post.image}
                     alt="post image"
                     width={500}
                     height={500}

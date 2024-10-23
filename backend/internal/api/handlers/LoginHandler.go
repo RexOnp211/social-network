@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	db "social-network/pkg/db/sqlite"
@@ -19,6 +20,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	login, err := db.LoginUserDB(username, password)
 	if err != nil {
+		fmt.Println("Error logging in", err)
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte(err.Error()))
 		log.Printf("Login failed: %v", err)
@@ -26,12 +28,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	userID, err := db.GetUserIDByUsernameOrEmail(username)
 	if err != nil {
+		fmt.Println("Error getting user ID", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to get user ID"))
 		return
 	}
 	token, err := NewSession(w, login.Username, userID)
 	if err != nil {
+		fmt.Println("Error creating session", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to create session"))
 		return

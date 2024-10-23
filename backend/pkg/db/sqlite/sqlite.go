@@ -111,8 +111,8 @@ func GetPostsFromDb() ([]helpers.Post, error) {
 	return posts, nil
 }
 
-func GetUserFromDb(nickname string) (pkg.User, error) {
-	user := pkg.User{}
+func GetUserFromDb(nickname string) (helpers.User, error) {
+	user := helpers.User{}
 
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
@@ -137,7 +137,7 @@ func GetUserFromDb(nickname string) (pkg.User, error) {
 	return user, nil
 }
 
-func GetUserPostFromDbByUser(userId int) ([]pkg.Post, error) {
+func GetUserPostFromDbByUser(userId int) ([]helpers.Post, error) {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
 		fmt.Println("DB Open Error:", err)
@@ -150,9 +150,9 @@ func GetUserPostFromDbByUser(userId int) ([]pkg.Post, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	posts := []pkg.Post{}
+	posts := []helpers.Post{}
 	for rows.Next() {
-		post := pkg.Post{}
+		post := helpers.Post{}
 		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.CreationDate, &post.Image, &post.Privacy)
 		if err != nil {
 			log.Println("Scan error:", err)
@@ -165,8 +165,8 @@ func GetUserPostFromDbByUser(userId int) ([]pkg.Post, error) {
 	return posts, nil
 }
 
-func GetGroupFromDb(groupname string) (pkg.Group, error) {
-	group := pkg.Group{}
+func GetGroupFromDb(groupname string) (helpers.Group, error) {
+	group := helpers.Group{}
 
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {

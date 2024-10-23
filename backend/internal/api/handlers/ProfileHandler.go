@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"social-network/pkg"
 	db "social-network/pkg/db/sqlite"
+	"social-network/pkg/helpers"
 	"strings"
 )
 
 type UserResponse struct {
-	User  pkg.User   `json:"user"`
-	Posts []pkg.Post `json:"posts"`
+	User  helpers.User   `json:"user"`
+	Posts []helpers.Post `json:"posts"`
 }
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,11 +36,11 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 
 	// fetch posts by user_id
 	posts, err := db.GetUserPostFromDbByUser(user.Id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			fmt.Println("Error getting user's post", err)
-			return
-		}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error getting user's post", err)
+		return
+	}
 
 	// TODO: fetch followers
 	/* followers, err := db.GetFollowersFromDb(path)
@@ -49,7 +49,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error getting followers", err)
 		return
 	}
- */
+	*/
 	// TODO: fetch followings
 	/* followings, err := db.GetFollowingsFromDb(path)
 	if err != nil {
@@ -63,7 +63,6 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		Posts: posts,
 	}
 	log.Println("response", response)
-
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
