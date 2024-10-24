@@ -101,7 +101,7 @@ func GetPostsFromDb() ([]helpers.Post, error) {
 	posts := []helpers.Post{}
 	for rows.Next() {
 		post := helpers.Post{}
-		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.CreationDate, &post.Image, &post.Privacy)
+		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.Image, &post.Privacy, &post.CreationDate)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return nil, err
