@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"social-network/pkg"
+	"social-network/pkg/helpers"
 	db "social-network/pkg/db/sqlite"
 
 	"github.com/gofrs/uuid"
@@ -37,7 +37,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	filepath := ""
 	if err == nil {
 		defer file.Close()
-		filepath, err = pkg.SaveFile(file, header, "post")
+		filepath, err = helpers.SaveFile(file, header, "post")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			fmt.Println("Error saving file", err)

@@ -4,6 +4,8 @@ import ProfileImage from "@/components/profileImage";
 import { Select } from "@headlessui/react";
 import FetchFromBackend from "@/lib/fetch";
 import formatDate from "@/lib/formatDate";
+import fetchCredential from "@/lib/fetchCredential";
+import ProfilePrivacyToggle from "@/components/profilePrivacyToggle";
 
 export default function Profile({ params }) {
   const { username } = params;
@@ -13,6 +15,8 @@ export default function Profile({ params }) {
   const [following, setFollowing] = useState([]);
   const [option, setOption] = useState("public");
   const [isOwner, setIsOwner] = useState(false);
+  const [userNotFound, setUserNotFound] = useState(false);
+  const [isPrivateProfile, setIsPrivateProfile] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // TODO: check the profile is own (compare login info and the page path)
@@ -21,51 +25,73 @@ export default function Profile({ params }) {
 
   // fetch user information
   useEffect(() => {
-    async function loadData() {
+    const fetchData = async () => {
       setLoading(true);
+      setIsOwner(false);
+      setUserNotFound(false);
       console.log(`starting process for ${username}`);
 
-      // fetch user information from users table
-      const response = await FetchFromBackend(`/profile/${username}`, {
-        method: "GET",
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${username}`);
+      try {
+        // check the login username
+        const credential = await fetchCredential();
+        console.log(`credential`, credential);
+
+        // fetch user information from database
+        const userResponse = await FetchFromBackend(`/profile/${username}`, {
+          method: "GET",
+        });
+        // show message when the user is not found
+        if (!userResponse.ok) {
+          console.log(`Failed to fetch ${username}`);
+          setUserNotFound(true);
+          setLoading(false);
+          return;
+        }
+        const user = await userResponse.json();
+        console.log("User Data:", user);
+
+        // login user & the user is same (own profile)
+        if (credential.username === user.user.nickname) {
+          setIsOwner(true);
+        }
+
+        setUserData(user.user);
+        setPosts(user.posts);
+
+        // TODO: fetch followers & followings
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
-      const data = await response.json();
-      console.log(data);
-      setUserData(data.user);
-
-      // fetch user activity (user's posts)
-      setPosts(data.posts);
-
-      // TODO: fetch followers & followings
-
-      setLoading(false);
-    }
-    loadData();
+    };
+    fetchData();
   }, [username]);
-
-  // don't show profile (private)
-  useEffect(() => {
-    if (userData && !userData.public) {
-      setUserData(null);
-    }
-  }, [userData]);
 
   // show loading message while the process is going on
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  // show message when the user is not found
-  if (!userData) {
-    return <div>The user doesn't exist or their profile is not public.</div>;
+  // when the user not found
+  if (userNotFound) {
+    return <div>The user doesn't exist.</div>;
+  }
+
+  // for private profile
+  if (!isOwner && userData && !userData.public) {
+    return <div>This profile is private. TODO: follow request button</div>;
   }
 
   // show profile (public)
   return (
     <div className="profile-page">
+      {isOwner && (
+        <ProfilePrivacyToggle
+          initialPublicStatus={userData.public}
+          username={username}
+        />
+      )}
       <div className="flex flex-row items-center">
         {
           <ProfileImage
@@ -86,12 +112,10 @@ export default function Profile({ params }) {
           </p>
         </div>
       </div>
-
       <div>
         <h2 className="mt-4 text-lg text-accent font-bold">About Me</h2>
         <p className="ml-2 text-gray-600">{userData.aboutMe}</p>
       </div>
-
       <div>
         <h2 className="mt-4 text-lg text-accent font-bold">User Activity</h2>
         {posts.length === 0 ? (

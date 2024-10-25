@@ -1,5 +1,0 @@
-ALTER TABLE posts
-ADD COLUMN image TEXT DEFAULT NULL;
-
-ALTER TABLE posts
-ADD COLUMN privacy TEXT DEFAULT 'public';

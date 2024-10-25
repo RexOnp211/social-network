@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"social-network/pkg"
 	db "social-network/pkg/db/sqlite"
+	"social-network/pkg/helpers"
 	"strings"
 )
 
 type UserResponse struct {
-	User  pkg.User   `json:"user"`
-	Posts []pkg.Post `json:"posts"`
+	User  helpers.User   `json:"user"`
+	Posts []helpers.Post `json:"posts"`
 }
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,6 +31,14 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Error getting user", err)
+		return
+	}
+
+	// user not found
+	log.Println("user default", user)
+	if (user == helpers.User{}) {
+		http.Error(w, "No user found with nickname:", http.StatusInternalServerError)
+		log.Println("No user found with nickname:", err)
 		return
 	}
 
@@ -63,7 +71,6 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		Posts: posts,
 	}
 	log.Println("response", response)
-
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)

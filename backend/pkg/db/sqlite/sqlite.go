@@ -2,12 +2,18 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
-	"social-network/pkg"
+
+	"social-network/pkg/helpers"
 )
 
 var DB *sql.DB
+
+func SetDB(database *sql.DB) {
+	DB = database
+}
 
 func RegisterUserDB(data []interface{}) error {
 
@@ -32,6 +38,37 @@ func RegisterUserDB(data []interface{}) error {
 	return nil
 }
 
+func LoginUserDB(username string, password string) (helpers.Login, error) {
+	var login helpers.Login
+
+	// TODO: logic to use email when user input email
+
+	err := DB.QueryRow("SELECT nickname, password FROM users WHERE nickname = ?", username).Scan(&login.Username, &login.Password)
+	if err != nil {
+		return login, errors.New("can't find username")
+	}
+	/* err = bcrypt.CompareHashAndPassword([]byte(login.Password), []byte(password))
+	if err != nil {
+		return login, errors.New("wrong Password")
+	} */
+	if login.Password != password {
+		return login, errors.New("wrong Password")
+	}
+	return login, nil
+}
+
+// GetUserIDByUsernameOrEmail retrieves a user ID based on their username or email.
+func GetUserIDByUsernameOrEmail(username string) (int, error) {
+	var userID int
+	var fieldname string
+
+	err := DB.QueryRow("SELECT user_id FROM users WHERE "+fieldname+" = ?", username).Scan(&userID)
+	if err != nil {
+		return 0, err
+	}
+	return userID, nil
+}
+
 func AddPostToDb(data []interface{}) error {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
@@ -54,7 +91,7 @@ func AddPostToDb(data []interface{}) error {
 	return nil
 }
 
-func GetPostsFromDb() ([]pkg.Post, error) {
+func GetPostsFromDb() ([]helpers.Post, error) {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
 		fmt.Println("DB Open Error:", err)
@@ -67,10 +104,10 @@ func GetPostsFromDb() ([]pkg.Post, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	posts := []pkg.Post{}
+	posts := []helpers.Post{}
 	for rows.Next() {
-		post := pkg.Post{}
-		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.CreationDate, &post.Image, &post.Privacy)
+		post := helpers.Post{}
+		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.Image, &post.Privacy, &post.CreationDate)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return nil, err
@@ -80,8 +117,8 @@ func GetPostsFromDb() ([]pkg.Post, error) {
 	return posts, nil
 }
 
-func GetUserFromDb(nickname string) (pkg.User, error) {
-	user := pkg.User{}
+func GetUserFromDb(nickname string) (helpers.User, error) {
+	user := helpers.User{}
 
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
@@ -106,7 +143,7 @@ func GetUserFromDb(nickname string) (pkg.User, error) {
 	return user, nil
 }
 
-func GetUserPostFromDbByUser(userId int) ([]pkg.Post, error) {
+func GetUserPostFromDbByUser(userId int) ([]helpers.Post, error) {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
 		fmt.Println("DB Open Error:", err)
@@ -119,10 +156,10 @@ func GetUserPostFromDbByUser(userId int) ([]pkg.Post, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	posts := []pkg.Post{}
+	posts := []helpers.Post{}
 	for rows.Next() {
-		post := pkg.Post{}
-		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.CreationDate, &post.Image, &post.Privacy)
+		post := helpers.Post{}
+		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.Image, &post.Privacy, &post.CreationDate)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return nil, err
@@ -134,8 +171,48 @@ func GetUserPostFromDbByUser(userId int) ([]pkg.Post, error) {
 	return posts, nil
 }
 
-func GetGroupFromDb(groupname string) (pkg.Group, error) {
-	group := pkg.Group{}
+func UpdateUserPrivacy(username string, privacyStatus string) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+    if err != nil {
+        fmt.Println("DB Open Error:", err)
+        return
+    }
+    defer DB.Close()
+
+	// string -> integer
+	var publicStatus int
+    if privacyStatus == "true" {
+        publicStatus = 1
+    } else if privacyStatus == "false" {
+        publicStatus = 0
+    } else {
+        return
+    }
+
+    query := `UPDATE users SET public = ? WHERE nickname = ?`
+    result, err := DB.Exec(query, publicStatus, username)
+    if err != nil {
+        log.Println("Update query error:", err)
+        return
+    }
+
+	// show result of update
+    rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        log.Println("Error checking affected rows:", err)
+        return
+    }
+    if rowsAffected == 0 {
+        log.Println("No user found with the given username:", username)
+        return
+    }
+
+    log.Println("User privacy status updated successfully for username:", username)
+    return
+}
+
+func GetGroupFromDb(groupname string) (helpers.Group, error) {
+	group := helpers.Group{}
 
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {

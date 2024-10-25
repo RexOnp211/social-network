@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"social-network/pkg"
+	"social-network/pkg/helpers"
 	db "social-network/pkg/db/sqlite"
 
 	"golang.org/x/crypto/bcrypt"
@@ -33,7 +33,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	filepath := "/image/profile.default.png"
 	if err == nil {
 		defer file.Close()
-		filepath, err = pkg.SaveFile(file, header, "avatar")
+		filepath, err = helpers.SaveFile(file, header, "avatar")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			fmt.Println("Error saving file", err)

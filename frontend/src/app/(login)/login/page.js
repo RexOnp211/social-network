@@ -1,20 +1,48 @@
 "use client";
+import FetchFromBackend from "@/lib/fetch";
 
 export default function Login() {
-  const OnSubmit = (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const email = formData.get("email");
     const password = formData.get("password");
     console.log(email, password);
-  };
+
+    try {
+      FetchFromBackend("/login", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      console.log(document.cookie);
+    } catch (error) {
+      console.error("error logging in", error);
+    }
+
+    try {
+      const response = await fetch("/protected", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.text();
+      console.log("Response from protected endpoint:", data);
+    } catch (error) {
+      console.error("Error fetching protected data:", error);
+    }
+  }
 
   return (
     <div className="flex w-screen h-screen justify-center items-center">
       <div className="p-6 bg-primary rounded-lg w-96 h-auto">
         <h2 className="text-center text-2xl m-1 mb-3">Log in</h2>
         <form
-          onSubmit={OnSubmit}
+          onSubmit={handleSubmit}
           className="flex flex-col justify-center items-center"
         >
           <div className="mb-4 w-full">

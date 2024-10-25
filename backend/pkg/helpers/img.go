@@ -1,4 +1,4 @@
-package pkg
+package helpers
 
 import (
 	"fmt"
@@ -6,26 +6,32 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 // add file, file header and either "post" or "avatar" as imgtype
 func SaveFile(file multipart.File, header *multipart.FileHeader, imgtype string) (string, error) {
 	defer file.Close()
-	var uploadDir string
+	uploadDir := "../../assets/image/"
 	fmt.Println(header.Header)
 	if imgtype == "post" {
-		uploadDir = "./../../../frontend/public/image/upload"
+		uploadDir += "upload/"
 	} else if imgtype == "avatar" {
-		uploadDir = "./../../../frontend/public/image/avatar"
+		uploadDir += "avatar/"
 	}
 	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
 		os.Mkdir(uploadDir, os.ModePerm)
 	}
 
-	// TODO: add user id to filename
-	userFileName := "userName" + "-" + header.Filename // userName is a placeholder
-	filename := filepath.Join(uploadDir, userFileName)
-	outFile, err := os.Create(filename)
+	// TODO: add image id to filename
+	files, err := os.ReadDir(uploadDir)
+	if err != nil {
+		return "", err
+	}
+	imgId := len(files) + 1
+	fileName := strconv.Itoa(imgId) + "_" + header.Filename
+	filepath := filepath.Join(uploadDir, fileName)
+	outFile, err := os.Create(filepath)
 	if err != nil {
 		return "", err
 	}
@@ -36,12 +42,5 @@ func SaveFile(file multipart.File, header *multipart.FileHeader, imgtype string)
 		return "", err
 	}
 
-	var path string
-	if imgtype == "post" {
-		path = "/image/upload/" + userFileName
-	} else if imgtype == "avatar" {
-		path = "/image/avatar/" + userFileName
-	}
-
-	return path, nil
+	return fileName, nil
 }
