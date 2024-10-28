@@ -34,13 +34,21 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fetch posts by user_id
-	posts, err := db.GetUserPostFromDbByUser(user.Id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Error getting user's post", err)
+	// user not found
+	log.Println("user default", user)
+	if (user == helpers.User{}) {
+		http.Error(w, "No user found with nickname:", http.StatusInternalServerError)
+		log.Println("No user found with nickname:", err)
 		return
 	}
+
+	// fetch posts by user_id
+	posts, err := db.GetUserPostFromDbByUser(user.Id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			fmt.Println("Error getting user's post", err)
+			return
+		}
 
 	// TODO: fetch followers
 	/* followers, err := db.GetFollowersFromDb(path)
@@ -49,7 +57,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error getting followers", err)
 		return
 	}
-	*/
+ */
 	// TODO: fetch followings
 	/* followings, err := db.GetFollowingsFromDb(path)
 	if err != nil {

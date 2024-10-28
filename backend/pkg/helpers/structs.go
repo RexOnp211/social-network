@@ -5,12 +5,12 @@ import (
 )
 
 type Post struct {
-	PostId       string  `json:"postId"`
-	UserId       string  `json:"userId"`
-	Subject      string  `json:"subject"`
-	Content      string  `json:"content"`
-	Privacy      string  `json:"privacy"`
-	CreationDate string  `json:"creationDate"`
+	PostId       string `json:"postId"`
+	UserId       string `json:"userId"`
+	Subject      string `json:"subject"`
+	Content      string `json:"content"`
+	Privacy      string `json:"privacy"`
+	CreationDate string `json:"creationDate"`
 	Image        *string `json:"image"`
 }
 
@@ -23,17 +23,12 @@ type User struct {
 	Lastname  string `json:"lastname"`
 	Dob       string `json:"dob"`
 	AboutMe   string `json:"aboutMe"`
-	Public    bool   `json:"public"`
-	Avatar    string `json:"avatar"`
+	Public   bool `json:"public"`
+	Avatar string `json:"avatar"`
 }
 
-type Group struct {
-	Id          string `json:"groupId"`
-	CreatorId   string `json:"creatorId"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-}
 type Login struct {
+	UserId int `json:"id"`
 	Username string `json:"email"`
 	Password string `json:"password"`
 }
@@ -43,4 +38,11 @@ type Session struct {
 	SessionToken string    `json:"session_token"`
 	ExpireTime   time.Time `json:"expire_time"`
 	UserID       int       `json:"user_id"`
+}
+
+type Group struct {
+	Id    	string `json:"groupId"`
+	CreatorId   string `json:"creatorId"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
 }

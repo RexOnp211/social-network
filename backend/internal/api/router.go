@@ -25,25 +25,12 @@ func NewRouter() *Router {
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
-	method := req.Method
+    method := req.Method
 
-	// process all requests with /profile/...
-	//   if strings.HasPrefix(path, "/profile/") {
-	//       corsHandler(http.HandlerFunc(handlers.ProfileHandler)).ServeHTTP(w, req)
-	//       return
-	//   }
-
-	// // process all requests with /group/...
-	// if strings.HasPrefix(path, "/group/") {
-	//       corsHandler(http.HandlerFunc(handlers.GroupHandler)).ServeHTTP(w, req)
-	//       return
-	//   }
-
-	// process other requests
 	handler := r.getHandler(method, path)
 	newHandler := corsHandler(handler)
 
-	newHandler.ServeHTTP(w, req)
+    newHandler.ServeHTTP(w, req)
 }
 
 func (r *Router) getHandler(method, path string) http.Handler {
@@ -62,7 +49,8 @@ func (r *Router) getHandler(method, path string) http.Handler {
 
 func corsHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
 

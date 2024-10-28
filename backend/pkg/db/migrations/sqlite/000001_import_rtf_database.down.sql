@@ -1,9 +1,11 @@
-DROP TABLE users;
-DROP TABLE posts;
-DROP TABLE comments;
 DROP TABLE categories;
+DROP TABLE comments;
+DROP TABLE group_posts;
+DROP TABLE groups;
 DROP TABLE likes;
-DROP TABLE post_categories;
-DROP TABLE sessions;
 DROP TABLE messages;
+DROP TABLE post_categories;
+DROP TABLE posts;
+DROP TABLE sessions;
 DROP TABLE user_status;
+DROP TABLE users;

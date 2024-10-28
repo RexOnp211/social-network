@@ -7,6 +7,7 @@ import (
 	"os"
 	"social-network/internal/api"
 	"social-network/internal/api/handlers"
+	db "social-network/pkg/db/sqlite"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
@@ -27,14 +28,14 @@ func main() {
 			return
 		}
 	}
-	db, err := sql.Open("sqlite3", dbPath)
+	DB, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		fmt.Println("DB Open Error:", err)
 		return
 	}
-	DB = db
+	db.SetDB(DB)
 
-	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
+	driver, err := sqlite3.WithInstance(DB, &sqlite3.Config{})
 	if err != nil {
 		fmt.Println("Driver Error:", err)
 		return
@@ -50,12 +51,17 @@ func main() {
 		return
 	}
 
+	if err := m.Down(); err != nil && err != migrate.ErrNoChange {
+		fmt.Println("Migration Up Error:", err)
+		return
+	}
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		fmt.Println("Migration Up Error:", err)
 		return
 	}
 
 	r := &api.Router{}
+	r.AddRoute("POST", "/login", http.HandlerFunc(handlers.LoginHandler))
 	r.AddRoute("GET", "/posts", http.HandlerFunc(handlers.HandlePosts))
 	r.AddRoute("GET", "/", http.HandlerFunc(handlers.HomeHandler))
 	r.AddRoute("GET", "/profile/", http.HandlerFunc(handlers.ProfileHandler))
@@ -63,6 +69,8 @@ func main() {
 	r.AddRoute("POST", "/", http.HandlerFunc(handlers.CreatePostHandler))
 	r.AddRoute("POST", "/register", http.HandlerFunc(handlers.RegisterUser))
 	r.AddRoute("GET", "/image/", http.HandlerFunc(handlers.GetImageHandler))
+	r.AddRoute("GET", "/credential", http.HandlerFunc(handlers.GetCredential))
+	r.AddRoute("POST", "/privacy", http.HandlerFunc(handlers.PrivacyHandler))
 
 	fmt.Println("Starting Go server")
 	err = http.ListenAndServe(":8080", r)
