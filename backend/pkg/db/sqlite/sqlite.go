@@ -8,6 +8,7 @@ import (
 
 	"social-network/pkg/helpers"
 
+	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -153,7 +154,7 @@ func GetUserPostFromDbByUser(userId int) ([]helpers.Post, error) {
 	posts := []helpers.Post{}
 	for rows.Next() {
 		post := helpers.Post{}
-		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.CreationDate, &post.Image, &post.Privacy)
+		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.Image, &post.Privacy, &post.CreationDate)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return nil, err
@@ -189,4 +190,80 @@ func GetGroupFromDb(groupname string) (helpers.Group, error) {
 	}
 
 	return group, nil
+}
+
+func GetPostFromId(id uuid.UUID) (helpers.Post, error) {
+	post := helpers.Post{}
+
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in GetPostFromId:", err)
+		return post, err
+	}
+
+	rows, err := DB.Query("SELECT * FROM posts WHERE post_id = ?", id)
+	if err != nil {
+		log.Println("Query error in GetPostFromId:", err)
+		return post, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.Image, &post.Privacy, &post.CreationDate)
+		if err != nil {
+			log.Println("Scan error in GetPostFromId:", err)
+			return post, err
+		}
+	}
+
+	return post, nil
+}
+
+func GetCommentsFromPostId(id uuid.UUID) ([]helpers.Comment, error) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in GetCommentFromPostId:", err)
+		return nil, err
+	}
+
+	rows, err := DB.Query("SELECT * FROM comments WHERE post_id = ?", id)
+	if err != nil {
+		log.Println("Query error in GetCommentFromPostId:", err)
+		return nil, err
+	}
+	defer rows.Close()
+	comments := []helpers.Comment{}
+	for rows.Next() {
+		comment := helpers.Comment{}
+		err := rows.Scan(&comment.CommentId, &comment.PostId, &comment.UserId, &comment.Content, &comment.CreationDate)
+		if err != nil {
+			log.Println("Scan error in GetCommentFromPostId:", err)
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+
+	return comments, nil
+}
+
+func AddCommentToDb(data []interface{}) error {
+	fmt.Println("interfacedata", data)
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in AddCommentToDb:", err)
+		return err
+	}
+
+	stmt, err := DB.Prepare("INSERT INTO comments comment_id, post_id, user_id, content, creation_date VALUES (?, ?, ?, ?, ?)")
+	if err != nil {
+		log.Println("Prepare error in AddCommentToDb:", err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec()
+	if err != nil {
+		log.Println("Exec error in AddCommentToDb:", err)
+		return err
+	}
+	return nil
 }

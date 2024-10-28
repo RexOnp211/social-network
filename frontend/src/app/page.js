@@ -7,6 +7,8 @@ import FetchFromBackend from "@/lib/fetch";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import ProfileImage from "@/components/profileImage";
+import { IoChatboxOutline } from "react-icons/io5";
+import Link from "next/link";
 
 export default function Home() {
   const [post, setPost] = useState(0);
@@ -30,7 +32,7 @@ export default function Home() {
         <SideBar />
         <div className="m-3 w-[90vw] h-[87vh] text-txtColor bg-primary rounded-lg shadow-lg p-6 overflow-y-auto">
           <h1>Home Page </h1>
-          <CreatePost />
+          <CreatePost type="Post" />
           {post.length > 0 ? (
             post.map((post) => (
               <div
@@ -54,7 +56,7 @@ export default function Home() {
                 <p>{post.content}</p>
                 {post.image ? (
                   <Image
-                    src={"http://localhost:8080" + post.image}
+                    src={"http://localhost:8080/image/" + post.image}
                     alt="post image"
                     width={500}
                     height={500}
@@ -63,6 +65,9 @@ export default function Home() {
                 ) : (
                   ""
                 )}
+                <Link href={`/post/${post.postId}`} title="comments">
+                  <IoChatboxOutline />
+                </Link>
               </div>
             ))
           ) : (

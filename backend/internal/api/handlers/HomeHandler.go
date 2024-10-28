@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"social-network/pkg/helpers"
 	db "social-network/pkg/db/sqlite"
+	"social-network/pkg/helpers"
 
 	"github.com/gofrs/uuid"
 )
@@ -18,6 +18,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error getting posts", err)
 		return
 	}
+	fmt.Println(posts)
 	json.NewEncoder(w).Encode(posts)
 }
 

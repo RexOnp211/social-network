@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS comments (
     post_id UUID NOT NULL,
     user_id UUID NOT NULL,
     content TEXT NOT NULL,
+    image TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(post_id) REFERENCES posts(post_id),
     FOREIGN KEY(user_id) REFERENCES users(user_id)
