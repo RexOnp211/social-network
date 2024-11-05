@@ -1,7 +1,9 @@
 "use client";
 import FetchFromBackend from "@/lib/fetch";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
+  const router = useRouter();
   async function handleSubmit(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -10,31 +12,36 @@ export default function Login() {
     console.log(email, password);
 
     try {
-      FetchFromBackend("/login", {
+      const res = await FetchFromBackend("/login", {
         method: "POST",
         body: formData,
         credentials: "include",
       });
-      console.log(document.cookie);
+      if (res.status === 200) {
+        console.log("Login successful");
+        router.push("/");
+      } else {
+        throw new Error("Login failed");
+      }
     } catch (error) {
       console.error("error logging in", error);
     }
 
-    try {
-      const response = await fetch("/protected", {
-        method: "GET",
-        credentials: "include",
-      });
+    // try {
+    //   const response = await fetch("/protected", {
+    //     method: "GET",
+    //     credentials: "include",
+    //   });
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
+    //   if (!response.ok) {
+    //     throw new Error("Network response was not ok");
+    //   }
 
-      const data = await response.text();
-      console.log("Response from protected endpoint:", data);
-    } catch (error) {
-      console.error("Error fetching protected data:", error);
-    }
+    //   const data = await response.text();
+    //   console.log("Response from protected endpoint:", data);
+    // } catch (error) {
+    //   console.error("Error fetching protected data:", error);
+    // }
   }
 
   return (

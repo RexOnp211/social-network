@@ -48,7 +48,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error getting session token", err)
 		return
 	}
-	userId := GetCredential(w, r)
+	userId := "1"
 	data := []interface{}{userId, subject, content, filepath, privacy}
 	err = db.AddPostToDb(data)
 	if err != nil {

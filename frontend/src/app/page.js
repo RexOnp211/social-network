@@ -9,9 +9,12 @@ import { useEffect, useState } from "react";
 import ProfileImage from "@/components/profileImage";
 import { IoChatboxOutline } from "react-icons/io5";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import FetchCredential from "@/lib/fetchCredential";
 
 export default function Home() {
   const [post, setPost] = useState(0);
+  const router = useRouter();
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -24,6 +27,19 @@ export default function Home() {
       }
     };
     fetchPosts();
+  }, []);
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const res = await FetchCredential();
+        if (res.username === "") {
+          router.push("/login");
+        }
+      } catch (error) {
+        console.error("error checking login", error);
+      }
+    };
+    checkLogin();
   }, []);
   return (
     <>
