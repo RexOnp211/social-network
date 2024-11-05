@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	db "social-network/pkg/db/sqlite"
-	"time"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -16,42 +15,44 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-	login, err := db.LoginUserDB(username, password)
+	err := r.ParseMultipartForm(10 << 20) // 10MB
 	if err != nil {
-		fmt.Println("Error logging in", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println("Error parsing multipart form:", err)
+		return
+	}
+
+	username := r.FormValue("email")
+	password := r.FormValue("password")
+	fmt.Println("TEST", username, password)
+
+	user, err := db.LoginUserDB(username, password)
+	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte(err.Error()))
 		log.Printf("Login failed: %v", err)
 		return
 	}
-	userID, err := db.GetUserIDByUsernameOrEmail(username)
+	/* 	userID, err := db.GetUserIDByUsernameOrEmail(username)
+	   	if err != nil {
+	   		w.WriteHeader(http.StatusInternalServerError)
+	   		w.Write([]byte("Failed to get user ID"))
+	   		return
+	   	} */
+	token, err := NewSession(w, user.Username, user.UserId)
 	if err != nil {
-		fmt.Println("Error getting user ID", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to get user ID"))
-		return
-	}
-	token, err := NewSession(w, login.Username, userID)
-	if err != nil {
-		fmt.Println("Error creating session", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to create session"))
 		return
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    token,
-		Expires:  time.Now().Add(24 * time.Hour),
-		Path:     "/",
-		HttpOnly: true,
+		Name:  "session_token",
+		Value: token,
 	})
 
-	log.Printf("User %s logged in with session token %s", login.Username, token)
+	log.Printf("User %s logged in with session token %s", user.Username, token)
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(token))
-
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 }

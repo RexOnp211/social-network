@@ -44,12 +44,12 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	postId := r.URL.Path[len("/post/"):]
-	postUUID, err := uuid.FromString(postId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Println("Error parsing uuid", err)
-		return
-	}
+	// postUUID, err := uuid.FromString(postId)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// 	fmt.Println("Error parsing uuid", err)
+	// 	return
+	// }
 	content := r.FormValue("commentBody")
 	file, header, err := r.FormFile("image")
 	filepath := ""
@@ -69,9 +69,7 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := 1
-
-	data := []interface{}{comment_id, postUUID, userId, content, filepath}
+	data := []interface{}{comment_id, postId, "3213", content, filepath}
 	fmt.Println("data before save", data)
 	err = db.AddCommentToDb(data)
 	if err != nil {

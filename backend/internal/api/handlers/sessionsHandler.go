@@ -3,8 +3,8 @@ package handlers
 import (
 	"log"
 	"net/http"
+	db "social-network/pkg/db/sqlite"
 	"social-network/pkg/helpers"
-	"social-network/pkg/db/sqlite"
 	"strconv"
 	"time"
 
@@ -40,6 +40,7 @@ func NewSession(w http.ResponseWriter, username string, userID int) (string, err
 	cookie := http.Cookie{
 		Name:     "session_token",
 		Value:    session.SessionToken,
+		Domain:   "localhost",
 		Expires:  expiration,
 		Path:     "/",
 		HttpOnly: true,
@@ -111,6 +112,7 @@ func CloseSession(w http.ResponseWriter, r *http.Request) {
 		cookie := http.Cookie{
 			Name:   "session_token",
 			Value:  "",
+			Domain: "localhost",
 			MaxAge: -1,
 			Path:   "/",
 		}
@@ -119,6 +121,8 @@ func CloseSession(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Failed to delete session from database: %v", err)
 		}
+	} else {
+		log.Printf("Session not found: %s", token)
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Logout successful"))
@@ -155,7 +159,9 @@ func RequireLogin(next http.Handler) http.Handler {
 func getSessionToken(r *http.Request) (string, error) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
+		log.Println("Failed to get session cookie:", err)
 		return "", err
 	}
+	log.Printf("Session cookie found: %s", cookie.Value)
 	return cookie.Value, nil
 }

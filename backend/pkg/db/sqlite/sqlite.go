@@ -9,10 +9,13 @@ import (
 	"social-network/pkg/helpers"
 
 	"github.com/gofrs/uuid"
-	"golang.org/x/crypto/bcrypt"
 )
 
 var DB *sql.DB
+
+func SetDB(database *sql.DB) {
+	DB = database
+}
 
 func RegisterUserDB(data []interface{}) error {
 
@@ -39,14 +42,18 @@ func RegisterUserDB(data []interface{}) error {
 
 func LoginUserDB(username string, password string) (helpers.Login, error) {
 	var login helpers.Login
-	var fieldname string
 
-	err := DB.QueryRow("SELECT username, password FROM users WHERE "+fieldname+" = ?", username).Scan(&login.Username, &login.Password)
+	// TODO: logic to use email when user input email
+
+	err := DB.QueryRow("SELECT nickname, password FROM users WHERE nickname = ?", username).Scan(&login.Username, &login.Password)
 	if err != nil {
 		return login, errors.New("can't find username")
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(login.Password), []byte(password))
+	/* err = bcrypt.CompareHashAndPassword([]byte(login.Password), []byte(password))
 	if err != nil {
+		return login, errors.New("wrong Password")
+	} */
+	if login.Password != password {
 		return login, errors.New("wrong Password")
 	}
 	return login, nil
@@ -71,7 +78,7 @@ func AddPostToDb(data []interface{}) error {
 		return nil
 	}
 
-	stmt, err := DB.Prepare("INSERT INTO posts (post_id, user_id, subject, content, privacy, image) VALUES (?, ?, ?, ?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO posts (user_id, subject, content, image, privacy) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Prepare statement error:", err)
 		return err
@@ -164,6 +171,46 @@ func GetUserPostFromDbByUser(userId int) ([]helpers.Post, error) {
 
 	log.Println(posts)
 	return posts, nil
+}
+
+func UpdateUserPrivacy(username string, privacyStatus string) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error:", err)
+		return
+	}
+	defer DB.Close()
+
+	// string -> integer
+	var publicStatus int
+	if privacyStatus == "true" {
+		publicStatus = 1
+	} else if privacyStatus == "false" {
+		publicStatus = 0
+	} else {
+		return
+	}
+
+	query := `UPDATE users SET public = ? WHERE nickname = ?`
+	result, err := DB.Exec(query, publicStatus, username)
+	if err != nil {
+		log.Println("Update query error:", err)
+		return
+	}
+
+	// show result of update
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("Error checking affected rows:", err)
+		return
+	}
+	if rowsAffected == 0 {
+		log.Println("No user found with the given username:", username)
+		return
+	}
+
+	log.Println("User privacy status updated successfully for username:", username)
+	return
 }
 
 func GetGroupFromDb(groupname string) (helpers.Group, error) {
@@ -260,7 +307,7 @@ func AddCommentToDb(data []interface{}) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec()
+	_, err = stmt.Exec(data)
 	if err != nil {
 		log.Println("Exec error in AddCommentToDb:", err)
 		return err

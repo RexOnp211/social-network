@@ -28,13 +28,8 @@ type User struct {
 	Avatar    string `json:"avatar"`
 }
 
-type Group struct {
-	Id          string `json:"groupId"`
-	CreatorId   string `json:"creatorId"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-}
 type Login struct {
+	UserId   int    `json:"id"`
 	Username string `json:"email"`
 	Password string `json:"password"`
 }
@@ -53,4 +48,10 @@ type Comment struct {
 	Content      string `json:"content"`
 	Image        string `json:"image"`
 	CreationDate string `json:"creationDate"`
+}
+type Group struct {
+	Id          string `json:"groupId"`
+	CreatorId   string `json:"creatorId"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
 }
