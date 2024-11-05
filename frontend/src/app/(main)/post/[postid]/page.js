@@ -83,7 +83,7 @@ export default function Posts({ params }) {
             {comment.image ? (
               <Image
                 src={"http://localhost:8080/image/" + comment.image}
-                alt="post image"
+                alt="comment image"
                 width={500}
                 height={500}
                 className="w-auto h-48"
