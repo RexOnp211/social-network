@@ -42,14 +42,14 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
+	nickname := ValidateSession(w, r)
+	user, err := db.GetUserFromDb(nickname)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Error getting session token", err)
+		fmt.Println("Error getting user", err)
 		return
 	}
-	userId := "1"
-	data := []interface{}{userId, subject, content, filepath, privacy}
+	data := []interface{}{user.Id, subject, content, filepath, privacy}
 	err = db.AddPostToDb(data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

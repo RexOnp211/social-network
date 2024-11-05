@@ -7,8 +7,6 @@ import (
 	"log"
 
 	"social-network/pkg/helpers"
-
-	"github.com/gofrs/uuid"
 )
 
 var DB *sql.DB
@@ -239,7 +237,7 @@ func GetGroupFromDb(groupname string) (helpers.Group, error) {
 	return group, nil
 }
 
-func GetPostFromId(id uuid.UUID) (helpers.Post, error) {
+func GetPostFromId(id int) (helpers.Post, error) {
 	post := helpers.Post{}
 
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
@@ -265,14 +263,14 @@ func GetPostFromId(id uuid.UUID) (helpers.Post, error) {
 	return post, nil
 }
 
-func GetCommentsFromPostId(id uuid.UUID) ([]helpers.Comment, error) {
+func GetCommentsFromPostId(id int) ([]helpers.Comment, error) {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
 		fmt.Println("DB Open Error in GetCommentFromPostId:", err)
 		return nil, err
 	}
 
-	rows, err := DB.Query("SELECT * FROM comments WHERE post_id = ?", id)
+	rows, err := DB.Query("SELECT comment_id, post_id, user_id, content, image FROM comments WHERE post_id = ?", id)
 	if err != nil {
 		log.Println("Query error in GetCommentFromPostId:", err)
 		return nil, err
@@ -281,7 +279,7 @@ func GetCommentsFromPostId(id uuid.UUID) ([]helpers.Comment, error) {
 	comments := []helpers.Comment{}
 	for rows.Next() {
 		comment := helpers.Comment{}
-		err := rows.Scan(&comment.CommentId, &comment.PostId, &comment.UserId, &comment.Content, &comment.CreationDate)
+		err := rows.Scan(&comment.CommentId, &comment.PostId, &comment.UserId, &comment.Content, &comment.Image)
 		if err != nil {
 			log.Println("Scan error in GetCommentFromPostId:", err)
 			return nil, err
@@ -300,14 +298,14 @@ func AddCommentToDb(data []interface{}) error {
 		return err
 	}
 
-	stmt, err := DB.Prepare("INSERT INTO comments comment_id, post_id, user_id, content, creation_date VALUES (?, ?, ?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO comments (post_id, user_id, content, image) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Prepare error in AddCommentToDb:", err)
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(data)
+	_, err = stmt.Exec(data...)
 	if err != nil {
 		log.Println("Exec error in AddCommentToDb:", err)
 		return err

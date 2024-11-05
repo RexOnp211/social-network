@@ -40,7 +40,7 @@ export default function Home() {
       }
     };
     checkLogin();
-  }, []);
+  }, [router]);
   return (
     <>
       <TopBar />

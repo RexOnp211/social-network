@@ -11,3 +11,12 @@ INSERT INTO posts (user_id, subject, content, privacy) VALUES
   ('2', 'Travel Diaries', 'I just came back from a trip to the mountains.', 'public'),
   ('2', 'Book Review', 'I recently read a fantastic book that I would recommend.', 'public'),
   ('2', 'Private Thoughts', 'Sometimes I just need to write down my thoughts.', 'private');
+
+INSERT INTO comments (post_id, user_id, content) VALUES
+  ('1', '2', 'Great post!'),
+  ('1', '3', 'I agree!'),
+  ('2', '3', 'Sounds like a fun day!'),
+  ('3', '1', 'I would love to try this recipe!'),
+  ('4', '1', 'I love the mountains!'),
+  ('5', '3', 'What book did you read?'),
+  ('6', '1', 'I understand the need to write down your thoughts.');

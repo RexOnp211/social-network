@@ -58,11 +58,11 @@ CREATE TABLE IF NOT EXISTS categories (
     category TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS comments (
-    comment_id INTEGER PRIMARY KEY NOT NULL,
+    comment_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     post_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     content TEXT NOT NULL,
-    image TEXT DEFAULT NULL,
+    image TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(post_id) REFERENCES posts(post_id),
     FOREIGN KEY(user_id) REFERENCES users(user_id)

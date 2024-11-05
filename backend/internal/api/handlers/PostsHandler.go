@@ -6,32 +6,31 @@ import (
 	"net/http"
 	db "social-network/pkg/db/sqlite"
 	"social-network/pkg/helpers"
-
-	"github.com/gofrs/uuid"
+	"strconv"
 )
 
 func HandlePosts(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len("/post/"):]
-	uuid, err := uuid.FromString(id)
+	strid := r.URL.Path[len("/post/"):]
+	id, err := strconv.Atoi(strid)
 	if err != nil {
-		fmt.Println("Error parsing uuid", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println("Error parsing id", err)
 		return
 	}
-	post, err := db.GetPostFromId(uuid)
+	post, err := db.GetPostFromId(id)
 	if err != nil {
 		fmt.Println("Error getting post", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(post)
-	comments, err := db.GetCommentsFromPostId(uuid)
+	comments, err := db.GetCommentsFromPostId(id)
 	if err != nil {
 		fmt.Println("Error getting comments", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(comments)
+	post.Comments = comments
+	fmt.Println("this is a post", post)
 	json.NewEncoder(w).Encode(post)
 }
 
@@ -62,14 +61,8 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	comment_id, err := uuid.NewV4()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Error generating uuid", err)
-		return
-	}
 
-	data := []interface{}{comment_id, postId, "3213", content, filepath}
+	data := []interface{}{postId, "3213", content, filepath}
 	fmt.Println("data before save", data)
 	err = db.AddCommentToDb(data)
 	if err != nil {

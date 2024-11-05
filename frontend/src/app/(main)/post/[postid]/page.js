@@ -14,7 +14,9 @@ export default function Posts({ params }) {
     const fetchPost = async () => {
       try {
         const path = `/post/${params.postid}`;
-        const res = await FetchFromBackend(path);
+        const res = await FetchFromBackend(path, {
+          method: "GET",
+        });
         const jsonData = await res.json();
         console.log(jsonData);
         setPost(jsonData);
@@ -57,6 +59,40 @@ export default function Posts({ params }) {
         </div>
       )}
       <CreateComment postId={params.postid} />
+      {post &&
+        post.comments &&
+        post.comments.map((comment) => (
+          <div
+            key={comment.commentId}
+            className="bg-secondary p-2 rounded-lg m-2"
+          >
+            <a
+              className="flex flex-row items-center"
+              href={`/profile/${comment.userId}`}
+            >
+              <ProfileImage
+                alt={comment.userId}
+                width={30}
+                height={30}
+                size={20}
+                userId={comment.userId}
+              />
+              {comment.userId}
+            </a>
+            <p>{comment.content}</p>
+            {comment.image ? (
+              <Image
+                src={"http://localhost:8080/image/" + comment.image}
+                alt="post image"
+                width={500}
+                height={500}
+                className="w-auto h-48"
+              />
+            ) : (
+              ""
+            )}
+          </div>
+        ))}
     </>
   );
 }

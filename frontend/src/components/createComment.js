@@ -1,15 +1,21 @@
+import FetchFromBackend from "@/lib/fetch";
+
 export default function CreateComment({ postId }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const form = new FormData(e.target);
-      FetchFromBackend(`/post/${postId}`, {
+      const response = await FetchFromBackend(`/post/${postId}`, {
         method: "POST",
+        credentials: "include",
         headers: {},
         body: form,
       });
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Error submitting the form:", error);
     }
   };
   return (
