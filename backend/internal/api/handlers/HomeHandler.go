@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"social-network/pkg/helpers"
 	db "social-network/pkg/db/sqlite"
-
-	"github.com/gofrs/uuid"
+	"social-network/pkg/helpers"
 )
 
 // gets posts from the database for the home page
@@ -44,17 +42,14 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	post_id, err := uuid.NewV4()
+	nickname := ValidateSession(w, r)
+	user, err := db.GetUserFromDb(nickname)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Error generating uuid", err)
+		fmt.Println("Error getting user", err)
 		return
 	}
-
-	userId := 1
-
-	data := []interface{}{post_id, userId, subject, content, privacy, filepath}
+	data := []interface{}{user.Id, subject, content, filepath, privacy}
 	err = db.AddPostToDb(data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -76,7 +76,7 @@ func AddPostToDb(data []interface{}) error {
 		return nil
 	}
 
-	stmt, err := DB.Prepare("INSERT INTO posts (post_id, user_id, subject, content, privacy, image) VALUES (?, ?, ?, ?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO posts (user_id, subject, content, image, privacy) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Prepare statement error:", err)
 		return err
@@ -173,42 +173,42 @@ func GetUserPostFromDbByUser(userId int) ([]helpers.Post, error) {
 
 func UpdateUserPrivacy(username string, privacyStatus string) {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-    if err != nil {
-        fmt.Println("DB Open Error:", err)
-        return
-    }
-    defer DB.Close()
+	if err != nil {
+		fmt.Println("DB Open Error:", err)
+		return
+	}
+	defer DB.Close()
 
 	// string -> integer
 	var publicStatus int
-    if privacyStatus == "true" {
-        publicStatus = 1
-    } else if privacyStatus == "false" {
-        publicStatus = 0
-    } else {
-        return
-    }
+	if privacyStatus == "true" {
+		publicStatus = 1
+	} else if privacyStatus == "false" {
+		publicStatus = 0
+	} else {
+		return
+	}
 
-    query := `UPDATE users SET public = ? WHERE nickname = ?`
-    result, err := DB.Exec(query, publicStatus, username)
-    if err != nil {
-        log.Println("Update query error:", err)
-        return
-    }
+	query := `UPDATE users SET public = ? WHERE nickname = ?`
+	result, err := DB.Exec(query, publicStatus, username)
+	if err != nil {
+		log.Println("Update query error:", err)
+		return
+	}
 
 	// show result of update
-    rowsAffected, err := result.RowsAffected()
-    if err != nil {
-        log.Println("Error checking affected rows:", err)
-        return
-    }
-    if rowsAffected == 0 {
-        log.Println("No user found with the given username:", username)
-        return
-    }
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("Error checking affected rows:", err)
+		return
+	}
+	if rowsAffected == 0 {
+		log.Println("No user found with the given username:", username)
+		return
+	}
 
-    log.Println("User privacy status updated successfully for username:", username)
-    return
+	log.Println("User privacy status updated successfully for username:", username)
+	return
 }
 
 func GetGroupFromDb(groupname string) (helpers.Group, error) {
@@ -235,4 +235,80 @@ func GetGroupFromDb(groupname string) (helpers.Group, error) {
 	}
 
 	return group, nil
+}
+
+func GetPostFromId(id int) (helpers.Post, error) {
+	post := helpers.Post{}
+
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in GetPostFromId:", err)
+		return post, err
+	}
+
+	rows, err := DB.Query("SELECT * FROM posts WHERE post_id = ?", id)
+	if err != nil {
+		log.Println("Query error in GetPostFromId:", err)
+		return post, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&post.PostId, &post.UserId, &post.Subject, &post.Content, &post.Image, &post.Privacy, &post.CreationDate)
+		if err != nil {
+			log.Println("Scan error in GetPostFromId:", err)
+			return post, err
+		}
+	}
+
+	return post, nil
+}
+
+func GetCommentsFromPostId(id int) ([]helpers.Comment, error) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in GetCommentFromPostId:", err)
+		return nil, err
+	}
+
+	rows, err := DB.Query("SELECT comment_id, post_id, user_id, content, image FROM comments WHERE post_id = ?", id)
+	if err != nil {
+		log.Println("Query error in GetCommentFromPostId:", err)
+		return nil, err
+	}
+	defer rows.Close()
+	comments := []helpers.Comment{}
+	for rows.Next() {
+		comment := helpers.Comment{}
+		err := rows.Scan(&comment.CommentId, &comment.PostId, &comment.UserId, &comment.Content, &comment.Image)
+		if err != nil {
+			log.Println("Scan error in GetCommentFromPostId:", err)
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+
+	return comments, nil
+}
+
+func AddCommentToDb(data []interface{}) error {
+	fmt.Println("interfacedata", data)
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in AddCommentToDb:", err)
+		return err
+	}
+
+	stmt, err := DB.Prepare("INSERT INTO comments (post_id, user_id, content, image) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		log.Println("Prepare error in AddCommentToDb:", err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(data...)
+	if err != nil {
+		log.Println("Exec error in AddCommentToDb:", err)
+		return err
+	}
+	return nil
 }

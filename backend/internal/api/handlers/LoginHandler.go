@@ -33,12 +33,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Login failed: %v", err)
 		return
 	}
-/* 	userID, err := db.GetUserIDByUsernameOrEmail(username)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to get user ID"))
-		return
-	} */
+	/* 	userID, err := db.GetUserIDByUsernameOrEmail(username)
+	   	if err != nil {
+	   		w.WriteHeader(http.StatusInternalServerError)
+	   		w.Write([]byte("Failed to get user ID"))
+	   		return
+	   	} */
 	token, err := NewSession(w, user.Username, user.UserId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -46,10 +46,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    token,
-	})
 
 	log.Printf("User %s logged in with session token %s", user.Username, token)
 

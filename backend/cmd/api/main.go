@@ -52,16 +52,20 @@ func main() {
 	}
 
 	if err := m.Down(); err != nil && err != migrate.ErrNoChange {
-		fmt.Println("Migration Up Error:", err)
+		fmt.Println("Migration Down Error:", err)
 		return
 	}
+
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		fmt.Println("Migration Up Error:", err)
 		return
 	}
 
 	r := &api.Router{}
+	r.AddRoute("GET", "/post/", http.HandlerFunc(handlers.HandlePosts))
+	r.AddRoute("POST", "/post/", http.HandlerFunc(handlers.CreateComment))
 	r.AddRoute("POST", "/login", http.HandlerFunc(handlers.LoginHandler))
+	r.AddRoute("POST", "/logout", http.HandlerFunc(handlers.LogoutHandler))
 	r.AddRoute("GET", "/posts", http.HandlerFunc(handlers.HandlePosts))
 	r.AddRoute("GET", "/", http.HandlerFunc(handlers.HomeHandler))
 	r.AddRoute("GET", "/profile/", http.HandlerFunc(handlers.ProfileHandler))
