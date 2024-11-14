@@ -7,6 +7,8 @@ import (
 	"log"
 
 	"social-network/pkg/helpers"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var DB *sql.DB
@@ -47,13 +49,14 @@ func LoginUserDB(username string, password string) (helpers.Login, error) {
 	if err != nil {
 		return login, errors.New("can't find username")
 	}
-	/* err = bcrypt.CompareHashAndPassword([]byte(login.Password), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(login.Password), []byte(password))
 	if err != nil {
 		return login, errors.New("wrong Password")
-	} */
-	if login.Password != password {
-		return login, errors.New("wrong Password")
 	}
+	// fmt.Println("login.Password", login.Password, "password", password)
+	// if login.Password != password {
+	// 	return login, errors.New("wrong Password")
+	// }
 	return login, nil
 }
 
@@ -311,4 +314,37 @@ func AddCommentToDb(data []interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func GetAvatarFromUserId(userId string) (string, error) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in GetAvatarFromUserId:", err)
+		return "", err
+	}
+	stmt := "SELECT avatar FROM users WHERE user_id = ?"
+	avatar := ""
+	err = DB.QueryRow(stmt, userId).Scan(&avatar)
+	if err != nil {
+		fmt.Println("QueryRow error in GetAvatarFromUserId:", err)
+		return "", err
+	}
+	return avatar, nil
+}
+
+func GetNicknameFromId(id string) string {
+	fmt.Println("id:", id)
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in GetNicknameFromId:", err)
+		return ""
+	}
+	stmt := "SELECT nickname FROM users WHERE user_id = ?"
+	nickname := ""
+	err = DB.QueryRow(stmt, id).Scan(&nickname)
+	if err != nil {
+		fmt.Println("QueryRow error in GetNicknameFromId:", err)
+		return ""
+	}
+	return nickname
 }

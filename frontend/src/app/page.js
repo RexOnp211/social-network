@@ -11,9 +11,11 @@ import { IoChatboxOutline } from "react-icons/io5";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import FetchCredential from "@/lib/fetchCredential";
+import Fetchnickname from "@/lib/fetchNickName";
 
 export default function Home() {
   const [post, setPost] = useState(0);
+  const [nickname, setNickname] = useState({});
   const router = useRouter();
   useEffect(() => {
     const fetchPosts = async () => {
@@ -28,6 +30,30 @@ export default function Home() {
     };
     fetchPosts();
   }, []);
+
+  useEffect(() => {
+    const findNickname = async () => {
+      const ids = [...new Set(post.map((p) => p.userId))];
+      const nicknameMap = {};
+
+      for (const userId of ids) {
+        try {
+          const res = await Fetchnickname(userId);
+          const textData = await res.text();
+          nicknameMap[userId] = textData;
+          console.log(textData);
+        } catch (error) {
+          console.error(`Error fetching nickname for userId ${userId}:`, error);
+        }
+      }
+
+      setNickname(nicknameMap);
+    };
+    if (post.length > 0) {
+      findNickname();
+    }
+  }, [post]);
+
   useEffect(() => {
     const checkLogin = async () => {
       try {
@@ -41,6 +67,7 @@ export default function Home() {
     };
     checkLogin();
   }, [router]);
+
   return (
     <>
       <TopBar />
@@ -64,9 +91,10 @@ export default function Home() {
                     width={100}
                     height={100}
                     size={40}
-                    userId={post.userId}
+                    avatar={"http://localhost:8080/avatar/" + post.userId}
+                    className={"rounded-full mr-3 w-auto h-16"}
                   />
-                  {post.userId}
+                  {nickname[post.userId] || "loading..."}
                 </a>
                 <h1 className="text-xl font-bold">{post.subject}</h1>
                 <p>{post.content}</p>
@@ -76,7 +104,7 @@ export default function Home() {
                     alt="post image"
                     width={500}
                     height={500}
-                    className="w-auto h-48"
+                    className="w-auto h-80"
                   />
                 ) : (
                   ""

@@ -3,13 +3,13 @@ import FetchFromBackend from "@/lib/fetch";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import ProfileImage from "@/components/profileImage";
-import { IoChatboxOutline } from "react-icons/io5";
-import Link from "next/link";
-import CreatePost from "@/components/createPost";
 import CreateComment from "@/components/createComment";
+import Fetchnickname from "@/lib/fetchNickName";
 
 export default function Posts({ params }) {
-  const [post, setPost] = useState(null);
+  const [post, setPost] = useState({});
+  const [nickname, setNickname] = useState("");
+  const [commentNN, setCommentNN] = useState({});
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -26,6 +26,52 @@ export default function Posts({ params }) {
     };
     fetchPost();
   }, [params.postid]);
+
+  useEffect(() => {
+    const findNickname = async () => {
+      const id = post.userId;
+      try {
+        const res = await Fetchnickname(id);
+        const textData = await res.text();
+        setNickname(textData);
+      } catch (error) {
+        console.error(`Error fetching nickname for userId ${id}:`, error);
+      }
+    };
+
+    if (post.userId) {
+      findNickname();
+    }
+  }, [post]);
+
+  useEffect(() => {
+    const findNickname = async () => {
+      const comments = post.comments || [];
+
+      const ids = [...new Set(comments.map((p) => p.userId))];
+      console.log(ids);
+      const commentNNmap = {};
+
+      for (const userId of ids) {
+        console.log("userid in comments", userId);
+        try {
+          const res = await Fetchnickname(userId);
+          const textData = await res.text();
+          commentNNmap[userId] = textData;
+          console.log("this is textdata from commetns ids", commentNNmap);
+        } catch (error) {
+          console.error(`Error fetching nickname for userId ${userId}:`, error);
+        }
+      }
+
+      setCommentNN(commentNNmap);
+    };
+    const com = post.comments || [];
+    if (com.length > 0) {
+      findNickname();
+    }
+  }, [post.comments]);
+
   return (
     <>
       {post && (
@@ -39,9 +85,10 @@ export default function Posts({ params }) {
               width={100}
               height={100}
               size={40}
-              userId={post.userId}
+              avatar={"http://localhost:8080/avatar/" + post.userId}
+              className={"rounded-full mr-3 w-auto h-16"}
             />
-            {post.userId}
+            {nickname || "loading..."}
           </a>
           <h1 className="text-xl font-bold">{post.subject}</h1>
           <p>{post.content}</p>
@@ -71,13 +118,14 @@ export default function Posts({ params }) {
               href={`/profile/${comment.userId}`}
             >
               <ProfileImage
-                alt={comment.userId}
-                width={30}
-                height={30}
-                size={20}
-                userId={comment.userId}
+                alt={comment.subject}
+                width={100}
+                height={100}
+                size={40}
+                avatar={"http://localhost:8080/avatar/" + comment.userId}
+                className={"rounded-full mr-3 w-auto h-16"}
               />
-              {comment.userId}
+              {commentNN[comment.userId] || "loading..."}
             </a>
             <p>{comment.content}</p>
             {comment.image ? (

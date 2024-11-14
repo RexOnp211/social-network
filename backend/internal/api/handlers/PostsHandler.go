@@ -61,8 +61,14 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	data := []interface{}{postId, "3213", content, filepath}
+	nickname := ValidateSession(w, r)
+	user, err := db.GetUserFromDb(nickname)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error getting user", err)
+		return
+	}
+	data := []interface{}{postId, user.Id, content, filepath}
 	fmt.Println("data before save", data)
 	err = db.AddCommentToDb(data)
 	if err != nil {

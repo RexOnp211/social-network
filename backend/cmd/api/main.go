@@ -73,8 +73,10 @@ func main() {
 	r.AddRoute("POST", "/", http.HandlerFunc(handlers.CreatePostHandler))
 	r.AddRoute("POST", "/register", http.HandlerFunc(handlers.RegisterUser))
 	r.AddRoute("GET", "/image/", http.HandlerFunc(handlers.GetImageHandler))
+	r.AddRoute("GET", "/avatar/", http.HandlerFunc(handlers.GetAvaterFromUserId))
 	r.AddRoute("GET", "/credential", http.HandlerFunc(handlers.GetCredential))
 	r.AddRoute("POST", "/privacy", http.HandlerFunc(handlers.PrivacyHandler))
+	r.AddRoute("GET", "/user/", http.HandlerFunc(handlers.GetNicknameFromId))
 
 	fmt.Println("Starting Go server")
 	err = http.ListenAndServe(":8080", r)
