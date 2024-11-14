@@ -84,7 +84,7 @@ export default function Home() {
               >
                 <a
                   className="flex flex-row items-center"
-                  href={`/profile/${post.userId}`}
+                  href={`/profile/${nickname[post.userId]}`}
                 >
                   <ProfileImage
                     alt={post.subject}

@@ -96,9 +96,11 @@ export default function Profile({ params }) {
         {
           <ProfileImage
             alt="Profile Image"
-            width={50}
-            height={50}
-            avatar={userData.avatar ? userData.avatar : "profile-default.png"}
+            width={100}
+            height={100}
+            size={40}
+            avatar={"http://localhost:8080/avatar/" + userData.userId}
+            className={"rounded-full mr-3 w-auto h-16"}
           />
         }
         <div className="ml-10">
