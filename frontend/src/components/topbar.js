@@ -11,7 +11,7 @@ import fetchCredential from "@/lib/fetchCredential";
 
 const links = [
   { name: "Home", href: "/", icon: IoHomeOutline },
-  { name: "Groups", href: "/groupmenu", icon: MdOutlineGroups },
+  { name: "Groups", href: "/group", icon: MdOutlineGroups },
   { name: "Chat", href: "/messages", icon: IoChatboxOutline },
   {
     name: "Notifications",
@@ -29,13 +29,9 @@ export default function TopBar() {
   // fetch login username and use it for profile link
   const [username, setUsername] = useState("");
   useEffect(() => {
-    const fetchUserCredential = async () => {
-      const credential = await fetchCredential();
-      if (credential && credential.username) {
-        setUsername(credential.username);
-      }
-    };
-    fetchUserCredential();
+    const storedUsername = localStorage.getItem("user");
+    console.log("Loaded username from localStorage:", storedUsername);
+    setUsername(storedUsername);
   }, []);
 
   return (

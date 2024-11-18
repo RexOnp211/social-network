@@ -3,8 +3,8 @@ package handlers
 import (
 	"log"
 	"net/http"
+	db "social-network/pkg/db/sqlite"
 	"social-network/pkg/helpers"
-	"social-network/pkg/db/sqlite"
 	"strconv"
 	"time"
 

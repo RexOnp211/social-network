@@ -43,7 +43,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// fetch posts by user_id
-	posts, err := db.GetUserPostFromDbByUser(user.Id)
+	posts, err := db.GetUserPostFromDbByUser(path)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			fmt.Println("Error getting user's post", err)

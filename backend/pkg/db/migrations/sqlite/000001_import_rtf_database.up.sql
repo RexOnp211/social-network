@@ -23,35 +23,43 @@ CREATE TABLE IF NOT EXISTS user_status (
 ----------------------- GROUP DATA
 
 CREATE TABLE IF NOT EXISTS groups (
-    group_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    creator_id INTEGER NOT NULL,
+    creator_name TEXT NOT NULL,
     title TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL,
-    FOREIGN KEY(creator_id) REFERENCES users(user_id)
+    FOREIGN KEY(creator_name) REFERENCES users(nickname)
+);
+CREATE TABLE IF NOT EXISTS group_members (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    title TEXT NOT NULL,
+    nickname TEXT NOT NULL,
+    status TEXT NOT NULL,  -- status ('requested', 'invited', 'approved')
+    FOREIGN KEY(title) REFERENCES groups(title) ON DELETE CASCADE,
+    FOREIGN KEY(nickname) REFERENCES users(nickname) ON DELETE CASCADE,
+    UNIQUE (title, nickname)
 );
 CREATE TABLE IF NOT EXISTS group_posts (
     post_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    group_id INTEGER NOT NULL,
-    user_id INTEGER NOT NULL,
+    group_title TEXT NOT NULL,
+    nickname TEXT NOT NULL,
     subject TEXT NOT NULL,
     content TEXT NOT NULL,
     image TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(group_id) REFERENCES users(group_id)
-    FOREIGN KEY(user_id) REFERENCES users(user_id)
+    FOREIGN KEY(group_title) REFERENCES groups(title)
+    FOREIGN KEY(nickname) REFERENCES users(nickname)
 );
 
 ----------------------- POST DATA
 
 CREATE TABLE IF NOT EXISTS posts (
     post_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    user_id INTEGER NOT NULL,
+    nickname TEXT NOT NULL,
     subject TEXT NOT NULL,
     content TEXT NOT NULL,
     image TEXT DEFAULT '',
     privacy TEXT DEFAULT 'public',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(user_id) REFERENCES users(user_id)
+    FOREIGN KEY(nickname) REFERENCES users(nickname)
 );
 CREATE TABLE IF NOT EXISTS categories (
     category_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,

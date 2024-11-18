@@ -33,6 +33,22 @@ func main() {
 		fmt.Println("DB Open Error:", err)
 		return
 	}
+
+	// Enable foreign key constraints
+	_, err = DB.Exec("PRAGMA foreign_keys = ON;")
+	if err != nil {
+		fmt.Println("Failed to enable foreign keys:", err)
+		return
+	}
+	row := DB.QueryRow("PRAGMA foreign_keys;")
+	var foreignKeyStatus int
+	err = row.Scan(&foreignKeyStatus)
+	if err != nil {
+		fmt.Println("Error checking foreign key status:", err)
+	} else {
+		fmt.Printf("Foreign Key Status: %d\n", foreignKeyStatus)
+	}
+
 	db.SetDB(DB)
 
 	driver, err := sqlite3.WithInstance(DB, &sqlite3.Config{})
@@ -66,11 +82,16 @@ func main() {
 	r.AddRoute("GET", "/", http.HandlerFunc(handlers.HomeHandler))
 	r.AddRoute("GET", "/profile/", http.HandlerFunc(handlers.ProfileHandler))
 	r.AddRoute("GET", "/group/", http.HandlerFunc(handlers.GroupHandler))
+	r.AddRoute("GET", "/groups", http.HandlerFunc(handlers.GroupsHandler))
+	r.AddRoute("GET", "/group_member/", http.HandlerFunc(handlers.GroupMemberHandler))
+	r.AddRoute("POST", "/creategroup", http.HandlerFunc(handlers.CreateGroupHandler))
 	r.AddRoute("POST", "/", http.HandlerFunc(handlers.CreatePostHandler))
 	r.AddRoute("POST", "/register", http.HandlerFunc(handlers.RegisterUser))
 	r.AddRoute("GET", "/image/", http.HandlerFunc(handlers.GetImageHandler))
 	r.AddRoute("GET", "/credential", http.HandlerFunc(handlers.GetCredential))
 	r.AddRoute("POST", "/privacy", http.HandlerFunc(handlers.PrivacyHandler))
+	r.AddRoute("POST", "/invitemember", http.HandlerFunc(handlers.InviteMemberHandler))
+	r.AddRoute("POST", "/update_member_status", http.HandlerFunc(handlers.UpdateMemberStatusHandler))
 
 	fmt.Println("Starting Go server")
 	err = http.ListenAndServe(":8080", r)

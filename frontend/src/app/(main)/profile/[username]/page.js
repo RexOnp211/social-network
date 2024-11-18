@@ -9,6 +9,7 @@ import ProfilePrivacyToggle from "@/components/profilePrivacyToggle";
 
 export default function Profile({ params }) {
   const { username } = params;
+  const [loginUsername, setLoginUsername] = useState(null);
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [followers, setFollowers] = useState([]);
@@ -33,8 +34,8 @@ export default function Profile({ params }) {
 
       try {
         // check the login username
-        const credential = await fetchCredential();
-        console.log(`credential`, credential);
+        const storedUsername = localStorage.getItem("user");
+        console.log("Loaded username from localStorage:", storedUsername);
 
         // fetch user information from database
         const userResponse = await FetchFromBackend(`/profile/${username}`, {
@@ -49,9 +50,10 @@ export default function Profile({ params }) {
         }
         const user = await userResponse.json();
         console.log("User Data:", user);
+        console.log("User Data:", user.user.nickname);
 
         // login user & the user is same (own profile)
-        if (credential.username === user.user.nickname) {
+        if (storedUsername === user.user.nickname) {
           setIsOwner(true);
         }
 

@@ -10,30 +10,20 @@ export default function Login() {
     console.log(email, password);
 
     try {
-      FetchFromBackend("/login", {
+      const loginResponse = await FetchFromBackend("/login", {
         method: "POST",
         body: formData,
         credentials: "include",
       });
       console.log(document.cookie);
+      const userData = await loginResponse.json();
+
+      // set username in localStorage
+      console.log("User Data:", userData.username);
+      localStorage.setItem("user", userData.username);
+      console.log(localStorage.getItem("user"));
     } catch (error) {
       console.error("error logging in", error);
-    }
-
-    try {
-      const response = await fetch("/protected", {
-        method: "GET",
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const data = await response.text();
-      console.log("Response from protected endpoint:", data);
-    } catch (error) {
-      console.error("Error fetching protected data:", error);
     }
   }
 
