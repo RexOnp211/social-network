@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -25,22 +24,19 @@ func NewRouter() *Router {
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
-    method := req.Method
+	method := req.Method
 
 	handler := r.getHandler(method, path)
 	newHandler := corsHandler(handler)
 
-    newHandler.ServeHTTP(w, req)
+	newHandler.ServeHTTP(w, req)
 }
 
 func (r *Router) getHandler(method, path string) http.Handler {
 	for _, route := range r.routes {
-		fmt.Println("Method", method, "Path", path, "Pattern", route.Pattern)
 		if route.Method == method && route.Pattern == path {
-			fmt.Println("Route mathed")
 			return route.Handler
 		} else if route.Pattern[len(route.Pattern)-1] == '/' && route.Pattern != "/" && strings.Contains(path, route.Pattern) && route.Method == method {
-			fmt.Println("dynamic Route mathed")
 			return route.Handler
 		}
 	}

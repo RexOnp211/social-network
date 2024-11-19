@@ -2,3 +2,6 @@
 
 /assets/image/upload/*
 !/assets/image/upload/.gitkeep
+
+/assets/image/avatar/*
+!/assets/image/avatar/.gitkeep

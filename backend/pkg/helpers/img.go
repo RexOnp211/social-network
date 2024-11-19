@@ -19,8 +19,12 @@ func SaveFile(file multipart.File, header *multipart.FileHeader, imgtype string)
 	} else if imgtype == "avatar" {
 		uploadDir += "avatar/"
 	}
-	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
-		os.Mkdir(uploadDir, os.ModePerm)
+	_, err := os.Stat(uploadDir)
+	if os.IsNotExist(err) {
+		err := os.MkdirAll(uploadDir, 0755)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	// TODO: add image id to filename

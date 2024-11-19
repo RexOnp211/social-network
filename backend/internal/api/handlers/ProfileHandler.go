@@ -7,6 +7,7 @@ import (
 	"net/http"
 	db "social-network/pkg/db/sqlite"
 	"social-network/pkg/helpers"
+	"strconv"
 	"strings"
 )
 
@@ -43,7 +44,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// fetch posts by user_id
-	posts, err := db.GetUserPostFromDbByUser(path)
+	posts, err := db.GetUserPostFromDbByUser(strconv.Itoa(user.Id))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			fmt.Println("Error getting user's post", err)

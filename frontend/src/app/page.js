@@ -7,9 +7,16 @@ import FetchFromBackend from "@/lib/fetch";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import ProfileImage from "@/components/profileImage";
+import { IoChatboxOutline } from "react-icons/io5";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import FetchCredential from "@/lib/fetchCredential";
+import Fetchnickname from "@/lib/fetchNickName";
 
 export default function Home() {
   const [post, setPost] = useState(0);
+  const [nickname, setNickname] = useState({});
+  const router = useRouter();
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -23,6 +30,44 @@ export default function Home() {
     };
     fetchPosts();
   }, []);
+
+  useEffect(() => {
+    const findNickname = async () => {
+      const ids = [...new Set(post.map((p) => p.userId))];
+      const nicknameMap = {};
+
+      for (const userId of ids) {
+        try {
+          const res = await Fetchnickname(userId);
+          const textData = await res.text();
+          nicknameMap[userId] = textData;
+          console.log(textData);
+        } catch (error) {
+          console.error(`Error fetching nickname for userId ${userId}:`, error);
+        }
+      }
+
+      setNickname(nicknameMap);
+    };
+    if (post.length > 0) {
+      findNickname();
+    }
+  }, [post]);
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const res = await FetchCredential();
+        if (res.username === "") {
+          router.push("/login");
+        }
+      } catch (error) {
+        console.error("error checking login", error);
+      }
+    };
+    checkLogin();
+  }, [router]);
+
   return (
     <>
       <TopBar />
@@ -30,7 +75,7 @@ export default function Home() {
         <SideBar />
         <div className="m-3 w-[90vw] h-[87vh] text-txtColor bg-primary rounded-lg shadow-lg p-6 overflow-y-auto">
           <h1>Home Page </h1>
-          <CreatePost />
+          <CreatePost type="Post" />
           {post.length > 0 ? (
             post.map((post) => (
               <div
@@ -39,30 +84,34 @@ export default function Home() {
               >
                 <a
                   className="flex flex-row items-center"
-                  href={`/profile/${post.userId}`}
+                  href={`/profile/${nickname[post.userId]}`}
                 >
                   <ProfileImage
                     alt={post.subject}
                     width={100}
                     height={100}
                     size={40}
-                    userId={post.userId}
+                    avatar={"http://localhost:8080/avatar/" + post.userId}
+                    className={"rounded-full mr-3 w-auto h-16"}
                   />
-                  {post.userId}
+                  {nickname[post.userId] || "loading..."}
                 </a>
                 <h1 className="text-xl font-bold">{post.subject}</h1>
                 <p>{post.content}</p>
                 {post.image ? (
                   <Image
-                    src={post.image}
+                    src={"http://localhost:8080/image/" + post.image}
                     alt="post image"
                     width={500}
                     height={500}
-                    className="w-auto h-48"
+                    className="w-auto h-80"
                   />
                 ) : (
                   ""
                 )}
+                <Link href={`/post/${post.postId}`} title="comments">
+                  <IoChatboxOutline />
+                </Link>
               </div>
             ))
           ) : (

@@ -8,6 +8,8 @@ import { IoIosNotificationsOutline } from "react-icons/io";
 import { CgProfile } from "react-icons/cg";
 import { useEffect, useState } from "react";
 import fetchCredential from "@/lib/fetchCredential";
+import FetchFromBackend from "@/lib/fetch";
+import { useRouter } from "next/navigation";
 
 const links = [
   { name: "Home", href: "/", icon: IoHomeOutline },
@@ -28,11 +30,29 @@ const links = [
 export default function TopBar() {
   // fetch login username and use it for profile link
   const [username, setUsername] = useState("");
+  const router = useRouter();
   useEffect(() => {
     const storedUsername = localStorage.getItem("user");
     console.log("Loaded username from localStorage:", storedUsername);
     setUsername(storedUsername);
   }, []);
+
+  const Logout = async () => {
+    try {
+      const res = await FetchFromBackend("/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.status === 200) {
+        console.log("Logout successful");
+        router.push("/login");
+      } else {
+        throw new Error("Logout failed");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="bg-primary m-3 p-4 rounded-lg shadow-lg">
@@ -52,6 +72,9 @@ export default function TopBar() {
           );
         })}
       </nav>
+      <button onClick={Logout} className="bg-secondary p-2 rounded-lg">
+        Logout
+      </button>
     </div>
   );
 }

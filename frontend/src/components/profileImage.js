@@ -1,17 +1,22 @@
 import Image from "next/image";
 
 // width and height are the quality of the image and size is the size of the image in html
-export default function ProfileImage({ alt, width, height, avatar }) {
-  // TODO: Fetch user profile image from images using userId
-  const src = `/image/${avatar}`;
+export default function ProfileImage({
+  alt,
+  width,
+  height,
+  size,
+  avatar,
+  className,
+}) {
   return (
-    <div className="overflow-hidden ml-4">
+    <div className="overflow-hidden">
       <Image
-        src={src}
+        src={avatar}
         width={width}
         height={height}
-        className="object-cover h-full w-full rounded-full"
         alt={alt}
+        className={className}
         priority={true}
       />
     </div>

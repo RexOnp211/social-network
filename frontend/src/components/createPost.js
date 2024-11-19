@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Select } from "@headlessui/react";
 import FetchFromBackend from "@/lib/fetch";
 
-export default function CreatePost(type) {
+export default function CreatePost() {
   const [option, setOption] = useState("public");
 
   function OnChange(e) {
@@ -17,6 +17,7 @@ export default function CreatePost(type) {
       const form = new FormData(e.target);
       FetchFromBackend("/", {
         method: "POST",
+        credentials: "include",
         headers: {},
         body: form,
       });
@@ -76,7 +77,6 @@ export default function CreatePost(type) {
             name="image"
             className="mb-4 w-full p-2 border border-gray-300 rounded-md focus:bg-primary"
           />
-
           <label
             htmlFor="privacy"
             className="mb-2 text-lg font-semibold text-gray-700"
@@ -95,7 +95,6 @@ export default function CreatePost(type) {
             <option value="friends">Friends</option>
           </Select>
           {option === "friends" ? <div>choose what friends see this</div> : ""}
-
           <button
             type="submit"
             className="bg-accent w-full text-white rounded-lg p-3 transition-colors hover:bg-accentDark"

@@ -6,6 +6,7 @@ import FetchFromBackend from "@/lib/fetch";
 import formatDate from "@/lib/formatDate";
 import fetchCredential from "@/lib/fetchCredential";
 import ProfilePrivacyToggle from "@/components/profilePrivacyToggle";
+import Link from "next/link";
 
 export default function Profile({ params }) {
   const { username } = params;
@@ -98,9 +99,11 @@ export default function Profile({ params }) {
         {
           <ProfileImage
             alt="Profile Image"
-            width={50}
-            height={50}
-            avatar={userData.avatar ? userData.avatar : "profile-default.png"}
+            width={100}
+            height={100}
+            size={40}
+            avatar={"http://localhost:8080/avatar/" + userData.userId}
+            className={"rounded-full mr-3 w-auto h-16"}
           />
         }
         <div className="ml-10">
@@ -121,12 +124,18 @@ export default function Profile({ params }) {
       <div>
         <h2 className="mt-4 text-lg text-accent font-bold">User Activity</h2>
         {posts.length === 0 ? (
-          <p>No posts yet</p>
+          <p className="ml-2 text-gray-600">No posts yet</p>
         ) : (
           <ul>
             {posts.map((post) => (
-              <li className="ml-2 text-gray-600" key={post.post_id}>
-                {post.subject}, {formatDate(post.creationDate)}
+              <li className="ml-2 text-gray-600" key={post.postId}>
+                <Link
+                  href={`/post/${post.postId}`}
+                  title={post.subject}
+                  className="text-foreground transition-colors hover:text-accent ease-in hover:underline"
+                >
+                  {post.subject}, {formatDate(post.creationDate)}
+                </Link>
               </li>
             ))}
           </ul>

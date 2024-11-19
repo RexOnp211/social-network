@@ -52,10 +52,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    token,
-	})
 
 	log.Printf("User %s logged in with session token %s", user.Username, token)
 

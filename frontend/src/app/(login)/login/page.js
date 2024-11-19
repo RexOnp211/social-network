@@ -1,7 +1,9 @@
 "use client";
 import FetchFromBackend from "@/lib/fetch";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
+  const router = useRouter();
   async function handleSubmit(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -10,18 +12,17 @@ export default function Login() {
     console.log(email, password);
 
     try {
-      const loginResponse = await FetchFromBackend("/login", {
+      const res = await FetchFromBackend("/login", {
         method: "POST",
         body: formData,
         credentials: "include",
       });
-      console.log(document.cookie);
-      const userData = await loginResponse.json();
-
-      // set username in localStorage
-      console.log("User Data:", userData.username);
-      localStorage.setItem("user", userData.username);
-      console.log(localStorage.getItem("user"));
+      if (res.status === 200) {
+        console.log("Login successful");
+        router.push("/");
+      } else {
+        throw new Error("Login failed");
+      }
     } catch (error) {
       console.error("error logging in", error);
     }
