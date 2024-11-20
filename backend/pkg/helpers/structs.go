@@ -50,8 +50,15 @@ type Comment struct {
 	CreationDate string `json:"creationDate"`
 }
 type Group struct {
-	Id          string `json:"groupId"`
-	CreatorId   string `json:"creatorId"`
+	CreatorName   string `json:"creatorName"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 }
+
+type GroupMembers struct {
+	Id	string `json:"id"`
+	Title       string `json:"title"`
+	Username     string    `json:"username"`
+	Status string `json:status`
+}
+

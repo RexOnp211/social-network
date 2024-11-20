@@ -6,9 +6,11 @@ import FetchFromBackend from "@/lib/fetch";
 import formatDate from "@/lib/formatDate";
 import fetchCredential from "@/lib/fetchCredential";
 import ProfilePrivacyToggle from "@/components/profilePrivacyToggle";
+import Link from "next/link";
 
 export default function Profile({ params }) {
   const { username } = params;
+  const [loginUsername, setLoginUsername] = useState(null);
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [followers, setFollowers] = useState([]);
@@ -33,8 +35,8 @@ export default function Profile({ params }) {
 
       try {
         // check the login username
-        const credential = await fetchCredential();
-        console.log(`credential`, credential);
+        const storedUsername = localStorage.getItem("user");
+        console.log("Loaded username from localStorage:", storedUsername);
 
         // fetch user information from database
         const userResponse = await FetchFromBackend(`/profile/${username}`, {
@@ -49,9 +51,10 @@ export default function Profile({ params }) {
         }
         const user = await userResponse.json();
         console.log("User Data:", user);
+        console.log("User Data:", user.user.nickname);
 
         // login user & the user is same (own profile)
-        if (credential.username === user.user.nickname) {
+        if (storedUsername === user.user.nickname) {
           setIsOwner(true);
         }
 
@@ -121,12 +124,18 @@ export default function Profile({ params }) {
       <div>
         <h2 className="mt-4 text-lg text-accent font-bold">User Activity</h2>
         {posts.length === 0 ? (
-          <p>No posts yet</p>
+          <p className="ml-2 text-gray-600">No posts yet</p>
         ) : (
           <ul>
             {posts.map((post) => (
-              <li className="ml-2 text-gray-600" key={post.post_id}>
-                {post.subject}, {formatDate(post.creationDate)}
+              <li className="ml-2 text-gray-600" key={post.postId}>
+                <Link
+                  href={`/post/${post.postId}`}
+                  title={post.subject}
+                  className="text-foreground transition-colors hover:text-accent ease-in hover:underline"
+                >
+                  {post.subject}, {formatDate(post.creationDate)}
+                </Link>
               </li>
             ))}
           </ul>

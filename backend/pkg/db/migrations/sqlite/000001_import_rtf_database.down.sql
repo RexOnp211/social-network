@@ -2,6 +2,7 @@ DROP TABLE categories;
 DROP TABLE comments;
 DROP TABLE group_posts;
 DROP TABLE groups;
+DROP TABLE group_members;
 DROP TABLE likes;
 DROP TABLE messages;
 DROP TABLE post_categories;

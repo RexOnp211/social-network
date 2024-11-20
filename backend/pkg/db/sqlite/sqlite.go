@@ -45,7 +45,7 @@ func LoginUserDB(username string, password string) (helpers.Login, error) {
 
 	// TODO: logic to use email when user input email
 
-	err := DB.QueryRow("SELECT nickname, password FROM users WHERE nickname = ?", username).Scan(&login.Username, &login.Password)
+	err := DB.QueryRow("SELECT user_id, nickname, password FROM users WHERE nickname = ?", username).Scan(&login.UserId , &login.Username, &login.Password)
 	if err != nil {
 		return login, errors.New("can't find username")
 	}
@@ -123,12 +123,6 @@ func GetPostsFromDb() ([]helpers.Post, error) {
 func GetUserFromDb(nickname string) (helpers.User, error) {
 	user := helpers.User{}
 
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error:", err)
-		return user, err
-	}
-
 	rows, err := DB.Query("SELECT user_id, nickname, email, firstname, lastname, dob, aboutme, public, avatar FROM users WHERE nickname = ?", nickname)
 	if err != nil {
 		log.Println("Query error:", err)
@@ -146,13 +140,7 @@ func GetUserFromDb(nickname string) (helpers.User, error) {
 	return user, nil
 }
 
-func GetUserPostFromDbByUser(userId int) ([]helpers.Post, error) {
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error:", err)
-		return nil, err
-	}
-
+func GetUserPostFromDbByUser(userId string) ([]helpers.Post, error) {
 	rows, err := DB.Query("SELECT * FROM posts WHERE user_id = ?", userId)
 	if err != nil {
 		log.Println("Query error:", err)
@@ -217,12 +205,6 @@ func UpdateUserPrivacy(username string, privacyStatus string) {
 func GetGroupFromDb(groupname string) (helpers.Group, error) {
 	group := helpers.Group{}
 
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error:", err)
-		return group, err
-	}
-
 	rows, err := DB.Query("SELECT * FROM groups WHERE title = ?", groupname)
 	if err != nil {
 		log.Println("Query error:", err)
@@ -230,7 +212,7 @@ func GetGroupFromDb(groupname string) (helpers.Group, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&group.Id, &group.CreatorId, &group.Title, &group.Description)
+		err := rows.Scan(&group.CreatorName, &group.Title, &group.Description)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return group, err
@@ -238,6 +220,139 @@ func GetGroupFromDb(groupname string) (helpers.Group, error) {
 	}
 
 	return group, nil
+}
+
+func GetGroupsFromDb() ([]helpers.Group, error) {
+	groups := []helpers.Group{}
+
+	rows, err := DB.Query("SELECT * FROM groups")
+	if err != nil {
+		log.Println("Query error:", err)
+		return groups, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		group := helpers.Group{}
+		err := rows.Scan(&group.CreatorName, &group.Title, &group.Description)
+		if err != nil {
+			log.Println("Scan error:", err)
+			return groups, err
+		}
+		groups = append(groups, group)
+	}
+
+	return groups, nil
+}
+
+func CreateGroupDB(data []interface{}) error {
+
+	stmt, err := DB.Prepare("INSERT INTO groups (creator_name, title, description) VALUES (?, ?, ?)")
+	if err != nil {
+		log.Println("Prepare statement error:", err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(data...)
+	if err != nil {
+		log.Println("Exec statement error:", err)
+		return err
+	}
+	return nil
+}
+
+type MembershipExistsError struct {
+	Status string
+}
+
+func (e *MembershipExistsError) Error() string {
+	return fmt.Sprintf("Membership already exists with status: %s", e.Status)
+}
+
+func InviteMemberDB(groupname string, username string, status string) (string, error) {
+
+	var existingStatus string
+	err := DB.QueryRow("SELECT status FROM group_members WHERE title = ? AND nickname = ?", groupname, username).Scan(&existingStatus)
+	log.Println("TEST", existingStatus, err)
+
+	// already there is data for the user & the group
+	if existingStatus != "" {
+		log.Println("Existing status found:", existingStatus)
+
+		switch existingStatus {
+		case "requested":
+			log.Println("Case: requested")
+			return fmt.Sprintf("User %s has already requested to join the group.", username),  &MembershipExistsError{Status: existingStatus}
+		case "invited":
+			log.Println("Case: invited")
+			return fmt.Sprintf("User %s has already been invited to the group.", username), &MembershipExistsError{Status: existingStatus}
+		case "approved":
+			log.Println("Case: approved")
+			return fmt.Sprintf("User %s is already a member of the group.", username), &MembershipExistsError{Status: existingStatus}
+		default:
+			log.Println("Unexpected status encountered")
+			return "Unexpected status.", nil
+		}}
+
+		// make new data
+		stmt, err := DB.Prepare("INSERT INTO group_members (title, nickname, status) VALUES (?, ?, ?)")
+		if err != nil {
+			log.Println("Prepare statement error:", err)
+			return "", err
+		}
+		defer stmt.Close()
+
+		// the user does not exist
+		_, err = stmt.Exec(groupname, username, status)
+		if err != nil {
+			if err.Error() == "FOREIGN KEY constraint failed" {
+				return fmt.Sprintf("Invitation unsent: user %s does not exist", username), err
+			}
+			return "", err
+		}
+
+		return "", nil
+}
+
+func GetGroupMembersFromDb(nickname string) ([]helpers.GroupMembers, error) {
+	rows, err := DB.Query("SELECT * FROM group_members WHERE nickname = ?", nickname)
+	if err != nil {
+		log.Println("Query error:", err)
+		return nil, err
+	}
+	defer rows.Close()
+	invitations := []helpers.GroupMembers{}
+	for rows.Next() {
+		invitation := helpers.GroupMembers{}
+		err := rows.Scan(&invitation.Id, &invitation.Title, &invitation.Username, &invitation.Status)
+		if err != nil {
+			log.Println("Scan error:", err)
+			return nil, err
+		}
+		invitations = append(invitations, invitation)
+	}
+
+	log.Println(invitations)
+	return invitations, nil
+}
+
+func UpdateMemberStatus(id int, status string) error {
+	var err error
+
+	if status == "approve" {
+		query := `UPDATE group_members SET status = ? WHERE id = ?`
+		_, err = DB.Exec(query, "approved", id)
+	}
+
+	if status == "reject" {
+		query := `DELETE FROM group_members WHERE id = ?`
+		_, err = DB.Exec(query, id)
+	}
+
+	if err != nil {
+		return fmt.Errorf("failed to update member status %v: %w", status, err)
+	}
+	return nil
 }
 
 func GetPostFromId(id int) (helpers.Post, error) {
