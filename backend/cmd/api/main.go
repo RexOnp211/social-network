@@ -67,10 +67,10 @@ func main() {
 		return
 	}
 
-	if err := m.Down(); err != nil && err != migrate.ErrNoChange {
-		fmt.Println("Migration Down Error:", err)
-		return
-	}
+	// if err := m.Down(); err != nil && err != migrate.ErrNoChange {
+	// 	fmt.Println("Migration Down Error:", err)
+	// 	return
+	// }
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		fmt.Println("Migration Up Error:", err)
