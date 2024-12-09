@@ -1,11 +1,16 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	db "social-network/pkg/db/sqlite"
 )
+
+type LoginResponse struct {
+    Username string `json:"username"`
+}
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the user credentials from the request body
@@ -33,12 +38,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Login failed: %v", err)
 		return
 	}
-	/* 	userID, err := db.GetUserIDByUsernameOrEmail(username)
-	   	if err != nil {
-	   		w.WriteHeader(http.StatusInternalServerError)
-	   		w.Write([]byte("Failed to get user ID"))
-	   		return
-	   	} */
+	fmt.Println("TEST", user)
+/* 	userID, err := db.GetUserIDByUsernameOrEmail(username)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to get user ID"))
+		return
+	} */
 	token, err := NewSession(w, user.Username, user.UserId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -50,4 +56,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+    response := LoginResponse{
+        Username: user.Username,
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    if err := json.NewEncoder(w).Encode(response); err != nil {
+        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+        return
+    }
 }

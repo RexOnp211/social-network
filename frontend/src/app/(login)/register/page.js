@@ -2,7 +2,6 @@
 
 import FetchFromBackend from "@/lib/fetch";
 
-
 export default function Register() {
   const OnSubmit = (e) => {
     e.preventDefault();
@@ -12,7 +11,7 @@ export default function Register() {
       headers: {},
       body: formData,
     });
-  }
+  };
   return (
     <div className="flex w-screen h-screen justify-center items-center">
       <div className="p-6 bg-primary rounded-lg w-96 h-auto">

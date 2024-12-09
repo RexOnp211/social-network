@@ -26,22 +26,6 @@ export default function Login() {
     } catch (error) {
       console.error("error logging in", error);
     }
-
-    // try {
-    //   const response = await fetch("/protected", {
-    //     method: "GET",
-    //     credentials: "include",
-    //   });
-
-    //   if (!response.ok) {
-    //     throw new Error("Network response was not ok");
-    //   }
-
-    //   const data = await response.text();
-    //   console.log("Response from protected endpoint:", data);
-    // } catch (error) {
-    //   console.error("Error fetching protected data:", error);
-    // }
   }
 
   return (
