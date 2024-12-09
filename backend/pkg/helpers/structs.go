@@ -55,3 +55,10 @@ type Group struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 }
+
+type FollowRequest struct {
+	FromUserId   string `json:"fromUserId"`
+	ToUserId     string `json:"toUserId"`
+	FollowsBack  bool   `json:"followsBack"`
+	CreationDate string `json:"creationDate"`
+}

@@ -45,7 +45,7 @@ func LoginUserDB(username string, password string) (helpers.Login, error) {
 
 	// TODO: logic to use email when user input email
 
-	err := DB.QueryRow("SELECT nickname, password FROM users WHERE nickname = ?", username).Scan(&login.Username, &login.Password)
+	err := DB.QueryRow("SELECT nickname, password, user_id FROM users WHERE nickname = ?", username).Scan(&login.Username, &login.Password, &login.UserId)
 	if err != nil {
 		return login, errors.New("can't find username")
 	}
@@ -347,4 +347,54 @@ func GetNicknameFromId(id string) string {
 		return ""
 	}
 	return nickname
+}
+
+func AddFollowRequestToDb(Fr helpers.FollowRequest) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in AddFollowRequestToDb:", err)
+		return
+	}
+	defer DB.Close()
+
+	stmt, err := DB.Prepare("INSERT INTO followers (follower_id, followee_id, follows_back) VALUES (?, ?, ?)")
+	if err != nil {
+		log.Println("Prepare error in AddFollowRequestToDb:", err)
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(Fr.FromUserId, Fr.ToUserId, Fr.FollowsBack)
+	if err != nil {
+		log.Println("Exec error in AddFollowRequestToDb:", err)
+		return
+	}
+	return
+}
+
+func GetFollowRequestsFromDb(userId int) ([]helpers.FollowRequest, error) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in GetFollowRequestsFromDb:", err)
+		return nil, err
+	}
+	defer DB.Close()
+
+	rows, err := DB.Query("SELECT follower_id, followee_id, follows_back FROM followers WHERE followee_id = ?", userId)
+	if err != nil {
+		log.Println("Query error in GetFollowRequestsFromDb:", err)
+		return nil, err
+	}
+	defer rows.Close()
+	followRequests := []helpers.FollowRequest{}
+	for rows.Next() {
+		fr := helpers.FollowRequest{}
+		err := rows.Scan(&fr.FromUserId, &fr.ToUserId, &fr.FollowsBack)
+		if err != nil {
+			log.Println("Scan error in GetFollowRequestsFromDb:", err)
+			return nil, err
+		}
+		followRequests = append(followRequests, fr)
+	}
+	return followRequests, nil
 }

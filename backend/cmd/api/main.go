@@ -77,6 +77,7 @@ func main() {
 	r.AddRoute("GET", "/credential", http.HandlerFunc(handlers.GetCredential))
 	r.AddRoute("POST", "/privacy", http.HandlerFunc(handlers.PrivacyHandler))
 	r.AddRoute("GET", "/user/", http.HandlerFunc(handlers.GetNicknameFromId))
+	r.AddRoute("GET", "/ws", http.HandlerFunc(handlers.WsHandler))
 
 	fmt.Println("Starting Go server")
 	err = http.ListenAndServe(":8080", r)

@@ -46,7 +46,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	log.Printf("User %s logged in with session token %s", user.Username, token)
 
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
