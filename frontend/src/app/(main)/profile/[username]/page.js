@@ -6,6 +6,10 @@ import FetchFromBackend from "@/lib/fetch";
 import formatDate from "@/lib/formatDate";
 import fetchCredential from "@/lib/fetchCredential";
 import ProfilePrivacyToggle from "@/components/profilePrivacyToggle";
+import { FollowRequest } from "@/lib/wsClient";
+import { useRef } from "react";
+import WsClient from "@/lib/wsClient";
+import Fetchnickname from "@/lib/fetchNickName";
 import Link from "next/link";
 
 export default function Profile({ params }) {
@@ -20,10 +24,41 @@ export default function Profile({ params }) {
   const [userNotFound, setUserNotFound] = useState(false);
   const [isPrivateProfile, setIsPrivateProfile] = useState(false);
   const [loading, setLoading] = useState(true);
+  const ws = useRef(null);
 
   // TODO: check the profile is own (compare login info and the page path)
   // show profile & option for change profile public/private
   // if the profile is not own, check the profile is public/private
+
+  const sendFollowRequest = async () => {
+    if (ws.current) {
+      console.log("sending follow request");
+      const user = await fetchCredential();
+      const id = await user.id; //int
+      const followingId = await userData.id; //int
+      id === followingId
+        ? alert("You can't follow yourself")
+        : ws.current.send(
+            JSON.stringify({
+              type: "follow_request",
+              payload: new FollowRequest("" + user.id, "" + followingId, false), //user.id is converted to string
+            }),
+          );
+    }
+  };
+
+  // set up websocket
+  useEffect(() => {
+    const load = async () => {
+      const wsClient = await WsClient();
+      ws.current = wsClient;
+
+      ws.current.onmessage = (event) => {
+        alert(`Message received: ${event.data}`);
+      };
+    };
+    load();
+  }, []);
 
   // fetch user information
   useEffect(() => {
@@ -78,7 +113,7 @@ export default function Profile({ params }) {
 
   // when the user not found
   if (userNotFound) {
-    return <div>The user doesn't exist.</div>;
+    return <div>The user doesnt exist.</div>;
   }
 
   // for private profile
@@ -116,6 +151,7 @@ export default function Profile({ params }) {
             Date of Birth: {formatDate(userData.dob)}
           </p>
         </div>
+        <button onClick={sendFollowRequest}>Follow</button>
       </div>
       <div>
         <h2 className="mt-4 text-lg text-accent font-bold">About Me</h2>

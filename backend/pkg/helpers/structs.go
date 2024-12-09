@@ -50,15 +50,21 @@ type Comment struct {
 	CreationDate string `json:"creationDate"`
 }
 type Group struct {
-	CreatorName   string `json:"creatorName"`
+	CreatorName string `json:"creatorName"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 }
 
-type GroupMembers struct {
-	Id	string `json:"id"`
-	Title       string `json:"title"`
-	Username     string    `json:"username"`
-	Status string `json:status`
+type FollowRequest struct {
+	FromUserId   string `json:"fromUserId"`
+	ToUserId     string `json:"toUserId"`
+	FollowsBack  bool   `json:"followsBack"`
+	CreationDate string `json:"creationDate"`
 }
 
+type GroupMembers struct {
+	Id       string `json:"id"`
+	Title    string `json:"title"`
+	Username string `json:"username"`
+	Status   string `json:status`
+}

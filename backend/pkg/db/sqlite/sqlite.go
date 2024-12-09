@@ -45,7 +45,7 @@ func LoginUserDB(username string, password string) (helpers.Login, error) {
 
 	// TODO: logic to use email when user input email
 
-	err := DB.QueryRow("SELECT user_id, nickname, password FROM users WHERE nickname = ?", username).Scan(&login.UserId , &login.Username, &login.Password)
+	err := DB.QueryRow("SELECT user_id, nickname, password FROM users WHERE nickname = ?", username).Scan(&login.UserId, &login.Username, &login.Password)
 	if err != nil {
 		return login, errors.New("can't find username")
 	}
@@ -282,7 +282,7 @@ func InviteMemberDB(groupname string, username string, status string) (string, e
 		switch existingStatus {
 		case "requested":
 			log.Println("Case: requested")
-			return fmt.Sprintf("User %s has already requested to join the group.", username),  &MembershipExistsError{Status: existingStatus}
+			return fmt.Sprintf("User %s has already requested to join the group.", username), &MembershipExistsError{Status: existingStatus}
 		case "invited":
 			log.Println("Case: invited")
 			return fmt.Sprintf("User %s has already been invited to the group.", username), &MembershipExistsError{Status: existingStatus}
@@ -292,26 +292,27 @@ func InviteMemberDB(groupname string, username string, status string) (string, e
 		default:
 			log.Println("Unexpected status encountered")
 			return "Unexpected status.", nil
-		}}
-
-		// make new data
-		stmt, err := DB.Prepare("INSERT INTO group_members (title, nickname, status) VALUES (?, ?, ?)")
-		if err != nil {
-			log.Println("Prepare statement error:", err)
-			return "", err
 		}
-		defer stmt.Close()
+	}
 
-		// the user does not exist
-		_, err = stmt.Exec(groupname, username, status)
-		if err != nil {
-			if err.Error() == "FOREIGN KEY constraint failed" {
-				return fmt.Sprintf("Invitation unsent: user %s does not exist", username), err
-			}
-			return "", err
+	// make new data
+	stmt, err := DB.Prepare("INSERT INTO group_members (title, nickname, status) VALUES (?, ?, ?)")
+	if err != nil {
+		log.Println("Prepare statement error:", err)
+		return "", err
+	}
+	defer stmt.Close()
+
+	// the user does not exist
+	_, err = stmt.Exec(groupname, username, status)
+	if err != nil {
+		if err.Error() == "FOREIGN KEY constraint failed" {
+			return fmt.Sprintf("Invitation unsent: user %s does not exist", username), err
 		}
+		return "", err
+	}
 
-		return "", nil
+	return "", nil
 }
 
 func GetGroupMembersFromDb(nickname string) ([]helpers.GroupMembers, error) {
@@ -462,4 +463,54 @@ func GetNicknameFromId(id string) string {
 		return ""
 	}
 	return nickname
+}
+
+func AddFollowRequestToDb(Fr helpers.FollowRequest) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in AddFollowRequestToDb:", err)
+		return
+	}
+	defer DB.Close()
+
+	stmt, err := DB.Prepare("INSERT INTO followers (follower_id, followee_id, follows_back) VALUES (?, ?, ?)")
+	if err != nil {
+		log.Println("Prepare error in AddFollowRequestToDb:", err)
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(Fr.FromUserId, Fr.ToUserId, Fr.FollowsBack)
+	if err != nil {
+		log.Println("Exec error in AddFollowRequestToDb:", err)
+		return
+	}
+	return
+}
+
+func GetFollowRequestsFromDb(userId int) ([]helpers.FollowRequest, error) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in GetFollowRequestsFromDb:", err)
+		return nil, err
+	}
+	defer DB.Close()
+
+	rows, err := DB.Query("SELECT follower_id, followee_id, follows_back FROM followers WHERE followee_id = ?", userId)
+	if err != nil {
+		log.Println("Query error in GetFollowRequestsFromDb:", err)
+		return nil, err
+	}
+	defer rows.Close()
+	followRequests := []helpers.FollowRequest{}
+	for rows.Next() {
+		fr := helpers.FollowRequest{}
+		err := rows.Scan(&fr.FromUserId, &fr.ToUserId, &fr.FollowsBack)
+		if err != nil {
+			log.Println("Scan error in GetFollowRequestsFromDb:", err)
+			return nil, err
+		}
+		followRequests = append(followRequests, fr)
+	}
+	return followRequests, nil
 }

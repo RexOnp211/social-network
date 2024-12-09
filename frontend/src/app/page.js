@@ -12,11 +12,27 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import FetchCredential from "@/lib/fetchCredential";
 import Fetchnickname from "@/lib/fetchNickName";
+import WsClient from "@/lib/wsClient";
+import { useRef } from "react";
 
 export default function Home() {
   const [post, setPost] = useState(0);
   const [nickname, setNickname] = useState({});
   const router = useRouter();
+  const ws = useRef(null);
+
+  useEffect(() => {
+    const load = async () => {
+      const wsClient = await WsClient();
+      ws.current = wsClient;
+
+      ws.current.onmessage = (event) => {
+        alert(`Message received: ${event.data}`);
+      };
+    };
+    load();
+  }, []);
+
   useEffect(() => {
     const fetchPosts = async () => {
       try {

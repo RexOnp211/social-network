@@ -122,3 +122,13 @@ CREATE TABLE IF NOT EXISTS user_status (
     last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
+
+CREATE TABLE IF NOT EXISTS followers (
+    follower_id INTEGER NOT NULL,
+    followee_id INTEGER NOT NULL,
+    follows_back BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (follower_id, followee_id),
+    FOREIGN KEY(follower_id) REFERENCES users(user_id),
+    FOREIGN KEY(followee_id) REFERENCES users(user_id)
+);
