@@ -9,6 +9,7 @@ import (
 )
 
 type LoginResponse struct {
+	Id int `json:"id"`
     Username string `json:"username"`
 }
 
@@ -52,13 +53,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	log.Printf("User %s logged in with session token %s", user.Username, token)
 
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
     response := LoginResponse{
+		Id: user.UserId,
         Username: user.Username,
     }
 

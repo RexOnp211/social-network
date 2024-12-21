@@ -19,6 +19,11 @@ export default function Login() {
       });
       if (res.status === 200) {
         console.log("Login successful");
+
+        // clear login info from local storage
+        localStorage.setItem("userID", res.userId);
+        localStorage.setItem("user", res.username);
+
         router.push("/");
       } else {
         throw new Error("Login failed");

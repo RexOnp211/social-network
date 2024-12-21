@@ -31,13 +31,17 @@ INSERT INTO groups (creator_name, title, description) VALUES
   ('pu2', 'test group 4', 'this is group description'),
   ('pu2', 'test group long name', 'this is group description'),
   ('pu2', 'test group 5', 'this is group description'),
-  ('publicuser', 'publicuser made', 'this is group description');
+  ('publicuser', 'publicuser made', 'this is group description'),
+  ('publicuser', 'publicuser made 2', 'this is group description');
 
 
-INSERT INTO group_members (title, nickname, status) VALUES
+INSERT INTO memberships (title, nickname, status) VALUES
   ('test group', 'publicuser', 'invited'),
+  ('test group', 'privateuser', 'required'),
   ('test group 2', 'publicuser', 'invited'),
   ('test group 3', 'publicuser', 'invited'),
   ('test group 4', 'publicuser', 'invited'),
   ('test group long name', 'publicuser', 'invited'),
+  ('publicuser made', 'privateuser', 'requested'),
+  ('publicuser made 2', 'pu2', 'requested'),
   ('publicuser made', 'pu2', 'invited');

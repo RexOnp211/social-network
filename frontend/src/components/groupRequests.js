@@ -4,21 +4,23 @@ import Popup from "@/components/popup";
 import UpdateMembership from "@/lib/updateMembership";
 import Link from "next/link";
 
-const GroupInvitation = ({ invitations, onAcceptOrReject }) => {
+const GroupRequests = ({ requests, onAcceptOrReject }) => {
   const [loggedInUsername, setLoggedInUsername] = useState(
     localStorage.getItem("user")
   );
 
-  async function handleInvitationStatus(invitation, status) {
+  async function handleRequestsStatus(request, status) {
+    console.log(request, status, loggedInUsername);
+
     try {
       const resultStatus = UpdateMembership(
-        invitation.id,
-        invitation.title,
+        request.id,
+        request.title,
         loggedInUsername,
         status
       );
 
-      onAcceptOrReject(invitation.title, status);
+      onAcceptOrReject(request.title, status);
     } catch (error) {
       console.error(`Error updating status ${status}:`, error);
     }
@@ -42,27 +44,27 @@ const GroupInvitation = ({ invitations, onAcceptOrReject }) => {
   return (
     <div className="bg-orange-100 p-4 mb-4 rounded-lg">
       <h2 className="text-lg text-accent font-bold mb-2">
-        You have received group invitations:
+        You have received group requests:
       </h2>
       <div>
-        {invitations.length !== 0 && (
+        {requests.length !== 0 && (
           <ul className="list-disc pl-5 marker:text-txtColor">
-            {invitations.map((invitation) => (
-              <li className="ml-2 text-gray-600 mb-2" key={invitation.title}>
+            {requests.map((request) => (
+              <li className="ml-2 text-gray-600 mb-2" key={request.title}>
                 <Link
-                  href={`/group/${invitation.title}`}
+                  href={`/group/${request.title}`}
                   className="text-txtColor hover:underline mr-4"
                 >
-                  {invitation.title}
+                  {request.title}
                 </Link>
                 <button
-                  onClick={() => handleInvitationStatus(invitation, "approve")}
+                  onClick={() => handleRequestsStatus(request, "approve")}
                   className="mr-2 transition-colors ease-in hover:bg-accentDark bg-accent text-white rounded-lg p-2 py-0.5"
                 >
                   Accept
                 </button>
                 <button
-                  onClick={() => handleInvitationStatus(invitation, "reject")}
+                  onClick={() => handleRequestsStatus(request, "reject")}
                   className="transition-colors ease-in hover:bg-red-700 bg-red-600 text-white rounded-lg p-2 py-0.5"
                 >
                   Reject
@@ -85,4 +87,4 @@ const GroupInvitation = ({ invitations, onAcceptOrReject }) => {
   );
 };
 
-export default GroupInvitation;
+export default GroupRequests;

@@ -61,6 +61,10 @@ export default function Home() {
         if (res.username === "") {
           router.push("/login");
         }
+        // set login info from local storage
+        console.log("test", res);
+        localStorage.setItem("userID", res.userId);
+        localStorage.setItem("user", res.username);
       } catch (error) {
         console.error("error checking login", error);
       }

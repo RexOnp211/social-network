@@ -44,7 +44,7 @@ func DeleteSession(token string) error {
 // GetSessionByUserID retrieves a session by user ID.
 func GetSessionByUserID(userID int) (*helpers.Session, error) {
 	var session helpers.Session
-	err := DB.QueryRow(`SELECT token, user_id, expires_at FROM sessions WHERE nickname = ?`, userID).Scan(
+	err := DB.QueryRow(`SELECT token, user_id, expires_at FROM sessions WHERE user_id = ?`, userID).Scan(
 		&session.SessionToken, &session.UserID, &session.ExpireTime)
 	if err != nil {
 		log.Printf("Error finding session for user ID %d: %v", userID, err)

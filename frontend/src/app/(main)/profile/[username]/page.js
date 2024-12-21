@@ -4,13 +4,14 @@ import ProfileImage from "@/components/profileImage";
 import { Select } from "@headlessui/react";
 import FetchFromBackend from "@/lib/fetch";
 import formatDate from "@/lib/formatDate";
-import fetchCredential from "@/lib/fetchCredential";
 import ProfilePrivacyToggle from "@/components/profilePrivacyToggle";
 import Link from "next/link";
 
 export default function Profile({ params }) {
   const { username } = params;
-  const [loginUsername, setLoginUsername] = useState(null);
+  const [loggedInUsername, setLoggedInUsername] = useState(
+    localStorage.getItem("user")
+  );
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [followers, setFollowers] = useState([]);
@@ -34,10 +35,6 @@ export default function Profile({ params }) {
       console.log(`starting process for ${username}`);
 
       try {
-        // check the login username
-        const storedUsername = localStorage.getItem("user");
-        console.log("Loaded username from localStorage:", storedUsername);
-
         // fetch user information from database
         const userResponse = await FetchFromBackend(`/profile/${username}`, {
           method: "GET",
@@ -54,7 +51,7 @@ export default function Profile({ params }) {
         console.log("User Data:", user.user.nickname);
 
         // login user & the user is same (own profile)
-        if (storedUsername === user.user.nickname) {
+        if (loggedInUsername === user.user.nickname) {
           setIsOwner(true);
         }
 
