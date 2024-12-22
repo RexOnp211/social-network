@@ -47,12 +47,10 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 func SendFollowRequestHandler(event Event, c *Client) error {
 	var followRequest helpers.FollowRequest
-	fmt.Println("client list:", c.manager.clients)
 	if err := json.Unmarshal(event.Payload, &followRequest); err != nil {
 		return fmt.Errorf("bad payload in request: %v", err)
 	}
 
-	fmt.Println("sending follow request to", c.user.Nickname)
 	fmt.Println("followrequest", followRequest)
 	db.AddFollowRequestToDb(followRequest)
 
@@ -100,12 +98,27 @@ func GetFollowRequestsHandler(event Event, c *Client) error {
 
 	followRequestsPayload, err := json.Marshal(followRequests)
 	if err != nil {
+		log.Println("Error marshaling follow request event:", err)
 		return fmt.Errorf("error marshalling follow requests: %v", err)
 	}
 
 	c.egress <- Event{
 		Type:    SendFollowRequest,
 		Payload: followRequestsPayload,
+	}
+
+	return nil
+}
+
+func AcceptOrDeclineFollowRequest(event Event, c *Client) error {
+	var followRequest helpers.FollowRequest
+	if err := json.Unmarshal(event.Payload, &followRequest); err != nil {
+		return fmt.Errorf("bad payload in request in AcceptFollowRequest: %v", err)
+	}
+
+	err2 := db.UpdateFollowRequestStatusDB(followRequest.FromUserId, followRequest.ToUserId, followRequest.FollowsBack)
+	if err2 != nil {
+		return err2
 	}
 
 	return nil

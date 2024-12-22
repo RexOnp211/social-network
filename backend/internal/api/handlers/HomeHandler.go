@@ -43,6 +43,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	nickname := ValidateSession(w, r)
+	fmt.Println("validate session broken?", nickname)
 	user, err := db.GetUserFromDb(nickname)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

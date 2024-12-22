@@ -11,6 +11,7 @@ import fetchCredential from "@/lib/fetchCredential";
 import FetchFromBackend from "@/lib/fetch";
 import { useRouter } from "next/navigation";
 
+
 const links = [
   { name: "Home", href: "/", icon: IoHomeOutline },
   { name: "Groups", href: "/group", icon: MdOutlineGroups },
@@ -32,9 +33,12 @@ export default function TopBar() {
   const [username, setUsername] = useState("");
   const router = useRouter();
   useEffect(() => {
-    const storedUsername = localStorage.getItem("user");
-    console.log("Loaded username from localStorage:", storedUsername);
-    setUsername(storedUsername);
+    const getUserName = async () => {
+      const res = await fetchCredential()
+      const data = await res.username
+      setUsername(data)
+    }
+    getUserName()
   }, []);
 
   const Logout = async () => {

@@ -496,7 +496,7 @@ func GetFollowRequestsFromDb(userId int) ([]helpers.FollowRequest, error) {
 	}
 	defer DB.Close()
 
-	rows, err := DB.Query("SELECT follower_id, followee_id, follows_back FROM followers WHERE followee_id = ?", userId)
+	rows, err := DB.Query("SELECT follower_id, followee_id, follows_back FROM followers WHERE followee_id = ? AND follows_back = ?", userId, false)
 	if err != nil {
 		log.Println("Query error in GetFollowRequestsFromDb:", err)
 		return nil, err
@@ -513,4 +513,36 @@ func GetFollowRequestsFromDb(userId int) ([]helpers.FollowRequest, error) {
 		followRequests = append(followRequests, fr)
 	}
 	return followRequests, nil
+}
+
+func UpdateFollowRequestStatusDB(from, to string, status bool) error {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in GetFollowRequestsFromDb:", err)
+		return err
+	}
+	defer DB.Close()
+
+	var querry string
+
+	// changes querry based on if followrquest accepted or declined
+	if status {
+		querry = "UPDATE followers SET follows_back = true WHERE follower_id = ? AND followee_id = ?"
+	} else {
+		querry = "DELETE FROM followers WHERE follower_id = ? AND followee_id ?"
+	}
+	stmt, err := DB.Prepare(querry)
+	if err != nil {
+		log.Println("Error Changing follow status", err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err2 := stmt.Exec(from, to)
+	if err2 != nil {
+		log.Println("Error executing followRequest Accept in db", err)
+		return err
+	}
+
+	return nil
 }

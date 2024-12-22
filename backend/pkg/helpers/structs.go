@@ -66,5 +66,5 @@ type GroupMembers struct {
 	Id       string `json:"id"`
 	Title    string `json:"title"`
 	Username string `json:"username"`
-	Status   string `json:status`
+	Status   string `json:"status"`
 }

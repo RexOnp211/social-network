@@ -124,13 +124,16 @@ func NewManager() *Manager {
 }
 
 var (
-	SendFollowRequest = "follow_request"
-	FollowRequestList = "follow_request_list"
+	SendFollowRequest     = "follow_request"
+	FollowRequestList     = "follow_request_list"
+	Follow_request_status = "follow_request_status"
+	RemoveFollowRequest   = "remove_follow_request"
 )
 
 func (m *Manager) setupEventHandlers() {
 	m.handlers[SendFollowRequest] = SendFollowRequestHandler
 	m.handlers[FollowRequestList] = GetFollowRequestsHandler
+	m.handlers[Follow_request_status] = AcceptOrDeclineFollowRequest
 }
 
 func (m *Manager) routeEvent(event Event, c *Client) error {
