@@ -52,8 +52,8 @@ export default function TopBar() {
         console.log("Logout successful");
 
         // clear login info from local storage
-        localStorage.clearItem("userID");
-        localStorage.clearItem("user");
+        localStorage.removeItem("userID");
+        localStorage.removeItem("user");
 
         router.push("/login");
       } else {
