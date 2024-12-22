@@ -63,8 +63,8 @@ export default function Home() {
         }
         // set login info from local storage
         console.log("test", res);
-        localStorage.removeItem("userID", res.userId);
-        localStorage.removeItem("user", res.username);
+        localStorage.setItem("userID", res.userId);
+        localStorage.setItem("user", res.username);
       } catch (error) {
         console.error("error checking login", error);
       }
