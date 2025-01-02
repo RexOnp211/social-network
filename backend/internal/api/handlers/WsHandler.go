@@ -52,7 +52,10 @@ func SendFollowRequestHandler(event Event, c *Client) error {
 	}
 
 	fmt.Println("followrequest", followRequest)
-	db.AddFollowRequestToDb(followRequest)
+	err := db.AddFollowRequestToDb(followRequest)
+	if err != nil {
+		return fmt.Errorf("users already follow eachother or sth went wrong: %v", err)
+	}
 
 	followRequestId, err := strconv.Atoi(followRequest.ToUserId)
 	if err != nil {

@@ -57,8 +57,6 @@ export default function Home() {
           const res = await Fetchnickname(userId);
           const textData = await res.text();
           nicknameMap[userId] = textData;
-          console.log("ids in home page", ids)
-          console.log("nicknames", textData);
         } catch (error) {
           console.error(`Error fetching nickname for userId ${userId}:`, error);
         }

@@ -97,6 +97,8 @@ export default function Notifications() {
           payload: new FollowRequest(fromUserId, toUserId, followsBack),
         })
       )
+      const notiBox = e.target.parentElement.parentElement;
+      notiBox.remove()
     }
   };
 

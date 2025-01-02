@@ -76,7 +76,10 @@ func (c *Client) Read() {
 		}
 
 		if err := c.manager.routeEvent(event, c); err != nil {
-			log.Printf("Error routing event: %v", err)
+			c.egress <- Event{
+				Type:    "Error",
+				Payload: json.RawMessage(err.Error()),
+			}
 			return
 		}
 	}
@@ -128,6 +131,7 @@ var (
 	FollowRequestList     = "follow_request_list"
 	Follow_request_status = "follow_request_status"
 	RemoveFollowRequest   = "remove_follow_request"
+	ErrorEvent            = "error"
 )
 
 func (m *Manager) setupEventHandlers() {
