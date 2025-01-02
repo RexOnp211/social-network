@@ -19,10 +19,11 @@ func GetAvaterFromUserId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pathToFile := "../../assets/image/avatar" + avatar
+	pathToFile := "../../assets/image/avatar/" + avatar
 	if avatar == "" {
 		pathToFile = "../../assets/image/default/profile-default.png"
 	}
+	fmt.Println("this is the path to the image file", pathToFile)
 	buf, err := helpers.EncodeImg(w, pathToFile)
 	if err != nil {
 		fmt.Println("Error encoding avatar", err)

@@ -139,7 +139,7 @@ export default function Profile({ params }) {
             width={100}
             height={100}
             size={40}
-            avatar={"http://localhost:8080/avatar/" + userData.userId}
+            avatar={"http://localhost:8080/avatar/" + userData.id}
             className={"rounded-full mr-3 w-auto h-16"}
           />
         }
