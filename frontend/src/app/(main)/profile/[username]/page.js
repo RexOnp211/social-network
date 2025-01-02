@@ -54,7 +54,9 @@ export default function Profile({ params }) {
       ws.current = wsClient;
 
       ws.current.onmessage = (event) => {
-        alert(`Message received: ${event.data}`);
+        if (event.type === "follow_request") {
+          alert(`Message received: ${event.data}`);
+        }
       };
     };
     load();

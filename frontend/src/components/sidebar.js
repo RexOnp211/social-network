@@ -1,27 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import FetchFromBackend from "@/lib/fetch";
+import { RSC_ACTION_CLIENT_WRAPPER_ALIAS } from "next/dist/lib/constants";
+import { useEffect, useState } from "react";
 
 export default function SideBar() {
-  const [showMoreFollowers, setShowMoreFollowers] = useState(false);
   const [showMoreFollowing, setShowMoreFollowing] = useState(false);
   const [showMoreGroups, setShowMoreGroups] = useState(false);
   const [showMoreEvents, setShowMoreEvents] = useState(false);
+  const [following, setFollowing] = useState([])
 
-  const followers = [
-    "Follower 1",
-    "Follower 2",
-    "Follower 3",
-    "Follower 4",
-    "Follower 5",
-  ];
-  const following = [
-    "Following 1",
-    "Following 2",
-    "Following 3",
-    "Following 4",
-    "Following 5",
-  ];
   const groups = ["Group 1", "Group 2", "Group 3", "Group 4", "Group 5"];
   const events = [
     "Event 1",
@@ -35,18 +23,22 @@ export default function SideBar() {
     "Event 9",
     "Event 10",
   ];
+  
+  useEffect(() => {
+    const getFollowing = async () => {
+      const res = await FetchFromBackend("/following", {
+        method: "GET",
+        credentials: "include",
+      })
+      const users = await res.json()
+      setFollowing(users)
+    }
+    getFollowing()
+  }, [])
+
   return (
     <div className="w-64 h-[87vh] m-3 bg-primary text-txtColor flex flex-col p-2 rounded-lg shadow-lg">
       <nav className="flex flex-col space-y-4 overflow-y-auto">
-        <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
-          <h1 className="text-lg text-accent font-bold">Followers</h1>
-          <RenderList
-            items={followers}
-            showMoreState={showMoreFollowers}
-            setShowMoreState={setShowMoreFollowers}
-            type="follower"
-          />
-        </div>
         <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
           <h1 className="text-lg text-accent font-bold">Following</h1>
           <RenderList
@@ -85,16 +77,19 @@ export default function SideBar() {
 }
 
 const RenderList = ({ items, showMoreState, setShowMoreState, type }) => {
+  console.log("items", items)
+  const validItems = Array.isArray(items) ? items : []
+  let showMoreitems = showMoreState ? validItems: validItems.slice(0,4)
   return (
     <>
       <ul className="list-disc pl-5 marker:text-txtColor">
-        {(showMoreState ? items : items.slice(0, 4)).map((item, index) => (
+        {showMoreitems.flatMap((item, index) => (
           <li key={index}>
             <a
               href={`/${type === "event" ? "events" : type === "group" ? "groups" : "profile"}/${type}${index + 1}`}
               className="text-txtColor hover:underline"
             >
-              {item}
+              {item.nickname}
             </a>
           </li>
         ))}

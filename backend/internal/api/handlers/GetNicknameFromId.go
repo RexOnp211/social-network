@@ -13,6 +13,7 @@ func GetNicknameFromId(w http.ResponseWriter, r *http.Request) {
 	re := regexp.MustCompile(`\d+$`)
 	userId := re.FindString(url)
 	nickname := db.GetNicknameFromId(userId)
+	fmt.Println("username", userId)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(nickname))
 }

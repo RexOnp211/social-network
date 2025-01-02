@@ -98,6 +98,8 @@ func main() {
 	r.AddRoute("POST", "/invitemember", http.HandlerFunc(handlers.InviteMemberHandler))
 	r.AddRoute("POST", "/update_member_status", http.HandlerFunc(handlers.UpdateMemberStatusHandler))
 	r.AddRoute("GET", "/user/", http.HandlerFunc(handlers.GetNicknameFromId))
+	r.AddRoute("GET", "/notifications", http.HandlerFunc(handlers.Notifications))
+	r.AddRoute("GET", "/following", http.HandlerFunc(handlers.GetFollowing))
 	r.AddRoute("GET", "/ws", http.HandlerFunc(handlers.WsHandler))
 
 	fmt.Println("Starting Go server")

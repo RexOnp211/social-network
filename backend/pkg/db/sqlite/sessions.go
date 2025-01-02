@@ -8,16 +8,16 @@ import (
 )
 
 // SaveSession saves a new session in the database.
-func SaveSession(token string, userID int, expiration time.Time) error {
+func SaveSession(token, nickname string, userID int, expiration time.Time) error {
 	if DB == nil {
 		return fmt.Errorf("db connection failed")
 	}
-	stmt, err := DB.Prepare(`INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?)`)
+	stmt, err := DB.Prepare(`INSERT INTO sessions (token, user_id, nickname, expires_at) VALUES (?, ?, ?, ?)`)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(token, userID, expiration)
+	_, err = stmt.Exec(token, userID, nickname, expiration)
 	if err != nil {
 		return err
 	}
@@ -67,6 +67,20 @@ func GetUserIDFromSession(token string) (int, error) {
 	}
 	log.Printf("Session token found for user ID: %d", userID)
 	return userID, nil
+}
+
+func GetNicknameFromSession(token string) (string, error) {
+	if DB == nil {
+		return "", fmt.Errorf("db connection failed")
+	}
+	var Nickname string
+	err := DB.QueryRow(`SELECT nickname FROM sessions WHERE token = ?`, token).Scan(&Nickname)
+	if err != nil {
+		log.Printf("Error finding session token: %v", err)
+		return "", err
+	}
+	log.Printf("Session token found for user ID: %s", Nickname)
+	return Nickname, nil
 }
 
 // ClearSessions deletes all sessions from the database.

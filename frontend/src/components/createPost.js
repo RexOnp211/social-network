@@ -15,6 +15,7 @@ export default function CreatePost() {
     e.preventDefault();
     try {
       const form = new FormData(e.target);
+      console.log("formcreatepost",)
       FetchFromBackend("/", {
         method: "POST",
         credentials: "include",

@@ -27,7 +27,7 @@ export default function Home() {
       ws.current = wsClient;
 
       ws.current.onmessage = (event) => {
-        alert(`Message received: ${event.data}`);
+        alert(`Message received: ${event.type}, ${event.data}`);
       };
     };
     load();
@@ -38,7 +38,7 @@ export default function Home() {
       try {
         const res = await FetchFromBackend("/");
         const jsonData = await res.json();
-        console.log(jsonData);
+        console.log("posts", jsonData);
         setPost(jsonData);
       } catch (error) {
         console.error(error);
@@ -57,7 +57,6 @@ export default function Home() {
           const res = await Fetchnickname(userId);
           const textData = await res.text();
           nicknameMap[userId] = textData;
-          console.log(textData);
         } catch (error) {
           console.error(`Error fetching nickname for userId ${userId}:`, error);
         }

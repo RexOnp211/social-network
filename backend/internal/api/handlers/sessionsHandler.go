@@ -1,11 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	db "social-network/pkg/db/sqlite"
 	"social-network/pkg/helpers"
-	"strconv"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -47,7 +47,7 @@ func NewSession(w http.ResponseWriter, username string, userID int) (string, err
 	}
 	http.SetCookie(w, &cookie)
 
-	err = db.SaveSession(token.String(), userID, expiration)
+	err = db.SaveSession(token.String(), username, userID, expiration)
 	if err != nil {
 		log.Fatalf("Failed to save session to database: %v", err)
 		return "", err
@@ -64,16 +64,18 @@ func ValidateSession(w http.ResponseWriter, r *http.Request) string {
 		return ""
 	}
 	log.Printf("Session token found: %s", token)
+	fmt.Println("sessions in code", sessions)
 	key, ok := sessions[token]
 	if ok {
 		log.Printf("Session valid for user: %s", key.Username)
 		return key.Username
 	} else {
 		log.Printf("Invalid session token: %s", token)
-		userID, err := db.GetUserIDFromSession(token)
+		nickname, err := db.GetNicknameFromSession(token)
 		if err == nil {
-			log.Printf("Valid session token found in database for user ID: %d", userID)
-			return strconv.Itoa(userID)
+			log.Printf("Valid session token found in database for user ID: %s", nickname)
+
+			return nickname
 		} else {
 			log.Printf("Session token not found in database: %v", err)
 		}
