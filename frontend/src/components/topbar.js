@@ -23,23 +23,24 @@ const links = [
   },
   {
     name: "Profile",
-    href: (username) => `/profile/${username}`,
+    href: (loggedInUsername) => `/profile/${loggedInUsername}`,
     icon: CgProfile,
   },
 ];
 
 export default function TopBar() {
   // fetch login username and use it for profile link
-  const [loggedInUsername, setLoggedInUsername] = useState(
-    localStorage.getItem("user")
-  );
+  const [loggedInUsername, setLoggedInUsername] = useState("");
 
   useEffect(() => {
-    (async () => {
-      console.log(loggedInUsername);
-      setLoggedInUsername(loggedInUsername);
-    })();
-  }, [loggedInUsername]);
+    const checklogin = async () => {
+      const res = await fetchCredential()
+      const data = await res.username
+      setLoggedInUsername(data)
+    }
+    checklogin()
+
+  }, []);
 
   const router = useRouter();
 

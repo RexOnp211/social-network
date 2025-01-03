@@ -2,7 +2,7 @@
 
 import FetchFromBackend from "@/lib/fetch";
 import { useState } from "react";
-import useRouter from "next/navigation"
+import { useRouter } from "next/navigation";
 
 export default function Register() {
   const [ErrorMsg, setErrorMsg] = useState(null)

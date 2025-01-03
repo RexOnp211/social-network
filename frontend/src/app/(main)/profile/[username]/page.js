@@ -96,6 +96,8 @@ export default function Profile({ params }) {
         setUserData(user.user);
         setPosts(user.posts);
 
+        const following = await FetchFromBackend(`/following`)
+
         // TODO: fetch followers & followings
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -176,6 +178,24 @@ export default function Profile({ params }) {
             ))}
           </ul>
         )}
+        <h2 className="mt-4 text-lg text-accent font-bold">User Activity</h2>
+        {posts.length === 0 ? (
+          <p className="ml-2 text-gray-600">No posts yet</p>
+        ) : (
+          <ul>
+            {posts.map((post) => (
+              <li className="ml-2 text-gray-600" key={post.postId}>
+                <Link
+                  href={`/post/${post.postId}`}
+                  title={post.subject}
+                  className="text-foreground transition-colors hover:text-accent ease-in hover:underline"
+                >
+                  {post.subject}, {formatDate(post.creationDate)}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}  
       </div>
     </div>
   );

@@ -75,11 +75,12 @@ export default function Home() {
         const res = await FetchCredential();
         if (res.username === "") {
           router.push("/login");
+        } else {
+          // set login info from local storage
+          localStorage.setItem("userID", await res.id);
+          localStorage.setItem("user", await res.username);
+          console.log("test", localStorage.getItem("user"))
         }
-        // set login info from local storage
-        console.log("test", res);
-        localStorage.setItem("userID", res.userId);
-        localStorage.setItem("user", res.username);
       } catch (error) {
         console.error("error checking login", error);
       }
