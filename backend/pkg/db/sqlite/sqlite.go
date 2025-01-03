@@ -400,3 +400,44 @@ func GetUsersFollowingListFromDb(userId int) ([]helpers.User, error) {
 
 	return userArr, nil
 }
+
+func GetUsersFollowersListFromDB(userId int) ([]helpers.User, error) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in GetFollowRequestsFromDb:", err)
+		return nil, err
+	}
+	defer DB.Close()
+
+	rows, err := DB.Query("SELECT follower_id FROM followers WHERE followee_id = ?", userId)
+	if err != nil {
+		fmt.Println("error querrying db for follwer ids", err)
+		return nil, err
+	}
+
+	followersUsersArr := []int{}
+	for rows.Next() {
+		var followerId int
+		err := rows.Scan(&followerId)
+		if err != nil {
+			fmt.Println("error scanning db for follower id")
+			return nil, err
+		}
+		followersUsersArr = append(followersUsersArr, followerId)
+	}
+
+	userArr := []helpers.User{}
+	for _, id := range followersUsersArr {
+		strId := strconv.Itoa(id)
+
+		nickname := GetNicknameFromId(strId)
+		user, err := GetUserFromDb(nickname)
+		if err != nil {
+			fmt.Println("error getting user for profilepage")
+			return nil, err
+		}
+		userArr = append(userArr, user)
+	}
+
+	return userArr, nil
+}
