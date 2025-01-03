@@ -30,16 +30,18 @@ const links = [
 
 export default function TopBar() {
   // fetch login username and use it for profile link
-  const [username, setUsername] = useState("");
-  const router = useRouter();
+  const [loggedInUsername, setLoggedInUsername] = useState(
+    localStorage.getItem("user")
+  );
+
   useEffect(() => {
-    const getUserName = async () => {
-      const res = await fetchCredential()
-      const data = await res.username
-      setUsername(data)
-    }
-    getUserName()
-  }, []);
+    (async () => {
+      console.log(loggedInUsername);
+      setLoggedInUsername(loggedInUsername);
+    })();
+  }, [loggedInUsername]);
+
+  const router = useRouter();
 
   const Logout = async () => {
     try {
@@ -49,6 +51,11 @@ export default function TopBar() {
       });
       if (res.status === 200) {
         console.log("Logout successful");
+
+        // clear login info from local storage
+        localStorage.removeItem("userID");
+        localStorage.removeItem("user");
+
         router.push("/login");
       } else {
         throw new Error("Logout failed");
@@ -63,7 +70,9 @@ export default function TopBar() {
       <nav className="flex justify-center">
         {links.map((link) => {
           const href =
-            typeof link.href === "function" ? link.href(username) : link.href;
+            typeof link.href === "function"
+              ? link.href(loggedInUsername)
+              : link.href;
           return (
             <Link
               title={link.name}

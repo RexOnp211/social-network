@@ -3,6 +3,7 @@ package helpers
 import (
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -11,13 +12,19 @@ import (
 
 // add file, file header and either "post" or "avatar" as imgtype
 func SaveFile(file multipart.File, header *multipart.FileHeader, imgtype string) (string, error) {
+	log.Println("posting to group...")
+
 	defer file.Close()
 	uploadDir := "../../assets/image/"
-	fmt.Println(header.Header)
+	fmt.Println("header", header.Header)
 	if imgtype == "post" {
 		uploadDir += "upload/"
 	} else if imgtype == "avatar" {
 		uploadDir += "avatar/"
+	} else if imgtype == "group-post" {
+		uploadDir += "group-post/"
+	} else if imgtype == "group-post-comment" {
+		uploadDir += "group-post-comment/"
 	}
 	_, err := os.Stat(uploadDir)
 	if os.IsNotExist(err) {
@@ -26,6 +33,7 @@ func SaveFile(file multipart.File, header *multipart.FileHeader, imgtype string)
 			return "", err
 		}
 	}
+	log.Println("posting to group...")
 
 	// TODO: add image id to filename
 	files, err := os.ReadDir(uploadDir)
@@ -40,6 +48,8 @@ func SaveFile(file multipart.File, header *multipart.FileHeader, imgtype string)
 		return "", err
 	}
 	defer outFile.Close()
+	log.Println("posting to group...")
+
 
 	_, err = io.Copy(outFile, file)
 	if err != nil {

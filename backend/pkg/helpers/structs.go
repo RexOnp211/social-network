@@ -68,3 +68,36 @@ type GroupMembers struct {
 	Username string `json:"username"`
 	Status   string `json:"status"`
 }
+type Membership struct {
+	Id       string `json:"id"`
+	Title    string `json:"title"`
+	Username string `json:"username"`
+	Status   string `json:"status"`
+}
+
+type GroupPost struct {
+	Id           string    `json:"Id"`
+	GroupTitle   string    `json:"groupTitle"`
+	Nickname     string    `json:"nickname"`
+	Subject      string    `json:"subject"`
+	Content      string    `json:"content"`
+	CreationDate string    `json:"creationDate"`
+	Image        string    `json:"image"`
+	Comments     []Comment `json:"comments"`
+}
+
+type GroupEvent struct {
+	Id          int    `json:"Id"`
+	GroupTitle  string `json:"groupTitle"`
+	Nickname    string `json:"nickname"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	EventDate   string `json:"eventDate"`
+}
+
+type EventStatus struct {
+	Id       int    `json:"Id"`
+	Nickname string `json:"nickname"`
+	EventId  int    `json:"eventId"`
+	Going    bool   `json:"going"`
+}

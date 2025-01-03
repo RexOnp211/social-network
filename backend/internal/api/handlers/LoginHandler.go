@@ -9,6 +9,7 @@ import (
 )
 
 type LoginResponse struct {
+	Id int `json:"id"`
     Username string `json:"username"`
 }
 
@@ -58,6 +59,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
     response := LoginResponse{
+		Id: user.UserId,
         Username: user.Username,
     }
 
