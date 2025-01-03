@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -23,6 +24,8 @@ func NewRouter() *Router {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	log.Printf("Incoming request: %s %s", req.Method, req.URL.Path) // リクエストログ
+
 	path := req.URL.Path
 	method := req.Method
 

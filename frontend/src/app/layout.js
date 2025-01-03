@@ -1,4 +1,3 @@
-import fetchCredential from "@/lib/fetchCredential";
 import "./globals.css";
 
 export const metadata = {

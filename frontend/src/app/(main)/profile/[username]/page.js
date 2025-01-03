@@ -4,17 +4,19 @@ import ProfileImage from "@/components/profileImage";
 import { Select } from "@headlessui/react";
 import FetchFromBackend from "@/lib/fetch";
 import formatDate from "@/lib/formatDate";
-import fetchCredential from "@/lib/fetchCredential";
 import ProfilePrivacyToggle from "@/components/profilePrivacyToggle";
 import { FollowRequest } from "@/lib/wsClient";
 import { useRef } from "react";
 import WsClient from "@/lib/wsClient";
 import Fetchnickname from "@/lib/fetchNickName";
 import Link from "next/link";
+import fetchCredential from "@/lib/fetchCredential";
 
 export default function Profile({ params }) {
   const { username } = params;
-  const [loginUsername, setLoginUsername] = useState(null);
+  const [loggedInUsername, setLoggedInUsername] = useState(
+    localStorage.getItem("user")
+  );
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [followers, setFollowers] = useState([]);
@@ -25,6 +27,7 @@ export default function Profile({ params }) {
   const [isPrivateProfile, setIsPrivateProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const ws = useRef(null);
+  
 
   // TODO: check the profile is own (compare login info and the page path)
   // show profile & option for change profile public/private
@@ -36,12 +39,13 @@ export default function Profile({ params }) {
       const user = await fetchCredential();
       const id = await user.id; //int
       const followingId = await userData.id; //int
+      const publicProfile = userData.public
       id === followingId
         ? alert("You can't follow yourself")
         : ws.current.send(
             JSON.stringify({
               type: "follow_request",
-              payload: new FollowRequest("" + user.id, "" + followingId, false), //user.id is converted to string
+              payload: new FollowRequest("" + user.id, "" + followingId, publicProfile ), //user.id is converted to string
             }),
           );
     }
@@ -71,10 +75,6 @@ export default function Profile({ params }) {
       console.log(`starting process for ${username}`);
 
       try {
-        // check the login username
-        const storedUsername = localStorage.getItem("user");
-        console.log("Loaded username from localStorage:", storedUsername);
-
         // fetch user information from database
         const userResponse = await FetchFromBackend(`/profile/${username}`, {
           method: "GET",
@@ -91,12 +91,30 @@ export default function Profile({ params }) {
         console.log("User Data:", user.user.nickname);
 
         // login user & the user is same (own profile)
-        if (storedUsername === user.user.nickname) {
+        if (loggedInUsername === user.user.nickname) {
           setIsOwner(true);
         }
 
         setUserData(user.user);
         setPosts(user.posts);
+
+        const following = await FetchFromBackend("/following", {
+          method: "GET",
+          credentials: "include"
+        })
+
+        const followingUsers = await following.json()
+
+        setFollowing(followingUsers)
+
+        const followers = await FetchFromBackend("/followers", {
+          method: "GET",
+          credentials: "include"
+        })
+
+        const followerUsers = await followers.json()
+
+        setFollowers(followerUsers) 
 
         // TODO: fetch followers & followings
       } catch (error) {
@@ -160,7 +178,7 @@ export default function Profile({ params }) {
         <p className="ml-2 text-gray-600">{userData.aboutMe}</p>
       </div>
       <div>
-        <h2 className="mt-4 text-lg text-accent font-bold">User Activity</h2>
+        <h2 className="mt-4 text-lg text-accent font-bold">Posts</h2>
         {posts.length === 0 ? (
           <p className="ml-2 text-gray-600">No posts yet</p>
         ) : (
@@ -178,6 +196,42 @@ export default function Profile({ params }) {
             ))}
           </ul>
         )}
+        <h2 className="mt-4 text-lg text-accent font-bold">Following</h2>
+        {following.length === 0 ? (
+          <p className="ml-2 text-gray-600">You are not following anybody</p>
+        ) : (
+          <ul>
+            {following.map((user) => (
+              <li className="ml-2 text-gray-600" key={user.id}>
+                <Link
+                  href={`/profile${user.nickname}`}
+                  title={user.nickname}
+                  className="text-foreground transition-colors hover:text-accent ease-in hover:underline"
+                >
+                  {user.nickname}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+        <h2 className="mt-4 text-lg text-accent font-bold">Followers</h2>
+        {followers.length === 0 ? (
+          <p className="ml-2 text-gray-600">You dont have any followers</p>
+        ) : (
+          <ul>
+            {followers.map((user) => (
+              <li className="ml-2 text-gray-600" key={user.id}>
+                <Link
+                  href={`/profile${user.nickname}`}
+                  title={user.nickname}
+                  className="text-foreground transition-colors hover:text-accent ease-in hover:underline"
+                >
+                  {user.nickname}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )} 
       </div>
     </div>
   );

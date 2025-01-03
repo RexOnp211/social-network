@@ -20,12 +20,6 @@ func SetDB(database *sql.DB) {
 
 func RegisterUserDB(data []interface{}) error {
 
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error:", err)
-		return nil
-	}
-
 	stmt, err := DB.Prepare("INSERT INTO users (nickname, email, password, firstname, lastname, dob, aboutme, avatar) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Prepare statement error:", err)
@@ -74,11 +68,6 @@ func GetUserIDByUsernameOrEmail(username string) (int, error) {
 }
 
 func AddPostToDb(data []interface{}) error {
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error:", err)
-		return nil
-	}
 
 	stmt, err := DB.Prepare("INSERT INTO posts (user_id, subject, content, image, privacy) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
@@ -96,11 +85,6 @@ func AddPostToDb(data []interface{}) error {
 }
 
 func GetPostsFromDb() ([]helpers.Post, error) {
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error:", err)
-		return nil, err
-	}
 
 	rows, err := DB.Query("SELECT * FROM posts")
 	if err != nil {
@@ -164,12 +148,6 @@ func GetUserPostFromDbByUser(userId string) ([]helpers.Post, error) {
 }
 
 func UpdateUserPrivacy(username string, privacyStatus string) {
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error:", err)
-		return
-	}
-	defer DB.Close()
 
 	// string -> integer
 	var publicStatus int
@@ -203,168 +181,8 @@ func UpdateUserPrivacy(username string, privacyStatus string) {
 	return
 }
 
-func GetGroupFromDb(groupname string) (helpers.Group, error) {
-	group := helpers.Group{}
-
-	rows, err := DB.Query("SELECT * FROM groups WHERE title = ?", groupname)
-	if err != nil {
-		log.Println("Query error:", err)
-		return group, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&group.CreatorName, &group.Title, &group.Description)
-		if err != nil {
-			log.Println("Scan error:", err)
-			return group, err
-		}
-	}
-
-	return group, nil
-}
-
-func GetGroupsFromDb() ([]helpers.Group, error) {
-	groups := []helpers.Group{}
-
-	rows, err := DB.Query("SELECT * FROM groups")
-	if err != nil {
-		log.Println("Query error:", err)
-		return groups, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		group := helpers.Group{}
-		err := rows.Scan(&group.CreatorName, &group.Title, &group.Description)
-		if err != nil {
-			log.Println("Scan error:", err)
-			return groups, err
-		}
-		groups = append(groups, group)
-	}
-
-	return groups, nil
-}
-
-func CreateGroupDB(data []interface{}) error {
-
-	stmt, err := DB.Prepare("INSERT INTO groups (creator_name, title, description) VALUES (?, ?, ?)")
-	if err != nil {
-		log.Println("Prepare statement error:", err)
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(data...)
-	if err != nil {
-		log.Println("Exec statement error:", err)
-		return err
-	}
-	return nil
-}
-
-type MembershipExistsError struct {
-	Status string
-}
-
-func (e *MembershipExistsError) Error() string {
-	return fmt.Sprintf("Membership already exists with status: %s", e.Status)
-}
-
-func InviteMemberDB(groupname string, username string, status string) (string, error) {
-
-	var existingStatus string
-	err := DB.QueryRow("SELECT status FROM group_members WHERE title = ? AND nickname = ?", groupname, username).Scan(&existingStatus)
-	log.Println("TEST", existingStatus, err)
-
-	// already there is data for the user & the group
-	if existingStatus != "" {
-		log.Println("Existing status found:", existingStatus)
-
-		switch existingStatus {
-		case "requested":
-			log.Println("Case: requested")
-			return fmt.Sprintf("User %s has already requested to join the group.", username), &MembershipExistsError{Status: existingStatus}
-		case "invited":
-			log.Println("Case: invited")
-			return fmt.Sprintf("User %s has already been invited to the group.", username), &MembershipExistsError{Status: existingStatus}
-		case "approved":
-			log.Println("Case: approved")
-			return fmt.Sprintf("User %s is already a member of the group.", username), &MembershipExistsError{Status: existingStatus}
-		default:
-			log.Println("Unexpected status encountered")
-			return "Unexpected status.", nil
-		}
-	}
-
-	// make new data
-	stmt, err := DB.Prepare("INSERT INTO group_members (title, nickname, status) VALUES (?, ?, ?)")
-	if err != nil {
-		log.Println("Prepare statement error:", err)
-		return "", err
-	}
-	defer stmt.Close()
-
-	// the user does not exist
-	_, err = stmt.Exec(groupname, username, status)
-	if err != nil {
-		if err.Error() == "FOREIGN KEY constraint failed" {
-			return fmt.Sprintf("Invitation unsent: user %s does not exist", username), err
-		}
-		return "", err
-	}
-
-	return "", nil
-}
-
-func GetGroupMembersFromDb(nickname string) ([]helpers.GroupMembers, error) {
-	rows, err := DB.Query("SELECT * FROM group_members WHERE nickname = ?", nickname)
-	if err != nil {
-		log.Println("Query error:", err)
-		return nil, err
-	}
-	defer rows.Close()
-	invitations := []helpers.GroupMembers{}
-	for rows.Next() {
-		invitation := helpers.GroupMembers{}
-		err := rows.Scan(&invitation.Id, &invitation.Title, &invitation.Username, &invitation.Status)
-		if err != nil {
-			log.Println("Scan error:", err)
-			return nil, err
-		}
-		invitations = append(invitations, invitation)
-	}
-
-	log.Println(invitations)
-	return invitations, nil
-}
-
-func UpdateMemberStatus(id int, status string) error {
-	var err error
-
-	if status == "approve" {
-		query := `UPDATE group_members SET status = ? WHERE id = ?`
-		_, err = DB.Exec(query, "approved", id)
-	}
-
-	if status == "reject" {
-		query := `DELETE FROM group_members WHERE id = ?`
-		_, err = DB.Exec(query, id)
-	}
-
-	if err != nil {
-		return fmt.Errorf("failed to update member status %v: %w", status, err)
-	}
-	return nil
-}
-
 func GetPostFromId(id int) (helpers.Post, error) {
 	post := helpers.Post{}
-
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error in GetPostFromId:", err)
-		return post, err
-	}
 
 	rows, err := DB.Query("SELECT * FROM posts WHERE post_id = ?", id)
 	if err != nil {
@@ -384,11 +202,6 @@ func GetPostFromId(id int) (helpers.Post, error) {
 }
 
 func GetCommentsFromPostId(id int) ([]helpers.Comment, error) {
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error in GetCommentFromPostId:", err)
-		return nil, err
-	}
 
 	rows, err := DB.Query("SELECT comment_id, post_id, user_id, content, image FROM comments WHERE post_id = ?", id)
 	if err != nil {
@@ -412,11 +225,6 @@ func GetCommentsFromPostId(id int) ([]helpers.Comment, error) {
 
 func AddCommentToDb(data []interface{}) error {
 	fmt.Println("interfacedata", data)
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error in AddCommentToDb:", err)
-		return err
-	}
 
 	stmt, err := DB.Prepare("INSERT INTO comments (post_id, user_id, content, image) VALUES (?, ?, ?, ?)")
 	if err != nil {
@@ -434,14 +242,10 @@ func AddCommentToDb(data []interface{}) error {
 }
 
 func GetAvatarFromUserId(userId string) (string, error) {
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error in GetAvatarFromUserId:", err)
-		return "", err
-	}
+
 	stmt := "SELECT avatar FROM users WHERE user_id = ?"
 	avatar := ""
-	err = DB.QueryRow(stmt, userId).Scan(&avatar)
+	err := DB.QueryRow(stmt, userId).Scan(&avatar)
 	if err != nil {
 		fmt.Println("QueryRow error in GetAvatarFromUserId:", err)
 		return "", err
@@ -451,14 +255,10 @@ func GetAvatarFromUserId(userId string) (string, error) {
 
 func GetNicknameFromId(id string) string {
 	fmt.Println("id:", id)
-	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
-	if err != nil {
-		fmt.Println("DB Open Error in GetNicknameFromId:", err)
-		return ""
-	}
+
 	stmt := "SELECT nickname FROM users WHERE user_id = ?"
 	nickname := ""
-	err = DB.QueryRow(stmt, id).Scan(&nickname)
+	err := DB.QueryRow(stmt, id).Scan(&nickname)
 	if err != nil {
 		fmt.Println("QueryRow error in GetNicknameFromId:", err)
 		return ""
@@ -474,28 +274,16 @@ func AddFollowRequestToDb(Fr helpers.FollowRequest) error {
 	}
 	defer DB.Close()
 
-	fr := helpers.FollowRequest{}
-	err = DB.QueryRow("SELECT follower_id, followee_id, follows_back FROM followers WHERE (follower_id = ? AND followee_id = ?) OR (followee_id = ? AND follower_id = ?)",
-		Fr.FromUserId, Fr.ToUserId, Fr.FromUserId, Fr.ToUserId).Scan(&fr.FromUserId, &fr.ToUserId, &fr.FollowsBack)
-	if err == sql.ErrNoRows {
-
-		stmt, err := DB.Prepare("INSERT INTO followers (follower_id, followee_id, follows_back) VALUES (?, ?, ?)")
-		if err != nil {
-			log.Println("Prepare error in AddFollowRequestToDb:", err)
-			return err
-		}
-		defer stmt.Close()
-
-		_, err = stmt.Exec(Fr.FromUserId, Fr.ToUserId, Fr.FollowsBack)
-		if err != nil {
-			log.Println("Exec error in AddFollowRequestToDb:", err)
-			return err
-		}
-	} else if err != nil {
-		fmt.Println("error checking if users already follow", err)
+	stmt2, err := DB.Prepare("INSERT INTO followers (follower_id, followee_id, accepted) VALUES (?, ?, ?)")
+	if err != nil {
+		log.Println("Prepare error in AddFollowRequestToDb:", err)
 		return err
-	} else {
-		fmt.Println("users already follow eachother")
+	}
+	defer stmt2.Close()
+
+	_, err = stmt2.Exec(Fr.FromUserId, Fr.ToUserId, Fr.FollowsBack)
+	if err != nil {
+		log.Println("Exec error in AddFollowRequestToDb:", err)
 		return err
 	}
 	return nil
@@ -509,7 +297,7 @@ func GetFollowRequestsFromDb(userId int) ([]helpers.FollowRequest, error) {
 	}
 	defer DB.Close()
 
-	rows, err := DB.Query("SELECT follower_id, followee_id, follows_back FROM followers WHERE followee_id = ? AND follows_back = ?", userId, false)
+	rows, err := DB.Query("SELECT follower_id, followee_id, accepted FROM followers WHERE followee_id = ? AND accepted = ?", userId, false)
 	if err != nil {
 		log.Println("Query error in GetFollowRequestsFromDb:", err)
 		return nil, err
@@ -540,21 +328,21 @@ func UpdateFollowRequestStatusDB(from, to string, status bool) error {
 
 	// changes querry based on if followrquest accepted or declined
 	if status {
-		querry = "UPDATE followers SET follows_back = true WHERE follower_id = ? AND followee_id = ?"
+		querry = "UPDATE followers SET accepted = true WHERE follower_id = ? AND followee_id = ?"
 	} else {
 		querry = "DELETE FROM followers WHERE follower_id = ? AND followee_id ?"
-	}
-	stmt, err := DB.Prepare(querry)
-	if err != nil {
-		log.Println("Error Changing follow status", err)
-		return err
-	}
-	defer stmt.Close()
+		stmt, err := DB.Prepare(querry)
+		if err != nil {
+			log.Println("Error Changing follow status", err)
+			return err
+		}
+		defer stmt.Close()
 
-	_, err2 := stmt.Exec(from, to)
-	if err2 != nil {
-		log.Println("Error executing followRequest Accept in db", err)
-		return err
+		_, err2 := stmt.Exec(from, to)
+		if err2 != nil {
+			log.Println("Error executing followRequest Accept in db", err)
+			return err
+		}
 	}
 
 	return nil
@@ -588,11 +376,54 @@ func GetUsersFollowingListFromDb(userId int) ([]helpers.User, error) {
 	userArr := []helpers.User{}
 	for _, id := range followingUsersArr {
 		strId := strconv.Itoa(id)
+		fmt.Println("THIS IS FOLLOWING ID", id)
 
 		nickname := GetNicknameFromId(strId)
 		user, err := GetUserFromDb(nickname)
 		if err != nil {
 			fmt.Println("Error getting user for sidebar")
+			return nil, err
+		}
+		userArr = append(userArr, user)
+	}
+
+	return userArr, nil
+}
+
+func GetUsersFollowersListFromDB(userId int) ([]helpers.User, error) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		fmt.Println("DB Open Error in GetFollowRequestsFromDb:", err)
+		return nil, err
+	}
+	defer DB.Close()
+
+	rows, err := DB.Query("SELECT follower_id FROM followers WHERE followee_id = ?", userId)
+	if err != nil {
+		fmt.Println("error querrying db for follwer ids", err)
+		return nil, err
+	}
+
+	followersUsersArr := []int{}
+	for rows.Next() {
+		var followerId int
+		err := rows.Scan(&followerId)
+		if err != nil {
+			fmt.Println("error scanning db for follower id")
+			return nil, err
+		}
+		followersUsersArr = append(followersUsersArr, followerId)
+	}
+
+	userArr := []helpers.User{}
+	for _, id := range followersUsersArr {
+		fmt.Println("THIS IS ID FOLLOWERS", id)
+		strId := strconv.Itoa(id)
+
+		nickname := GetNicknameFromId(strId)
+		user, err := GetUserFromDb(nickname)
+		if err != nil {
+			fmt.Println("error getting user for profilepage")
 			return nil, err
 		}
 		userArr = append(userArr, user)
