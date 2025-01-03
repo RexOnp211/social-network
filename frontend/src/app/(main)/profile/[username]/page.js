@@ -107,6 +107,15 @@ export default function Profile({ params }) {
 
         setFollowing(followingUsers)
 
+        const followers = await FetchFromBackend("/followers", {
+          method: "GET",
+          credentials: "include"
+        })
+
+        const followerUsers = await followers.json()
+
+        setFollowers(followerUsers) 
+
         // TODO: fetch followers & followings
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -204,7 +213,25 @@ export default function Profile({ params }) {
               </li>
             ))}
           </ul>
-        )}  
+        )}
+        <h2 className="mt-4 text-lg text-accent font-bold">Followers</h2>
+        {followers.length === 0 ? (
+          <p className="ml-2 text-gray-600">You dont have any followers</p>
+        ) : (
+          <ul>
+            {following.map((user) => (
+              <li className="ml-2 text-gray-600" key={user.id}>
+                <Link
+                  href={`/profile${user.nickname}`}
+                  title={user.nickname}
+                  className="text-foreground transition-colors hover:text-accent ease-in hover:underline"
+                >
+                  {user.nickname}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )} 
       </div>
     </div>
   );

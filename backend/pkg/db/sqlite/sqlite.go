@@ -274,28 +274,16 @@ func AddFollowRequestToDb(Fr helpers.FollowRequest) error {
 	}
 	defer DB.Close()
 
-	fr := helpers.FollowRequest{}
-	err = DB.QueryRow("SELECT follower_id, followee_id, follows_back FROM followers WHERE (follower_id = ? AND followee_id = ?) OR (followee_id = ? AND follower_id = ?)",
-		Fr.FromUserId, Fr.ToUserId, Fr.FromUserId, Fr.ToUserId).Scan(&fr.FromUserId, &fr.ToUserId, &fr.FollowsBack)
-	if err == sql.ErrNoRows {
-
-		stmt, err := DB.Prepare("INSERT INTO followers (follower_id, followee_id, follows_back) VALUES (?, ?, ?)")
-		if err != nil {
-			log.Println("Prepare error in AddFollowRequestToDb:", err)
-			return err
-		}
-		defer stmt.Close()
-
-		_, err = stmt.Exec(Fr.FromUserId, Fr.ToUserId, Fr.FollowsBack)
-		if err != nil {
-			log.Println("Exec error in AddFollowRequestToDb:", err)
-			return err
-		}
-	} else if err != nil {
-		fmt.Println("error checking if users already follow", err)
+	stmt2, err := DB.Prepare("INSERT INTO followers (follower_id, followee_id, accepted) VALUES (?, ?, ?)")
+	if err != nil {
+		log.Println("Prepare error in AddFollowRequestToDb:", err)
 		return err
-	} else {
-		fmt.Println("users already follow eachother")
+	}
+	defer stmt2.Close()
+
+	_, err = stmt2.Exec(Fr.FromUserId, Fr.ToUserId, Fr.FollowsBack)
+	if err != nil {
+		log.Println("Exec error in AddFollowRequestToDb:", err)
 		return err
 	}
 	return nil
@@ -309,7 +297,7 @@ func GetFollowRequestsFromDb(userId int) ([]helpers.FollowRequest, error) {
 	}
 	defer DB.Close()
 
-	rows, err := DB.Query("SELECT follower_id, followee_id, follows_back FROM followers WHERE followee_id = ? AND follows_back = ?", userId, false)
+	rows, err := DB.Query("SELECT follower_id, followee_id, accepted FROM followers WHERE followee_id = ? AND accepted = ?", userId, false)
 	if err != nil {
 		log.Println("Query error in GetFollowRequestsFromDb:", err)
 		return nil, err
@@ -340,21 +328,21 @@ func UpdateFollowRequestStatusDB(from, to string, status bool) error {
 
 	// changes querry based on if followrquest accepted or declined
 	if status {
-		querry = "UPDATE followers SET follows_back = true WHERE follower_id = ? AND followee_id = ?"
+		querry = "UPDATE followers SET accepted = true WHERE follower_id = ? AND followee_id = ?"
 	} else {
 		querry = "DELETE FROM followers WHERE follower_id = ? AND followee_id ?"
-	}
-	stmt, err := DB.Prepare(querry)
-	if err != nil {
-		log.Println("Error Changing follow status", err)
-		return err
-	}
-	defer stmt.Close()
+		stmt, err := DB.Prepare(querry)
+		if err != nil {
+			log.Println("Error Changing follow status", err)
+			return err
+		}
+		defer stmt.Close()
 
-	_, err2 := stmt.Exec(from, to)
-	if err2 != nil {
-		log.Println("Error executing followRequest Accept in db", err)
-		return err
+		_, err2 := stmt.Exec(from, to)
+		if err2 != nil {
+			log.Println("Error executing followRequest Accept in db", err)
+			return err
+		}
 	}
 
 	return nil

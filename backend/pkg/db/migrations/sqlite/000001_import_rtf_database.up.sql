@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS user_status (
 CREATE TABLE IF NOT EXISTS followers (
     follower_id INTEGER NOT NULL,
     followee_id INTEGER NOT NULL,
-    follows_back BOOLEAN NOT NULL DEFAULT false,
+    accepted BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (follower_id, followee_id),
     FOREIGN KEY(follower_id) REFERENCES users(user_id),

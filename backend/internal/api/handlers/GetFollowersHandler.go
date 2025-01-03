@@ -31,7 +31,7 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 		log.Println("error getting user Info for following list", err)
 		return
 	}
-	userArr, err := db.GetUsersFollowingListFromDb(user.Id)
+	userArr, err := db.GetUsersFollowersListFromDB(user.Id)
 	if err != nil {
 		log.Println("error getting people user follows", err)
 		return
