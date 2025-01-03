@@ -10,6 +10,7 @@ import { useRef } from "react";
 import WsClient from "@/lib/wsClient";
 import Fetchnickname from "@/lib/fetchNickName";
 import Link from "next/link";
+import fetchCredential from "@/lib/fetchCredential";
 
 export default function Profile({ params }) {
   const { username } = params;
@@ -26,6 +27,7 @@ export default function Profile({ params }) {
   const [isPrivateProfile, setIsPrivateProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const ws = useRef(null);
+  
 
   // TODO: check the profile is own (compare login info and the page path)
   // show profile & option for change profile public/private
@@ -96,7 +98,14 @@ export default function Profile({ params }) {
         setUserData(user.user);
         setPosts(user.posts);
 
-        const following = await FetchFromBackend(`/following`)
+        const following = await FetchFromBackend("/following", {
+          method: "GET",
+          credentials: "include"
+        })
+
+        const followingUsers = await following.json()
+
+        setFollowing(followingUsers)
 
         // TODO: fetch followers & followings
       } catch (error) {
@@ -160,7 +169,7 @@ export default function Profile({ params }) {
         <p className="ml-2 text-gray-600">{userData.aboutMe}</p>
       </div>
       <div>
-        <h2 className="mt-4 text-lg text-accent font-bold">User Activity</h2>
+        <h2 className="mt-4 text-lg text-accent font-bold">Posts</h2>
         {posts.length === 0 ? (
           <p className="ml-2 text-gray-600">No posts yet</p>
         ) : (
@@ -178,19 +187,19 @@ export default function Profile({ params }) {
             ))}
           </ul>
         )}
-        <h2 className="mt-4 text-lg text-accent font-bold">User Activity</h2>
-        {posts.length === 0 ? (
-          <p className="ml-2 text-gray-600">No posts yet</p>
+        <h2 className="mt-4 text-lg text-accent font-bold">Following</h2>
+        {following.length === 0 ? (
+          <p className="ml-2 text-gray-600">You are not following anybody</p>
         ) : (
           <ul>
-            {posts.map((post) => (
-              <li className="ml-2 text-gray-600" key={post.postId}>
+            {following.map((user) => (
+              <li className="ml-2 text-gray-600" key={user.id}>
                 <Link
-                  href={`/post/${post.postId}`}
-                  title={post.subject}
+                  href={`/profile${user.nickname}`}
+                  title={user.nickname}
                   className="text-foreground transition-colors hover:text-accent ease-in hover:underline"
                 >
-                  {post.subject}, {formatDate(post.creationDate)}
+                  {user.nickname}
                 </Link>
               </li>
             ))}
