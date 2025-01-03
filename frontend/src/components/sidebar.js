@@ -58,7 +58,7 @@ export default function SideBar() {
           />
         </div>
         <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
-          <a href="/createGroup" className="text-txtColor hover:underline">
+          <a href="/group" className="text-txtColor hover:underline">
             <h1 className="text-lg text-accent font-bold">Create Group</h1>
           </a>
         </div>
@@ -86,10 +86,10 @@ const RenderList = ({ items, showMoreState, setShowMoreState, type }) => {
         {showMoreitems.flatMap((item, index) => (
           <li key={index}>
             <a
-              href={`/${type === "event" ? "events" : type === "group" ? "groups" : "profile"}/${type}${index + 1}`}
+              href={`/${type === "event" ? "events" : type === "group" ? "groups" : "profile"}/${item.nickname}`}
               className="text-txtColor hover:underline"
             >
-              {item.nickname}
+              {(type !== "event" && type !== "group") ? item.nickname : item}
             </a>
           </li>
         ))}

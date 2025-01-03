@@ -36,12 +36,13 @@ export default function Profile({ params }) {
       const user = await fetchCredential();
       const id = await user.id; //int
       const followingId = await userData.id; //int
+      const publicProfile = userData.public
       id === followingId
         ? alert("You can't follow yourself")
         : ws.current.send(
             JSON.stringify({
               type: "follow_request",
-              payload: new FollowRequest("" + user.id, "" + followingId, false), //user.id is converted to string
+              payload: new FollowRequest("" + user.id, "" + followingId, publicProfile ), //user.id is converted to string
             }),
           );
     }

@@ -1,8 +1,12 @@
 "use client";
 
 import FetchFromBackend from "@/lib/fetch";
+import { useState } from "react";
+import useRouter from "next/navigation"
 
 export default function Register() {
+  const [ErrorMsg, setErrorMsg] = useState(null)
+  const router = useRouter();
   const OnSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
