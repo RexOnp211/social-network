@@ -426,6 +426,29 @@ func GetUsersFollowersListFromDB(userId int) ([]helpers.User, error) {
 		}
 		userArr = append(userArr, user)
 	}
-
+	fmt.Println("THIS IS THE FOLLOWERSLIST:", userArr)
 	return userArr, nil
+}
+
+func UnfollowUserFromDB(follower, followee int) error {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		log.Println("DB Open Error in AddFollowRequestToDb:", err)
+		return err
+	}
+	defer DB.Close()
+
+	stmt, err := DB.Prepare("DELETE FROM followers WHERE follower_id = ? AND followee_id ?")
+	if err != nil {
+		log.Println("error unfollowing person", err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(follower, followee)
+	if err != nil {
+		log.Println("error unfollowing person from db", err)
+		return err
+	}
+	return nil
 }
