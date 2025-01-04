@@ -219,7 +219,7 @@ export default function Profile({ params }) {
           <p className="ml-2 text-gray-600">You dont have any followers</p>
         ) : (
           <ul>
-            {following.map((user) => (
+            {followers.map((user) => (
               <li className="ml-2 text-gray-600" key={user.id}>
                 <Link
                   href={`/profile${user.nickname}`}

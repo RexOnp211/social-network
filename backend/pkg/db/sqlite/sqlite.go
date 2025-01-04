@@ -376,6 +376,7 @@ func GetUsersFollowingListFromDb(userId int) ([]helpers.User, error) {
 	userArr := []helpers.User{}
 	for _, id := range followingUsersArr {
 		strId := strconv.Itoa(id)
+		fmt.Println("THIS IS FOLLOWING ID", id)
 
 		nickname := GetNicknameFromId(strId)
 		user, err := GetUserFromDb(nickname)
@@ -416,6 +417,7 @@ func GetUsersFollowersListFromDB(userId int) ([]helpers.User, error) {
 
 	userArr := []helpers.User{}
 	for _, id := range followersUsersArr {
+		fmt.Println("THIS IS ID FOLLOWERS", id)
 		strId := strconv.Itoa(id)
 
 		nickname := GetNicknameFromId(strId)
