@@ -1,6 +1,7 @@
 "use client";
 
 import FetchFromBackend from "@/lib/fetch";
+import fetchCredential from "@/lib/fetchCredential";
 import { RSC_ACTION_CLIENT_WRAPPER_ALIAS } from "next/dist/lib/constants";
 import { useEffect, useState } from "react";
 
@@ -26,7 +27,8 @@ export default function SideBar() {
   
   useEffect(() => {
     const getFollowing = async () => {
-      const res = await FetchFromBackend("/following", {
+      const user = await fetchCredential()
+      const res = await FetchFromBackend(`/following/${user.username}`, {
         method: "GET",
         credentials: "include",
       })

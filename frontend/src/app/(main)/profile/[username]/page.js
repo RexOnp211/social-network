@@ -11,12 +11,15 @@ import WsClient from "@/lib/wsClient";
 import Fetchnickname from "@/lib/fetchNickName";
 import Link from "next/link";
 import fetchCredential from "@/lib/fetchCredential";
+import { useRouter } from "next/navigation";
 
 export default function Profile({ params }) {
   const { username } = params;
-  const [loggedInUsername, setLoggedInUsername] = useState(
-    localStorage.getItem("user")
-  );
+  // const [loggedInUsername, setLoggedInUsername] = useState(
+  //   localStorage.getItem("user")
+  // );
+  // doesnt seem to work for me :/
+  const [loggedInUsername, setLoggedInUsername] = useState(null)
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [followers, setFollowers] = useState([]);
@@ -26,7 +29,9 @@ export default function Profile({ params }) {
   const [userNotFound, setUserNotFound] = useState(false);
   const [isPrivateProfile, setIsPrivateProfile] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [followsUser, setFollowsUser] = useState(false)
   const ws = useRef(null);
+  const router = useRouter()
   
 
   // TODO: check the profile is own (compare login info and the page path)
@@ -48,8 +53,31 @@ export default function Profile({ params }) {
               payload: new FollowRequest("" + user.id, "" + followingId, publicProfile ), //user.id is converted to string
             }),
           );
+      alert("sending follow request")
+      window.location.reload()
     }
   };
+
+  const unFollowUser = async () => {
+    const user = await fetchCredential();
+    const followingId = await user.id
+    const data = {follower_id: followingId , followee_id: userData.id}
+    const res = await FetchFromBackend("/unfollow", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data) 
+    })
+    console.log("responce", res)
+    if (!res.ok) {
+      alert("unfollowing User failed")
+    } else {
+      alert("Successfully unfollowed user")
+      window.location.reload()
+    }
+  }
 
   // set up websocket
   useEffect(() => {
@@ -75,6 +103,7 @@ export default function Profile({ params }) {
       console.log(`starting process for ${username}`);
 
       try {
+        
         // fetch user information from database
         const userResponse = await FetchFromBackend(`/profile/${username}`, {
           method: "GET",
@@ -90,15 +119,16 @@ export default function Profile({ params }) {
         console.log("User Data:", user);
         console.log("User Data:", user.user.nickname);
 
+        const loggedUser = await fetchCredential()
         // login user & the user is same (own profile)
-        if (loggedInUsername === user.user.nickname) {
+        if (loggedUser.username === user.user.nickname) {
           setIsOwner(true);
         }
 
         setUserData(user.user);
         setPosts(user.posts);
 
-        const following = await FetchFromBackend("/following", {
+        const following = await FetchFromBackend(`/following/${user.user.nickname}`, {
           method: "GET",
           credentials: "include"
         })
@@ -107,7 +137,7 @@ export default function Profile({ params }) {
 
         setFollowing(followingUsers)
 
-        const followers = await FetchFromBackend("/followers", {
+        const followers = await FetchFromBackend(`/followers/${user.user.nickname}`, {
           method: "GET",
           credentials: "include"
         })
@@ -116,6 +146,9 @@ export default function Profile({ params }) {
 
         setFollowers(followerUsers) 
 
+        if (followerUsers.some(obj => obj.nickname === loggedUser.username)) {
+          setFollowsUser(true)
+        }
         // TODO: fetch followers & followings
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -171,7 +204,9 @@ export default function Profile({ params }) {
             Date of Birth: {formatDate(userData.dob)}
           </p>
         </div>
-        <button onClick={sendFollowRequest}>Follow</button>
+        {
+          (isOwner) ? "" : (followsUser) ? <button onClick={unFollowUser}>UnFollow</button> : <button onClick={sendFollowRequest}>Follow</button>
+        }
       </div>
       <div>
         <h2 className="mt-4 text-lg text-accent font-bold">About Me</h2>
@@ -204,7 +239,7 @@ export default function Profile({ params }) {
             {following.map((user) => (
               <li className="ml-2 text-gray-600" key={user.id}>
                 <Link
-                  href={`/profile${user.nickname}`}
+                  href={`/profile/${user.nickname}`}
                   title={user.nickname}
                   className="text-foreground transition-colors hover:text-accent ease-in hover:underline"
                 >
@@ -222,7 +257,7 @@ export default function Profile({ params }) {
             {followers.map((user) => (
               <li className="ml-2 text-gray-600" key={user.id}>
                 <Link
-                  href={`/profile${user.nickname}`}
+                  href={`/profile/${user.nickname}`}
                   title={user.nickname}
                   className="text-foreground transition-colors hover:text-accent ease-in hover:underline"
                 >

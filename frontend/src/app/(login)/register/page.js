@@ -15,6 +15,7 @@ export default function Register() {
       headers: {},
       body: formData,
     });
+    window.location.href = "/login"
   };
   return (
     <div className="flex w-screen h-screen justify-center items-center">
