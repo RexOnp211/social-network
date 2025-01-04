@@ -178,7 +178,6 @@ func UpdateUserPrivacy(username string, privacyStatus string) {
 	}
 
 	log.Println("User privacy status updated successfully for username:", username)
-	return
 }
 
 func GetPostFromId(id int) (helpers.Post, error) {
