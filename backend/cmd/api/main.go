@@ -95,7 +95,7 @@ func main() {
 	r.AddRoute("GET", "/notifications", http.HandlerFunc(handlers.Notifications))
 	r.AddRoute("GET", "/following/", http.HandlerFunc(handlers.GetFollowing))
 	r.AddRoute("GET", "/followers/", http.HandlerFunc(handlers.GetFollowers))
-	r.AddRoute("GET", "/unfollow", http.HandlerFunc(handlers.GetUnfollowing))
+	r.AddRoute("POST", "/unfollow", http.HandlerFunc(handlers.GetUnfollowing))
 	r.AddRoute("GET", "/ws", http.HandlerFunc(handlers.WsHandler))
 
 	// group-related handlers

@@ -11,6 +11,7 @@ import WsClient from "@/lib/wsClient";
 import Fetchnickname from "@/lib/fetchNickName";
 import Link from "next/link";
 import fetchCredential from "@/lib/fetchCredential";
+import { useRouter } from "next/navigation";
 
 export default function Profile({ params }) {
   const { username } = params;
@@ -30,6 +31,7 @@ export default function Profile({ params }) {
   const [loading, setLoading] = useState(true);
   const [followsUser, setFollowsUser] = useState(false)
   const ws = useRef(null);
+  const router = useRouter()
   
 
   // TODO: check the profile is own (compare login info and the page path)
@@ -51,23 +53,29 @@ export default function Profile({ params }) {
               payload: new FollowRequest("" + user.id, "" + followingId, publicProfile ), //user.id is converted to string
             }),
           );
+      alert("sending follow request")
+      window.location.reload()
     }
   };
 
   const unFollowUser = async () => {
     const user = await fetchCredential();
     const followingId = await user.id
-    const data = {follower: followingId , following: userData.id}
-    const res = FetchFromBackend("/unfollow", {
+    const data = {follower_id: followingId , followee_id: userData.id}
+    const res = await FetchFromBackend("/unfollow", {
       method: "POST",
       credentials: "include",
-      headers: {},
-      body: data
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data) 
     })
+    console.log("responce", res)
     if (!res.ok) {
       alert("unfollowing User failed")
     } else {
       alert("Successfully unfollowed user")
+      window.location.reload()
     }
   }
 

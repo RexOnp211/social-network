@@ -439,7 +439,7 @@ func UnfollowUserFromDB(follower, followee int) error {
 	}
 	defer DB.Close()
 
-	stmt, err := DB.Prepare("DELETE FROM followers WHERE follower_id = ? AND followee_id ?")
+	stmt, err := DB.Prepare("DELETE FROM followers WHERE follower_id = ? AND followee_id = ?")
 	if err != nil {
 		log.Println("error unfollowing person", err)
 		return err

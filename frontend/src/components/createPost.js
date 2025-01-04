@@ -22,6 +22,7 @@ export default function CreatePost() {
         headers: {},
         body: form,
       });
+      window.location.reload()
     } catch (error) {
       console.error(error);
     }

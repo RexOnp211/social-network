@@ -61,6 +61,7 @@ func GetUnfollowing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("PAYLOAD", payload)
 	err = db.UnfollowUserFromDB(payload.FollowerID, payload.FolloweeID)
 	if err != nil {
 		log.Println("Error unfollowing user:", err)
