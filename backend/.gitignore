@@ -5,3 +5,6 @@
 
 /assets/image/avatar/*
 !/assets/image/avatar/.gitkeep
+
+/assets/image/group-post/*
+!/assets/image/group-post/.gitkeep

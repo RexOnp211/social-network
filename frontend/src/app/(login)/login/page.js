@@ -26,10 +26,11 @@ export default function Login() {
 
         router.push("/");
       } else {
-        throw new Error("Login failed");
+        throw new Error(await res.text());
       }
     } catch (error) {
       console.error("error logging in", error);
+      alert(error)
     }
   }
 

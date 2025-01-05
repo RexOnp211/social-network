@@ -7,14 +7,19 @@ import { useRouter } from "next/navigation";
 export default function Register() {
   const [ErrorMsg, setErrorMsg] = useState(null)
   const router = useRouter();
-  const OnSubmit = (e) => {
+  const OnSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    FetchFromBackend("/register", {
+    const res = await FetchFromBackend("/register", {
       method: "POST",
       headers: {},
       body: formData,
     });
+    if (res.ok) {
+    window.location.href = "/login"
+    } else {
+      alert(await res.text())
+    }
   };
   return (
     <div className="flex w-screen h-screen justify-center items-center">

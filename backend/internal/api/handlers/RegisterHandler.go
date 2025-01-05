@@ -35,7 +35,8 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 		filepath, err = helpers.SaveFile(file, header, "avatar")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
 			fmt.Println("Error saving file", err)
 			return
 		}
@@ -43,17 +44,22 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	aboutMe := r.FormValue("aboutme")
 	encryptedPassword, err2 := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err2 != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		http.Error(w, "Error hashing password", http.StatusInternalServerError)
 		return
 	}
 
+	if nickname == "" {
+		nickname = email
+	}
 	data := []interface{}{nickname, email, string(encryptedPassword), firstname, lastname, dob, aboutMe, filepath}
 	err = db.RegisterUserDB(data)
 	log.Println("data:", data)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		w.Write([]byte("Failed to register user"))
 		return
 	}
 	fmt.Fprintf(w, "User created successfully!")

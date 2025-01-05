@@ -1,4 +1,3 @@
-"use client";
 import FetchFromBackend from "@/lib/fetch";
 
 export default async function FetchGroupPosts(groupname) {

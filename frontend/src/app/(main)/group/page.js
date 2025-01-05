@@ -7,9 +7,7 @@ import GroupRequests from "@/components/groupRequests";
 import Popup from "@/components/popup";
 
 export default function GroupMenu() {
-  const [loggedInUsername, setLoggedInUsername] = useState(
-    localStorage.getItem("user")
-  );
+  const [loggedInUsername, setLoggedInUsername] = useState(null);
   const [invitations, setInvitations] = useState(false);
   const [joinedGroups, setJoinedGroups] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -23,14 +21,41 @@ export default function GroupMenu() {
   const [description, setDescription] = useState("");
   const [membershipsLoading, setMembershipsLoading] = useState(true);
   const [requestsLoading, setRequestsLoading] = useState(true);
+  
+  useEffect(() => {
+  const nick = localStorage.getItem("user")
+  setLoggedInUsername(nick)
+  })
+  // fetch all groups
+  async function fetchGroups(loggedInUsername) {
+    const response = await FetchFromBackend(`/groups`, {
+      method: "GET",
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch groups`);
+    }
+    const data = await response.json();
+    console.log(data.groups);
+    setGroups(data.groups);
+
+    // Filter groups the user made
+    const userMadeGroups = data.groups.filter((group) => {
+      return group.creatorName === loggedInUsername;
+    });
+    setGroupUserMade(userMadeGroups);
+    console.log(userMadeGroups);
+
+    FetchRequests(userMadeGroups);
+  }
 
   // load necessary data when the page is accessed
   useEffect(() => {
-    (async () => {
+    const GetGroupInfo = async () => {
       await fetchMemberships(loggedInUsername);
       await fetchGroups(loggedInUsername);
-    })();
-  }, []);
+    }
+    GetGroupInfo()
+  }, [loggedInUsername]);
 
   // fetch group memberships for the user
   async function fetchMemberships(loggedInUsername) {
@@ -71,28 +96,6 @@ export default function GroupMenu() {
     } catch (error) {
       console.error("Error in fetchMemberships:", error);
     }
-  }
-
-  // fetch all groups
-  async function fetchGroups(loggedInUsername) {
-    const response = await FetchFromBackend(`/groups`, {
-      method: "GET",
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch groups`);
-    }
-    const data = await response.json();
-    console.log(data.groups);
-    setGroups(data.groups);
-
-    // Filter groups the user made
-    const userMadeGroups = data.groups.filter((group) => {
-      return group.creatorName === loggedInUsername;
-    });
-    setGroupUserMade(userMadeGroups);
-    console.log(userMadeGroups);
-
-    FetchRequests(userMadeGroups);
   }
 
   async function FetchRequests(userMadeGroups) {

@@ -24,6 +24,7 @@ export default function GroupPost({
 
       FetchFromBackend("/create_group_post", {
         method: "POST",
+        credentials: "include",
         body: form,
       });
     } catch (error) {

@@ -24,6 +24,7 @@ export default function GroupEvent({
 
       const response = await FetchFromBackend("/create_group_event", {
         method: "POST",
+        credentials: "include",
         body: form,
       });
       if (!response.ok) {

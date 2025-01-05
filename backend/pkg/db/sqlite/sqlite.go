@@ -68,6 +68,7 @@ func GetUserIDByUsernameOrEmail(username string) (int, error) {
 }
 
 func AddPostToDb(data []interface{}) error {
+	fmt.Println("THIS POST WAS ADDED TO DB", data)
 
 	stmt, err := DB.Prepare("INSERT INTO posts (user_id, subject, content, image, privacy) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
@@ -206,7 +207,6 @@ func UpdateUserPrivacy(username string, privacyStatus string) {
 	}
 
 	log.Println("User privacy status updated successfully for username:", username)
-	return
 }
 
 func GetPostFromId(id int) (helpers.Post, error) {
@@ -358,19 +358,19 @@ func UpdateFollowRequestStatusDB(from, to string, status bool) error {
 	if status {
 		querry = "UPDATE followers SET accepted = true WHERE follower_id = ? AND followee_id = ?"
 	} else {
-		querry = "DELETE FROM followers WHERE follower_id = ? AND followee_id ?"
-		stmt, err := DB.Prepare(querry)
-		if err != nil {
-			log.Println("Error Changing follow status", err)
-			return err
-		}
-		defer stmt.Close()
+		querry = "DELETE FROM followers WHERE follower_id = ? AND followee_id = ?"
+	}
+	stmt, err := DB.Prepare(querry)
+	if err != nil {
+		log.Println("Error Changing follow status", err)
+		return err
+	}
+	defer stmt.Close()
 
-		_, err2 := stmt.Exec(from, to)
-		if err2 != nil {
-			log.Println("Error executing followRequest Accept in db", err)
-			return err
-		}
+	_, err2 := stmt.Exec(from, to)
+	if err2 != nil {
+		log.Println("Error executing followRequest Accept in db", err)
+		return err
 	}
 
 	return nil
@@ -479,7 +479,7 @@ func UnfollowUserFromDB(follower, followee int) error {
 	}
 	defer DB.Close()
 
-	stmt, err := DB.Prepare("DELETE FROM followers WHERE follower_id = ? AND followee_id ?")
+	stmt, err := DB.Prepare("DELETE FROM followers WHERE follower_id = ? AND followee_id = ?")
 	if err != nil {
 		log.Println("error unfollowing person", err)
 		return err

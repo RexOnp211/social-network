@@ -2,9 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import ProfileImage from "@/components/profileImage";
 import { IoChatboxOutline } from "react-icons/io5";
+import UploadImage from "@/components/images";
 
 export default function RenderPost(post, groupData) {
-  console.log(post);
+  console.log("THIS IS GROUP POST", post);
   return (
     <div>
       <div key={post.Id} className="bg-secondary p-4 rounded-lg m-4">
@@ -17,7 +18,7 @@ export default function RenderPost(post, groupData) {
             width={100}
             height={100}
             size={40}
-            avatar={"http://localhost:8080/avatar/" + post.userId}
+            avatar={"/avatar/" + post.Id}
             className={"rounded-full mr-3 w-auto h-16"}
           />
           {post.nickname || "loading..."}
@@ -25,8 +26,8 @@ export default function RenderPost(post, groupData) {
         <h1 className="text-xl font-bold">{post.subject}</h1>
         <p>{post.content}</p>
         {post.image ? (
-          <Image
-            src={"http://localhost:8080/image/" + post.image}
+          <UploadImage
+            src={"/image/" + post.image}
             alt="post image"
             width={500}
             height={500}

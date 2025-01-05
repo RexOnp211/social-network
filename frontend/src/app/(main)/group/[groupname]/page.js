@@ -69,7 +69,7 @@ export default function Group({ params }) {
       setLoading(false);
     }
     loadData();
-  }, [decodedGroupname, memberStatus]);
+  }, [decodedGroupname, memberStatus, loggedInUsername]);
 
   //  when the group is not found
   if (loading) {

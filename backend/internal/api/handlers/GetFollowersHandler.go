@@ -6,13 +6,16 @@ import (
 	"log"
 	"net/http"
 	db "social-network/pkg/db/sqlite"
+	"strings"
 )
 
 func GetFollowing(w http.ResponseWriter, r *http.Request) {
-	username := ValidateSession(w, r)
-	user, err := db.GetUserFromDb(username)
+	nickname := r.URL.Path
+	trimmedNickname := strings.TrimPrefix(nickname, "/following/")
+	fmt.Println("userId In url", trimmedNickname)
+	user, err := db.GetUserFromDb(trimmedNickname)
 	if err != nil {
-		log.Println("error getting user Info for following list", err)
+		log.Println("error getting user from db in GetFollowing", err)
 		return
 	}
 	userArr, err := db.GetUsersFollowingListFromDb(user.Id)
@@ -25,10 +28,11 @@ func GetFollowing(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetFollowers(w http.ResponseWriter, r *http.Request) {
-	username := ValidateSession(w, r)
-	user, err := db.GetUserFromDb(username)
+	nickname := r.URL.Path
+	trimmedNickname := strings.TrimPrefix(nickname, "/followers/")
+	user, err := db.GetUserFromDb(trimmedNickname)
 	if err != nil {
-		log.Println("error getting user Info for following list", err)
+		log.Println("error getting user from db in GetFollowers", err)
 		return
 	}
 	userArr, err := db.GetUsersFollowersListFromDB(user.Id)
@@ -57,6 +61,7 @@ func GetUnfollowing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("PAYLOAD", payload)
 	err = db.UnfollowUserFromDB(payload.FollowerID, payload.FolloweeID)
 	if err != nil {
 		log.Println("Error unfollowing user:", err)

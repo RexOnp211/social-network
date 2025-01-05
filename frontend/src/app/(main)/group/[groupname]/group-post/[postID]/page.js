@@ -9,6 +9,7 @@ import Image from "next/image";
 import ProfileImage from "@/components/profileImage";
 import CreateGroupPostComment from "@/components/createGroupPostComment";
 import Popup from "@/components/popup";
+import UploadImage from "@/components/images";
 
 export default function GroupPost({ params }) {
   const { groupname, postID } = params;
@@ -52,7 +53,7 @@ export default function GroupPost({ params }) {
       router.push(`/group/${groupname}`);
     }
     loadData();
-  }, []);
+  }, [decodedGroupname, groupname, loggedInUsername, params, postID, router]);
 
   // function to update comments
   async function updateComments(postID) {
@@ -109,7 +110,7 @@ export default function GroupPost({ params }) {
               width={100}
               height={100}
               size={40}
-              avatar={"http://localhost:8080/avatar/" + post.userId}
+              avatar={"/avatar/" + post.userId}
               className={"rounded-full mr-3 w-auto h-16"}
             />
             {post.nickname || "loading..."}
@@ -117,8 +118,8 @@ export default function GroupPost({ params }) {
           <h1 className="text-xl font-bold">{post.subject}</h1>
           <p>{post.content}</p>
           {post.image ? (
-            <Image
-              src={"http://localhost:8080/image/" + post.image}
+            <UploadImage
+              upload={"/image/" + post.image}
               alt="post image"
               width={500}
               height={500}
@@ -152,15 +153,15 @@ export default function GroupPost({ params }) {
                 width={100}
                 height={100}
                 size={40}
-                avatar={"http://localhost:8080/avatar/" + comment.userId}
+                avatar={"/avatar/" + comment.userId}
                 className={"rounded-full mr-3 w-auto h-16"}
               />
               {comment.userId || "loading..."}
             </a>
             <p>{comment.content}</p>
             {comment.image ? (
-              <Image
-                src={"http://localhost:8080/image/" + comment.image}
+              <UploadImage
+                upload={"/image/" + comment.image}
                 alt="comment image"
                 width={500}
                 height={500}

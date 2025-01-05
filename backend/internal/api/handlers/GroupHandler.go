@@ -25,16 +25,16 @@ type GroupPostsResponse struct {
 }
 
 type Invitation struct {
-	ID     int    `json:"id"`
+	ID        int    `json:"id"`
 	GroupName string `json:"groupname"`
-	UserName string `json:"username"`
-	Status string `json:"status"`
+	UserName  string `json:"username"`
+	Status    string `json:"status"`
 }
 
 type MemberStatusChange struct {
-	GroupName     string    `json:"groupname"`
-	UserName string `json:"username"`
-	Status string `json:"status"`
+	GroupName string `json:"groupname"`
+	UserName  string `json:"username"`
+	Status    string `json:"status"`
 }
 
 // BASIC GROUP INFO ----------------------------------
@@ -100,7 +100,7 @@ func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := r.ParseMultipartForm(10 << 20) // 10MB
+	err := r.ParseMultipartForm(50 << 20) // 50MB
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		fmt.Println("Error parsing multipart form:", err)
@@ -182,7 +182,7 @@ func InviteMemberHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("inviting member...", invitation)
 
 	errorMessage, isError := db.InviteMemberDB(invitation.Groupname, invitation.Username)
-	fmt.Println("TEST",errorMessage, isError )
+	fmt.Println("TEST", errorMessage, isError)
 	if isError {
 		if errorMessage != "" {
 			w.Header().Set("Content-Type", "application/json")
@@ -213,10 +213,10 @@ func UpdateMemberStatusHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("changing member stat... 2")
 
 	data := struct {
-		ID int
-        Groupname string
-        Username string
-        Status string
+		ID        int
+		Groupname string
+		Username  string
+		Status    string
 	}{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
@@ -237,7 +237,7 @@ func UpdateMemberStatusHandler(w http.ResponseWriter, r *http.Request) {
 func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("posting to group...")
 
-	err := r.ParseMultipartForm(10 << 20) // 10 MB
+	err := r.ParseMultipartForm(50 << 20) // 50 MB
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		fmt.Println("Error parsing form", err)
@@ -275,7 +275,7 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GroupPostsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("fetching group posts..." , r.URL.Path)
+	log.Println("fetching group posts...", r.URL.Path)
 
 	path := strings.TrimPrefix(r.URL.Path, "/fetch_group_posts/")
 	if path == "" {
@@ -301,7 +301,7 @@ func GroupPostsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GroupPostHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("fetching group post..." , r.URL.Path)
+	log.Println("fetching group post...", r.URL.Path)
 
 	path := strings.TrimPrefix(r.URL.Path, "/fetch_group_post/")
 	if path == "" {
@@ -330,7 +330,7 @@ func GroupPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GroupPostCommentsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("fetching group comments..." , r.URL.Path)
+	log.Println("fetching group comments...", r.URL.Path)
 
 	path := strings.TrimPrefix(r.URL.Path, "/fetch_group_post_comment/")
 	if path == "" {
@@ -361,7 +361,7 @@ func GroupPostCommentsHandler(w http.ResponseWriter, r *http.Request) {
 func CreateGroupPostCommentHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("posting comment...")
 
-	err := r.ParseMultipartForm(10 << 20) // 10 MB
+	err := r.ParseMultipartForm(50 << 20) // 50 MB
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		fmt.Println("Error parsing form", err)
@@ -400,7 +400,7 @@ func CreateGroupPostCommentHandler(w http.ResponseWriter, r *http.Request) {
 // EVENTS ----------------------------------
 
 func FetchGroupEventsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("fetching:" , r.URL.Path)
+	log.Println("fetching:", r.URL.Path)
 
 	target := strings.TrimPrefix(r.URL.Path, "/fetch_group_events/")
 	if target == "" {
@@ -425,7 +425,7 @@ func FetchGroupEventsHandler(w http.ResponseWriter, r *http.Request) {
 func CreateGroupEventHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("creating events...")
 
-	err := r.ParseMultipartForm(10 << 20) // 10 MB
+	err := r.ParseMultipartForm(50 << 20) // 10 MB
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		fmt.Println("Error parsing form", err)
@@ -458,7 +458,6 @@ func CreateGroupEventHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("checked")
 
-
 	data := []interface{}{groupname, nickname, title, description, date}
 	err = db.AddGroupEventToDb(data)
 	if err != nil {
@@ -468,7 +467,6 @@ func CreateGroupEventHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("added")
 
-
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Event created successfully"))
 }
@@ -477,12 +475,12 @@ func FetchUserEventStatusHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("fetching event status...")
 
 	nickname := r.URL.Query().Get("username")
-    event := r.URL.Query().Get("event")
+	event := r.URL.Query().Get("event")
 
-    if nickname == "" || event == "" {
-        http.Error(w, "Missing parameters", http.StatusBadRequest)
-        return
-    }
+	if nickname == "" || event == "" {
+		http.Error(w, "Missing parameters", http.StatusBadRequest)
+		return
+	}
 	eventID, _ := strconv.Atoi(event)
 	log.Println(nickname, eventID)
 
@@ -525,17 +523,17 @@ func FetchYourRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("fetching group you made...")
 
 	if r.Method != http.MethodPost {
-        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-        return
-    }
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-    var groups []helpers.Membership
-    err := json.NewDecoder(r.Body).Decode(&groups)
-    if err != nil {
-        http.Error(w, "Invalid request body", http.StatusBadRequest)
-        return
-    }
-    log.Println("Received groups:", groups)
+	var groups []helpers.Membership
+	err := json.NewDecoder(r.Body).Decode(&groups)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	log.Println("Received groups:", groups)
 
 	groupsYouMade := db.GetYourRequestsFromDb(groups)
 	log.Println(groupsYouMade)
