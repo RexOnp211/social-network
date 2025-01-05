@@ -3,7 +3,7 @@ import Link from "next/link";
 import ProfileImage from "@/components/profileImage";
 import { IoChatboxOutline } from "react-icons/io5";
 
-export default function RenderPost(post, groupData) {
+export default function RenderGroupPost(post, groupData) {
   console.log(post);
   return (
     <div>
@@ -26,7 +26,7 @@ export default function RenderPost(post, groupData) {
         <p>{post.content}</p>
         {post.image ? (
           <Image
-            src={"http://localhost:8080/image/" + post.image}
+            src={"http://localhost:8080/group-post-image/" + post.image}
             alt="post image"
             width={500}
             height={500}

@@ -5,14 +5,17 @@ import Link from "next/link";
 import FetchGroupInfo from "@/lib/fetchGroupInfo";
 import FetchGroupMembership from "@/lib/fetchGroupMembership";
 import FetchGroupPosts from "@/lib/fetchGroupPosts";
-import RenderPost from "@/lib/renderPost";
-import GroupPost from "@/components/groupPost";
+import RenderGroupPost from "@/lib/renderGroupPost";
+import CreateGroupPost from "@/components/createGroupPost";
 import Popup from "@/components/popup";
 
 export default function Group({ params }) {
   const { groupname, postId } = params;
   const router = useRouter();
   const decodedGroupname = decodeURIComponent(groupname);
+  const [loggedInUserID, setLoggedInUserID] = useState(
+    localStorage.getItem("userID")
+  );
   const [loggedInUsername, setLoggedInUsername] = useState(
     localStorage.getItem("user")
   );
@@ -95,8 +98,9 @@ export default function Group({ params }) {
 
               {/* Group Post Form */}
               {
-                <GroupPost
+                <CreateGroupPost
                   loggedInUsername={loggedInUsername}
+                  loggedInUserID={loggedInUserID}
                   groupTitle={decodedGroupname}
                   onPostSubmit={updatePosts}
                   showPopup={showPopup}
@@ -107,7 +111,7 @@ export default function Group({ params }) {
               {posts &&
                 posts.length > 0 &&
                 posts.map((post) => (
-                  <div key={post.Id}> {RenderPost(post, groupData)}</div>
+                  <div key={post.Id}> {RenderGroupPost(post, groupData)}</div>
                 ))}
             </>
           )}

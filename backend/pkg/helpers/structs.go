@@ -78,6 +78,7 @@ type Membership struct {
 type GroupPost struct {
 	Id           string    `json:"Id"`
 	GroupTitle   string    `json:"groupTitle"`
+	UserID		 string    `json:"userId"`
 	Nickname     string    `json:"nickname"`
 	Subject      string    `json:"subject"`
 	Content      string    `json:"content"`
@@ -86,9 +87,20 @@ type GroupPost struct {
 	Comments     []Comment `json:"comments"`
 }
 
+type GroupComment struct {
+	CommentId    string `json:"commentId"`
+	PostId       string `json:"postId"`
+	UserID		 string `json:"userId"`
+	Nickname     string `json:"nickname"`
+	Content      string `json:"content"`
+	Image        string `json:"image"`
+	CreationDate string `json:"creationDate"`
+}
+
 type GroupEvent struct {
 	Id          int    `json:"Id"`
 	GroupTitle  string `json:"groupTitle"`
+	UserID		 string `json:"userId"`
 	Nickname    string `json:"nickname"`
 	Title       string `json:"title"`
 	Description string `json:"description"`

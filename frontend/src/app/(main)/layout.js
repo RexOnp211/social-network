@@ -8,16 +8,23 @@ import { useEffect } from "react";
 
 export default function DefaultLayout({ children }) {
   const router = useRouter();
+
   useEffect(() => {
     const checkLogin = async () => {
       try {
         const res = await FetchCredential();
-        if (res.username === "") {
-          router.push("/login");
+        if (res.id !== 0) {
+          // get user info when login confirmed
+          localStorage.getItem("userID");
+          localStorage.getItem("user");
+          return;
         }
+        router.push("/login");
       } catch (error) {
         console.error("error checking login", error);
       }
+      // clear userdata from localStorage
+      localStorage.clear();
     };
     checkLogin();
   }, [router]);

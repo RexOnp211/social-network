@@ -19,7 +19,7 @@ export default function Profile({ params }) {
   //   localStorage.getItem("user")
   // );
   // doesnt seem to work for me :/
-  const [loggedInUsername, setLoggedInUsername] = useState(null)
+  const [loggedInUsername, setLoggedInUsername] = useState(null);
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [followers, setFollowers] = useState([]);
@@ -29,10 +29,9 @@ export default function Profile({ params }) {
   const [userNotFound, setUserNotFound] = useState(false);
   const [isPrivateProfile, setIsPrivateProfile] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [followsUser, setFollowsUser] = useState(false)
+  const [followsUser, setFollowsUser] = useState(false);
   const ws = useRef(null);
-  const router = useRouter()
-  
+  const router = useRouter();
 
   // TODO: check the profile is own (compare login info and the page path)
   // show profile & option for change profile public/private
@@ -44,40 +43,44 @@ export default function Profile({ params }) {
       const user = await fetchCredential();
       const id = await user.id; //int
       const followingId = await userData.id; //int
-      const publicProfile = userData.public
+      const publicProfile = userData.public;
       id === followingId
         ? alert("You can't follow yourself")
         : ws.current.send(
             JSON.stringify({
               type: "follow_request",
-              payload: new FollowRequest("" + user.id, "" + followingId, publicProfile ), //user.id is converted to string
-            }),
+              payload: new FollowRequest(
+                "" + user.id,
+                "" + followingId,
+                publicProfile
+              ), //user.id is converted to string
+            })
           );
-      alert("sending follow request")
-      window.location.reload()
+      alert("sending follow request");
+      window.location.reload();
     }
   };
 
   const unFollowUser = async () => {
     const user = await fetchCredential();
-    const followingId = await user.id
-    const data = {follower_id: followingId , followee_id: userData.id}
+    const followingId = await user.id;
+    const data = { follower_id: followingId, followee_id: userData.id };
     const res = await FetchFromBackend("/unfollow", {
       method: "POST",
       credentials: "include",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(data) 
-    })
-    console.log("responce", res)
+      body: JSON.stringify(data),
+    });
+    console.log("responce", res);
     if (!res.ok) {
-      alert("unfollowing User failed")
+      alert("unfollowing User failed");
     } else {
-      alert("Successfully unfollowed user")
-      window.location.reload()
+      alert("Successfully unfollowed user");
+      window.location.reload();
     }
-  }
+  };
 
   // set up websocket
   useEffect(() => {
@@ -103,7 +106,6 @@ export default function Profile({ params }) {
       console.log(`starting process for ${username}`);
 
       try {
-        
         // fetch user information from database
         const userResponse = await FetchFromBackend(`/profile/${username}`, {
           method: "GET",
@@ -119,7 +121,7 @@ export default function Profile({ params }) {
         console.log("User Data:", user);
         console.log("User Data:", user.user.nickname);
 
-        const loggedUser = await fetchCredential()
+        const loggedUser = await fetchCredential();
         // login user & the user is same (own profile)
         if (loggedUser.username === user.user.nickname) {
           setIsOwner(true);
@@ -128,26 +130,32 @@ export default function Profile({ params }) {
         setUserData(user.user);
         setPosts(user.posts);
 
-        const following = await FetchFromBackend(`/following/${user.user.nickname}`, {
-          method: "GET",
-          credentials: "include"
-        })
+        const following = await FetchFromBackend(
+          `/following/${user.user.nickname}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
-        const followingUsers = await following.json()
+        const followingUsers = await following.json();
 
-        setFollowing(followingUsers)
+        setFollowing(followingUsers);
 
-        const followers = await FetchFromBackend(`/followers/${user.user.nickname}`, {
-          method: "GET",
-          credentials: "include"
-        })
+        const followers = await FetchFromBackend(
+          `/followers/${user.user.nickname}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
-        const followerUsers = await followers.json()
+        const followerUsers = await followers.json();
 
-        setFollowers(followerUsers) 
+        setFollowers(followerUsers);
 
-        if (followerUsers.some(obj => obj.nickname === loggedUser.username)) {
-          setFollowsUser(true)
+        if (followerUsers.some((obj) => obj.nickname === loggedUser.username)) {
+          setFollowsUser(true);
         }
         // TODO: fetch followers & followings
       } catch (error) {
@@ -204,9 +212,13 @@ export default function Profile({ params }) {
             Date of Birth: {formatDate(userData.dob)}
           </p>
         </div>
-        {
-          (isOwner) ? "" : (followsUser) ? <button onClick={unFollowUser}>UnFollow</button> : <button onClick={sendFollowRequest}>Follow</button>
-        }
+        {isOwner ? (
+          ""
+        ) : followsUser ? (
+          <button onClick={unFollowUser}>UnFollow</button>
+        ) : (
+          <button onClick={sendFollowRequest}>Follow</button>
+        )}
       </div>
       <div>
         <h2 className="mt-4 text-lg text-accent font-bold">About Me</h2>
@@ -266,7 +278,7 @@ export default function Profile({ params }) {
               </li>
             ))}
           </ul>
-        )} 
+        )}
       </div>
     </div>
   );

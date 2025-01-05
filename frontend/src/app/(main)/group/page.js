@@ -95,9 +95,9 @@ export default function GroupMenu() {
     FetchRequests(userMadeGroups);
   }
 
+  // fetch group request for your group
   async function FetchRequests(userMadeGroups) {
     console.log("fetch_your_requests");
-    // fetch group request for your group
     try {
       const response = await FetchFromBackend(`/fetch_your_requests`, {
         method: "POST",
@@ -180,18 +180,18 @@ export default function GroupMenu() {
           requests.length != 0 && (
             <GroupRequests
               requests={requests}
-              onAcceptOrReject={async (requestTitle, status) => {
+              onAcceptOrReject={async (request, status) => {
                 setRequestsLoading(true);
                 if (status == "approve") {
                   showPopup(
                     false,
-                    `You are now a member of "${requestTitle}"!`,
+                    `"${request.username}" is now a member of "${request.title}"!`,
                     3000
                   );
                 } else if (status == "reject") {
                   showPopup(
                     true,
-                    `Reject invitation from "${requestTitle}".`,
+                    `Reject request from "${request.username}".`,
                     3000
                   );
                 }
@@ -212,22 +212,21 @@ export default function GroupMenu() {
           invitations.length != 0 && (
             <GroupInvitation
               invitations={invitations}
-              onAcceptOrReject={async (invitation, status) => {
+              onAcceptOrReject={async (invitationTitle, status) => {
                 setMembershipsLoading(true);
                 if (status == "approve") {
                   showPopup(
                     false,
-                    `${invitation.username} is now a member of "${invitation.title}"!`,
+                    `You are now a member of "${invitationTitle}"!`,
                     3000
                   );
                 } else if (status == "reject") {
                   showPopup(
                     true,
-                    `Reject request from "${invitation.username}".`,
+                    `Reject invitation from "${invitationTitle}".`,
                     3000
                   );
                 }
-
                 console.log("updating dates...");
                 setTimeout(async () => {
                   await fetchMemberships(loggedInUsername);

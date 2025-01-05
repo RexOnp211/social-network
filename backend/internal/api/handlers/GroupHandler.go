@@ -244,6 +244,7 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := r.FormValue("user_id")
 	groupname := r.FormValue("groupname")
 	nickname := r.FormValue("nickname")
 	subject := r.FormValue("postTitle")
@@ -262,7 +263,7 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	data := []interface{}{groupname, nickname, subject, content, filepath}
+	data := []interface{}{groupname, userID, nickname, subject, content, filepath}
 	log.Println("after savefile")
 	err = db.AddGroupPostToDb(data)
 	if err != nil {
@@ -348,7 +349,7 @@ func GroupPostCommentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := struct {
-		Comments []helpers.Comment `json:"comments"`
+		Comments []helpers.GroupComment `json:"comments"`
 	}{
 		Comments: comments,
 	}
@@ -369,11 +370,11 @@ func CreateGroupPostCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	postID := r.FormValue("post_id")
+	userID := r.FormValue("user_id")
 	nickname := r.FormValue("nickname")
 	content := r.FormValue("commentBody")
 
 	file, header, err := r.FormFile("image")
-	log.Println("TEST", file, header, err)
 
 	filepath := ""
 	if err == nil {
@@ -385,7 +386,7 @@ func CreateGroupPostCommentHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	data := []interface{}{postID, nickname, content, filepath}
+	data := []interface{}{postID, userID, nickname, content, filepath}
 	log.Println("after savefile")
 	err = db.AddGroupPostCommentToDb(data)
 	if err != nil {
@@ -433,11 +434,11 @@ func CreateGroupEventHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	groupname := r.FormValue("groupname")
+	userID := r.FormValue("user_id")
 	nickname := r.FormValue("nickname")
 	title := r.FormValue("eventTitle")
 	description := r.FormValue("eventDescription")
 	date := r.FormValue("eventDate")
-	log.Println(groupname, nickname, title, description, date)
 
 	// Validate eventDate
 	eventTime, err := time.Parse("2006-01-02T15:04", date)
@@ -446,7 +447,6 @@ func CreateGroupEventHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error parsing date:", err)
 		return
 	}
-	log.Println("validated")
 
 	// Check if the date is in the past
 	if eventTime.Before(time.Now()) {
@@ -456,18 +456,14 @@ func CreateGroupEventHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	log.Println("checked")
 
-
-	data := []interface{}{groupname, nickname, title, description, date}
+	data := []interface{}{groupname, userID, nickname, title, description, date}
 	err = db.AddGroupEventToDb(data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Error adding group event to db", err)
 		return
 	}
-	log.Println("added")
-
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Event created successfully"))

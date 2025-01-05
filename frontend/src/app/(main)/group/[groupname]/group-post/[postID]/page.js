@@ -18,6 +18,9 @@ export default function GroupPost({ params }) {
   const [memberStatus, setMemberStatus] = useState("none");
   const [post, setPost] = useState();
   const [comments, setComments] = useState({});
+  const [loggedInUserID, setLoggedInUserID] = useState(
+    localStorage.getItem("userID")
+  );
   const [loggedInUsername, setLoggedInUsername] = useState(
     localStorage.getItem("user")
   );
@@ -118,7 +121,7 @@ export default function GroupPost({ params }) {
           <p>{post.content}</p>
           {post.image ? (
             <Image
-              src={"http://localhost:8080/image/" + post.image}
+              src={"http://localhost:8080/group-post-image/" + post.image}
               alt="post image"
               width={500}
               height={500}
@@ -131,6 +134,7 @@ export default function GroupPost({ params }) {
       )}
       <CreateGroupPostComment
         postId={postID}
+        loggedInUserID={loggedInUserID}
         loggedInUsername={loggedInUsername}
         onCommentSubmit={updateComments}
         showPopup={showPopup}
@@ -145,7 +149,7 @@ export default function GroupPost({ params }) {
           >
             <a
               className="flex flex-row items-center"
-              href={`/profile/${comment.userId}`}
+              href={`/profile/${comment.nickname}`}
             >
               <ProfileImage
                 alt={comment.subject}
@@ -155,12 +159,15 @@ export default function GroupPost({ params }) {
                 avatar={"http://localhost:8080/avatar/" + comment.userId}
                 className={"rounded-full mr-3 w-auto h-16"}
               />
-              {comment.userId || "loading..."}
+              {comment.nickname || "loading..."}
             </a>
             <p>{comment.content}</p>
             {comment.image ? (
               <Image
-                src={"http://localhost:8080/image/" + comment.image}
+                src={
+                  "http://localhost:8080/group-post-comment-image/" +
+                  comment.image
+                }
                 alt="comment image"
                 width={500}
                 height={500}

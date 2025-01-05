@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function CreateGroupPostComment({
   postId,
+  loggedInUserID,
   loggedInUsername,
   onCommentSubmit,
   showPopup,
@@ -14,6 +15,7 @@ export default function CreateGroupPostComment({
     e.preventDefault();
     try {
       const form = new FormData(e.target);
+      form.append("user_id", loggedInUserID);
       form.append("nickname", loggedInUsername);
       form.append("post_id", postId);
 
@@ -76,6 +78,7 @@ export default function CreateGroupPostComment({
           type="file"
           id="image"
           name="image"
+          accept=".png, .jpg, .jpeg, .gif"
           className="mb-4 w-full p-2 border border-gray-300 rounded-md focus:bg-primary"
         />
         <button

@@ -40,32 +40,38 @@ CREATE TABLE IF NOT EXISTS memberships (
 CREATE TABLE IF NOT EXISTS group_posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     group_title TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
     nickname TEXT NOT NULL,
     subject TEXT NOT NULL,
     content TEXT NOT NULL,
     image TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(group_title) REFERENCES groups(title)
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(nickname) REFERENCES users(nickname)
 );
 CREATE TABLE IF NOT EXISTS group_comments (
     comment_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     post_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
     nickname TEXT NOT NULL,
     content TEXT NOT NULL,
     image TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(post_id) REFERENCES posts(post_id),
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(nickname) REFERENCES users(nickname)
 );
 CREATE TABLE IF NOT EXISTS group_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     group_title TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
     nickname TEXT NOT NULL,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     event_date TIMESTAMP NOT NULL,
     FOREIGN KEY(group_title) REFERENCES groups(title)
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(nickname) REFERENCES users(nickname)
 );
 CREATE TABLE IF NOT EXISTS user_event_status (

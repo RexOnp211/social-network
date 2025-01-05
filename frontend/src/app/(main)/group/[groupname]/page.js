@@ -6,7 +6,7 @@ import FetchGroupMembership from "@/lib/fetchGroupMembership";
 import FetchGroupPosts from "@/lib/fetchGroupPosts";
 import UpdateMembership from "@/lib/updateMembership";
 import InviteMember from "@/lib/inviteMember";
-import RenderPost from "@/lib/renderPost";
+import RenderGroupPost from "@/lib/renderGroupPost";
 import RenderEvent from "@/lib/renderEvent";
 import Link from "next/link";
 import Popup from "@/components/popup";
@@ -174,7 +174,10 @@ export default function Group({ params }) {
                     posts
                       .slice(0, 2)
                       .map((post) => (
-                        <div key={post.Id}> {RenderPost(post, groupData)}</div>
+                        <div key={post.Id}>
+                          {" "}
+                          {RenderGroupPost(post, groupData)}
+                        </div>
                       ))}
                   <Link
                     href={`/group/${encodeURIComponent(

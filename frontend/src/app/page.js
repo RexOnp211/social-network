@@ -79,7 +79,6 @@ export default function Home() {
           // set login info from local storage
           localStorage.setItem("userID", await res.id);
           localStorage.setItem("user", await res.username);
-          console.log("test", localStorage.getItem("user"))
         }
       } catch (error) {
         console.error("error checking login", error);

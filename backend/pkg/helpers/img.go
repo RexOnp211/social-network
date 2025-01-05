@@ -22,9 +22,9 @@ func SaveFile(file multipart.File, header *multipart.FileHeader, imgtype string)
 	} else if imgtype == "avatar" {
 		uploadDir += "avatar/"
 	} else if imgtype == "group-post" {
-		uploadDir += "group-post/"
+		uploadDir += "upload/group-post-image/"
 	} else if imgtype == "group-post-comment" {
-		uploadDir += "group-post-comment/"
+		uploadDir += "upload/group-post-comment-image/"
 	}
 	_, err := os.Stat(uploadDir)
 	if os.IsNotExist(err) {
