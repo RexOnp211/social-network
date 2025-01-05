@@ -170,8 +170,8 @@ export default function Profile({ params }) {
   }
 
   // for private profile
-  if (!isOwner && userData && !userData.public) {
-    return <div>This profile is private. TODO: follow request button</div>;
+  if (!isOwner && userData && !userData.public && !followsUser) {
+    return <div>This profile is private. <button className="bg-secondary p-2 rounded-lg" onClick={sendFollowRequest}>Follow user to see info</button></div>;
   }
 
   // show profile (public)
@@ -190,7 +190,7 @@ export default function Profile({ params }) {
             width={100}
             height={100}
             size={40}
-            avatar={"http://localhost:8080/avatar/" + userData.id}
+            avatar={"/avatar/" + userData.id}
             className={"rounded-full mr-3 w-auto h-16"}
           />
         }

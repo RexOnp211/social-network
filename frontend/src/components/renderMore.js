@@ -1,4 +1,8 @@
 import Link from "next/link";
+import ProfileImage from "./profileImage";
+import Image from "next/image";
+import { IoChatboxOutline } from "react-icons/io5";
+import UploadImage from "./images";
 
 function RenderMore(posts) {
   const maxPostsToShow = 3;
@@ -18,7 +22,7 @@ function RenderMore(posts) {
               width={100}
               height={100}
               size={40}
-              avatar={"http://localhost:8080/avatar/" + post.userId}
+              avatar={"/avatar/" + post.userId}
               className={"rounded-full mr-3 w-auto h-16"}
             />
             {post.nickname || "loading..."}
@@ -26,8 +30,8 @@ function RenderMore(posts) {
           <h1 className="text-xl font-bold">{post.subject}</h1>
           <p>{post.content}</p>
           {post.image ? (
-            <Image
-              src={"http://localhost:8080/image/" + post.image}
+            <UploadImage
+              upload={"/image/" + post.image}
               alt="post image"
               width={500}
               height={500}

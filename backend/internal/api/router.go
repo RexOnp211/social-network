@@ -48,10 +48,19 @@ func (r *Router) getHandler(method, path string) http.Handler {
 
 func corsHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		origin := r.Header.Get("Origin")
+		// You can customize the list of allowed origins
+		allowedOrigins := map[string]bool{
+			"http://localhost:3000": true,
+			"http://app:3000":       true,
+		}
+
+		if allowedOrigins[origin] {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		}
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)

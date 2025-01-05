@@ -19,10 +19,9 @@ export default function CreatePost() {
       FetchFromBackend("/", {
         method: "POST",
         credentials: "include",
-        headers: {},
         body: form,
-      });
-      window.location.reload()
+      })
+      .then(() => window.location.reload())
     } catch (error) {
       console.error(error);
     }

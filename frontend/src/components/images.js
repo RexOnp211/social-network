@@ -5,17 +5,17 @@ import { useEffect } from "react";
 import { useState } from "react";
 
 // width and height are the quality of the image and size is the size of the image in html
-export default function ProfileImage({
+export default function UploadImage({
   alt,
   width,
   height,
   size,
-  avatar,
+  upload,
   className,
 }) {
   const [url, setUrl] = useState("")
   useEffect(() => {
-  FetchFromBackend(avatar, {
+  FetchFromBackend(upload, {
     credentials: "include"
   })
   .then(response => response.blob())

@@ -61,7 +61,7 @@ export default function Group({ params }) {
       }
     }
     loadData();
-  }, []);
+  }, [decodedGroupname, groupname, loggedInUsername, router]);
 
   // function to update group events
   async function updateEvents(groupname) {

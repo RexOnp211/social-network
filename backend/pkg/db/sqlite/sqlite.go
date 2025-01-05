@@ -68,6 +68,7 @@ func GetUserIDByUsernameOrEmail(username string) (int, error) {
 }
 
 func AddPostToDb(data []interface{}) error {
+	fmt.Println("THIS POST WAS ADDED TO DB", data)
 
 	stmt, err := DB.Prepare("INSERT INTO posts (user_id, subject, content, image, privacy) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
@@ -329,19 +330,19 @@ func UpdateFollowRequestStatusDB(from, to string, status bool) error {
 	if status {
 		querry = "UPDATE followers SET accepted = true WHERE follower_id = ? AND followee_id = ?"
 	} else {
-		querry = "DELETE FROM followers WHERE follower_id = ? AND followee_id ?"
-		stmt, err := DB.Prepare(querry)
-		if err != nil {
-			log.Println("Error Changing follow status", err)
-			return err
-		}
-		defer stmt.Close()
+		querry = "DELETE FROM followers WHERE follower_id = ? AND followee_id = ?"
+	}
+	stmt, err := DB.Prepare(querry)
+	if err != nil {
+		log.Println("Error Changing follow status", err)
+		return err
+	}
+	defer stmt.Close()
 
-		_, err2 := stmt.Exec(from, to)
-		if err2 != nil {
-			log.Println("Error executing followRequest Accept in db", err)
-			return err
-		}
+	_, err2 := stmt.Exec(from, to)
+	if err2 != nil {
+		log.Println("Error executing followRequest Accept in db", err)
+		return err
 	}
 
 	return nil
@@ -355,7 +356,7 @@ func GetUsersFollowingListFromDb(userId int) ([]helpers.User, error) {
 	}
 	defer DB.Close()
 
-	rows, err := DB.Query("SELECT followee_id FROM followers WHERE follower_id = ?", userId)
+	rows, err := DB.Query("SELECT followee_id FROM followers WHERE follower_id = ? AND accepted = true", userId)
 	if err != nil {
 		fmt.Println("error querrying db for follwee ids", err)
 		return nil, err
@@ -397,7 +398,7 @@ func GetUsersFollowersListFromDB(userId int) ([]helpers.User, error) {
 	}
 	defer DB.Close()
 
-	rows, err := DB.Query("SELECT follower_id FROM followers WHERE followee_id = ?", userId)
+	rows, err := DB.Query("SELECT follower_id FROM followers WHERE followee_id = ? AND accepted = true", userId)
 	if err != nil {
 		fmt.Println("error querrying db for follwer ids", err)
 		return nil, err

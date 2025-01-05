@@ -26,7 +26,7 @@ export default function RenderEvent({ loggedInUsername, event }) {
       setIsGoing(status.going);
     };
     fetchData();
-  }, []);
+  }, [event.Id, loggedInUsername]);
 
   // trigger when user change the event going status
   async function handleToggle() {

@@ -14,12 +14,14 @@ import FetchCredential from "@/lib/fetchCredential";
 import Fetchnickname from "@/lib/fetchNickName";
 import WsClient from "@/lib/wsClient";
 import { useRef } from "react";
+import UploadImage from "@/components/images";
 
 export default function Home() {
   const [post, setPost] = useState(0);
   const [nickname, setNickname] = useState({});
   const router = useRouter();
   const ws = useRef(null);
+  console.log("ENV", process.env.go_api)
 
   useEffect(() => {
     const load = async () => {
@@ -111,7 +113,7 @@ export default function Home() {
                     width={100}
                     height={100}
                     size={40}
-                    avatar={"http://localhost:8080/avatar/" + post.userId}
+                    avatar={"/avatar/" + post.userId}
                     className={"rounded-full mr-3 w-auto h-16"}
                   />
                   {nickname[post.userId] || "loading..."}
@@ -119,13 +121,14 @@ export default function Home() {
                 <h1 className="text-xl font-bold">{post.subject}</h1>
                 <p>{post.content}</p>
                 {post.image ? (
-                  <Image
-                    src={"http://localhost:8080/image/" + post.image}
+                  <UploadImage
+                    upload={"/image/" + post.image}
                     alt="post image"
                     width={500}
                     height={500}
                     className="w-auto h-80"
                   />
+
                 ) : (
                   ""
                 )}

@@ -29,7 +29,7 @@ export default function Notifications() {
       }
     };
     load();
-  }, []);
+  }, [notifications]);
 
   useEffect(() => {
     const GetNoti = async () => {
@@ -44,7 +44,7 @@ export default function Notifications() {
       }
     }
     GetNoti()
-  }, [])
+  }, [notifications])
 
   useEffect(() => {
     const findNickname = async () => {
