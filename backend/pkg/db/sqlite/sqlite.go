@@ -84,6 +84,34 @@ func AddPostToDb(data []interface{}) error {
 	return nil
 }
 
+func GetLastInsertID() (int, error) {
+	var id int
+	err := DB.QueryRow("SELECT last_insert_rowid()").Scan(&id)
+	if err != nil {
+		log.Println("Error fetching last insert ID:", err)
+		return 0, err
+	}
+	return id, nil
+}
+
+func SavePostPrivacy(postID int, allowedUserIDs []int) error {
+	stmt, err := DB.Prepare("INSERT INTO post_privacy (post_id, user_id) VALUES (?, ?)")
+	if err != nil {
+		log.Println("Prepare statement error in SavePostPrivacy:", err)
+		return err
+	}
+	defer stmt.Close()
+
+	for _, userID := range allowedUserIDs {
+		_, err = stmt.Exec(postID, userID)
+		if err != nil {
+			log.Println("Exec statement error in SavePostPrivacy:", err)
+			return err
+		}
+	}
+	return nil
+}
+
 func GetPostsFromDb() ([]helpers.Post, error) {
 
 	rows, err := DB.Query("SELECT * FROM posts")
@@ -348,37 +376,44 @@ func UpdateFollowRequestStatusDB(from, to string, status bool) error {
 	return nil
 }
 
-func GetUsersFollowingListFromDb(userId int) ([]helpers.User, error) {
+func GetFollowingIDs(userID int) ([]int, error) {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
-		fmt.Println("DB Open Error in GetFollowRequestsFromDb:", err)
+		fmt.Println("DB Open Error:", err)
 		return nil, err
 	}
 	defer DB.Close()
 
-	rows, err := DB.Query("SELECT followee_id FROM followers WHERE follower_id = ?", userId)
+	rows, err := DB.Query("SELECT followee_id FROM followers WHERE follower_id = ? AND accepted = true", userID)
 	if err != nil {
-		fmt.Println("error querrying db for follwee ids", err)
+		fmt.Println("Error querying db for followee ids:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	followingIDs := []int{}
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			fmt.Println("Error scanning followee ID:", err)
+			return nil, err
+		}
+		followingIDs = append(followingIDs, id)
+	}
+
+	return followingIDs, nil
+}
+
+func GetUsersFollowingListFromDb(userID int) ([]helpers.User, error) {
+	followingIDs, err := GetFollowingIDs(userID)
+	if err != nil {
 		return nil, err
 	}
 
-	followingUsersArr := []int{}
-	for rows.Next() {
-		var followingId int
-		err := rows.Scan(&followingId)
-		if err != nil {
-			fmt.Println("error scanning db for followee id")
-			return nil, err
-		}
-		followingUsersArr = append(followingUsersArr, followingId)
-	}
-
 	userArr := []helpers.User{}
-	for _, id := range followingUsersArr {
-		strId := strconv.Itoa(id)
-		fmt.Println("THIS IS FOLLOWING ID", id)
-
-		nickname := GetNicknameFromId(strId)
+	for _, id := range followingIDs {
+		strID := strconv.Itoa(id)
+		nickname := GetNicknameFromId(strID)
 		user, err := GetUserFromDb(nickname)
 		if err != nil {
 			fmt.Println("Error getting user for sidebar")
@@ -390,6 +425,10 @@ func GetUsersFollowingListFromDb(userId int) ([]helpers.User, error) {
 	return userArr, nil
 }
 
+func GetFollowersForUser(userID int) ([]int, error) {
+	return GetFollowingIDs(userID)
+}
+
 func GetUsersFollowersListFromDB(userId int) ([]helpers.User, error) {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
@@ -398,7 +437,7 @@ func GetUsersFollowersListFromDB(userId int) ([]helpers.User, error) {
 	}
 	defer DB.Close()
 
-	rows, err := DB.Query("SELECT follower_id FROM followers WHERE followee_id = ?", userId)
+	rows, err := DB.Query("SELECT follower_id FROM followers WHERE followee_id = ? AND accepted = true", userId)
 	if err != nil {
 		fmt.Println("error querrying db for follwer ids", err)
 		return nil, err

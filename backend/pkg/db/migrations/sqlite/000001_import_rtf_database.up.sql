@@ -90,6 +90,14 @@ CREATE TABLE IF NOT EXISTS posts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
+CREATE TABLE IF NOT EXISTS post_privacy (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    post_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY(post_id) REFERENCES posts(post_id),
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
+    UNIQUE(post_id, user_id)
+);
 CREATE TABLE IF NOT EXISTS categories (
     category_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     category TEXT NOT NULL

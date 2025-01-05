@@ -3,9 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	db "social-network/pkg/db/sqlite"
 	"social-network/pkg/helpers"
+	"strconv"
 )
 
 // gets posts from the database for the home page
@@ -57,5 +59,29 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	lastInsertID, err := db.GetLastInsertID()
+	if err != nil {
+		http.Error(w, "Error fetching last post ID", http.StatusInternalServerError)
+		log.Println("Error fetching last post ID:", err)
+		return
+	}
+
+	if privacy == "private" {
+		allowedUserIDs := r.Form["allowedUserIDs[]"]
+		intUserIDs := []int{}
+
+		for _, userID := range allowedUserIDs {
+			id, err := strconv.Atoi(userID)
+			if err != nil {
+				http.Error(w, "Invalid user ID format", http.StatusBadRequest)
+				log.Println("Invalid user ID format:", err)
+				return
+			}
+			intUserIDs = append(intUserIDs, id)
+		}
+
+		err = db.SavePostPrivacy(lastInsertID, intUserIDs)
+		
+	}
 	fmt.Println(filepath)
 }
