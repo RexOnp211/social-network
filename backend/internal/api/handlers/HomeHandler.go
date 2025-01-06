@@ -18,7 +18,38 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error getting posts", err)
 		return
 	}
-	json.NewEncoder(w).Encode(posts)
+	nickname := ValidateSession(w, r)
+	user, err := db.GetUserFromDb(nickname)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error getting user", err)
+		return
+	}
+	visiblePosts := []helpers.Post{}
+	for _, post := range posts {
+		intPostId, err := strconv.Atoi(post.PostId)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			fmt.Println("Error converting postId to string", err)
+		}
+		intUserId, err := strconv.Atoi(post.UserId)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			fmt.Println("Erroc converting post UserId into int", err)
+		}
+		CanSeeThisPost, err := db.GetPostPrivacy(intPostId, intUserId, user.Id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			fmt.Println("Error Checking in user can see post", err)
+		}
+
+		fmt.Println("CAN SEE THIS POST", user.Id, CanSeeThisPost)
+		if CanSeeThisPost || user.Id == intUserId {
+			visiblePosts = append(visiblePosts, post)
+		}
+	}
+	fmt.Println("VISIBLE POSTS", visiblePosts)
+	json.NewEncoder(w).Encode(visiblePosts)
 }
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +99,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if privacy == "private" {
-		allowedUserIDs := r.Form["allowedUserIDs[]"]
+		allowedUserIDs := r.Form["followers"]
 		intUserIDs := []int{}
 
 		for _, userID := range allowedUserIDs {
@@ -82,7 +113,11 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		err = db.SavePostPrivacy(lastInsertID, intUserIDs)
-		
+		if err != nil {
+			http.Error(w, "Error saving post privacy", http.StatusInternalServerError)
+			log.Println("error saving post privacy")
+		}
+
 	}
 	fmt.Println(filepath)
 }

@@ -6,6 +6,7 @@ export default async function FetchGroupEvents(groupname) {
     `/fetch_group_events/${groupname}`,
     {
       method: "GET",
+      credentials: "include",
     }
   );
   if (!eventResponse.ok) {

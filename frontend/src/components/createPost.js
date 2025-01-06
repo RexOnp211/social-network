@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { Select } from "@headlessui/react";
 import FetchFromBackend from "@/lib/fetch";
+import fetchCredential from "@/lib/fetchCredential";
 
 export default function CreatePost() {
   const [option, setOption] = useState("public");
+  const [followers, setFollowers] = useState([])
 
   function OnChange(e) {
     setOption(e.target.value);
@@ -26,6 +28,21 @@ export default function CreatePost() {
       console.error(error);
     }
   }
+
+  useEffect(() => {
+    const checkFollowers = async () => {
+      const user = await fetchCredential()
+
+      const followerRes = await FetchFromBackend(`/followers/${user.username}`, {
+        method: "GET",
+        credentials: "include"
+      })
+      const followersJson = await followerRes.json()
+      setFollowers(followersJson)
+      console.log("users current followers", followers, user.username)
+    }
+    checkFollowers()
+  }, [])
 
   return (
     <div className="mb-4">
@@ -92,10 +109,21 @@ export default function CreatePost() {
             onChange={OnChange}
           >
             <option value="public">Public</option>
-            <option value="private">Private</option>
-            <option value="friends">Friends</option>
+            <option value="almost private">almost private</option>
+            <option value="private">private</option>
           </Select>
-          {option === "friends" ? <div>choose what friends see this</div> : ""}
+          {option === "private" ? 
+          <div>
+            <p>Choose which followers see this</p>
+            {followers.map((follower) => (
+            <div key={follower.id}>
+            <input type="checkbox" name="followers" value={follower.id} key={follower.id}/>
+            {" " + follower.nickname}
+            </div>
+            )
+            )}
+          </div>
+          : ""}
           <button
             type="submit"
             className="bg-accent w-full text-white rounded-lg p-3 transition-colors hover:bg-accentDark"

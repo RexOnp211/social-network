@@ -5,6 +5,7 @@ export default async function FetchGroupInfo(decodedGroupname) {
     `/group/${decodedGroupname}`,
     {
       method: "GET",
+      credentials: "include"
     }
   );
   if (!groupInfoResponse.ok) {

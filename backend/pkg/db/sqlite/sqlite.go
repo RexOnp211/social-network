@@ -493,3 +493,62 @@ func UnfollowUserFromDB(follower, followee int) error {
 	}
 	return nil
 }
+
+func GetPostPrivacy(postId, postUserId, userId int) (bool, error) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		log.Println("DB open Error in GetPostPrivacy")
+		return false, err
+	}
+	defer DB.Close()
+
+	privacy := ""
+	stmt := "SELECT privacy FROM posts WHERE post_id = ?"
+	err = DB.QueryRow(stmt, postId).Scan(&privacy)
+	if err != nil {
+		log.Println("Error checking post privacy")
+		return false, err
+	}
+
+	switch privacy {
+	case "private":
+		rows, err := DB.Query("SELECT user_id FROM post_privacy WHERE post_id = ?", postId)
+		if err != nil {
+			log.Println("Error checking for user in post privacy")
+			return false, err
+		}
+
+		for rows.Next() {
+			var id int
+			err = rows.Scan(&id)
+			if err != nil {
+				log.Println("Error scanning rows in getPostPrivacy")
+				return false, err
+			}
+			if id == userId {
+				return true, err
+			} else {
+				return false, err
+			}
+		}
+	case "almost private":
+		accepted := false
+		stmt2 := "SELECT accepted FROM followers WHERE follower_id = ? AND followee_id = ?"
+		err = DB.QueryRow(stmt2, userId, postUserId).Scan(&accepted)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return false, nil
+			} else {
+				fmt.Println("ERROR CHECKING alsmost private", err)
+				return false, err
+			}
+		}
+		fmt.Println("ACCEPTED", accepted)
+		if accepted {
+			return true, nil
+		}
+
+	}
+
+	return true, nil
+}

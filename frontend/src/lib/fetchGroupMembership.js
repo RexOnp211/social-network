@@ -16,6 +16,7 @@ export default async function FetchGroupMembership(
     `/fetch_memberships/${loggedInUsername}`,
     {
       method: "GET",
+      credentials: "include"
     }
   );
   if (!memberStatResponse.ok) {

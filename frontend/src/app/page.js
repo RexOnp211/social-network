@@ -38,7 +38,10 @@ export default function Home() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await FetchFromBackend("/");
+        const res = await FetchFromBackend("/", {
+          method: "GET",
+          credentials: "include"
+        });
         const jsonData = await res.json();
         console.log("posts", jsonData);
         setPost(jsonData);

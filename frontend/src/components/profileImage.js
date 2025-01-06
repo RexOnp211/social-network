@@ -30,7 +30,8 @@ export default function ProfileImage({
   return (
     <div className="overflow-hidden">
       <Image
-        src={url}
+        rel="preload"
+        src={url || "https://churchthemes.com/wp-content/uploads/2016/07/google-maps-oops-something-went-wrong.png"}
         width={width}
         height={height}
         alt={alt}

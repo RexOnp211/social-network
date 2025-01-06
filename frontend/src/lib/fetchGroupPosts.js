@@ -6,6 +6,7 @@ export default async function FetchGroupPosts(groupname) {
     `/fetch_group_posts/${groupname}`,
     {
       method: "GET",
+      credentials: "include"
     }
   );
   if (!postResponse.ok) {
@@ -22,6 +23,7 @@ export async function FetchGroupPostComments(postID) {
     `/fetch_group_post_comment/${postID}`,
     {
       method: "GET",
+      credentials: "include"
     }
   );
   if (!commentsResponse.ok) {
