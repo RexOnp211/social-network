@@ -62,6 +62,12 @@ type FollowRequest struct {
 	CreationDate string `json:"creationDate"`
 }
 
+type PrivateMessage struct {
+	FromUserId string `json:"fromUserId"`
+	ToUserId   string `json:"toUserId"`
+	Content    string `json:"content"`
+}
+
 type GroupMembers struct {
 	Id       string `json:"id"`
 	Title    string `json:"title"`

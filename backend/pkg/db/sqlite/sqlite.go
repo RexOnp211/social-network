@@ -567,7 +567,7 @@ func GetChatMessagesFromDb(user1, user2 int) ([]helpers.ChatMessage, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		fmt.Println("Error finding messages in GetChatMEssages", err)
+		fmt.Println("Error finding messages in GetChatMessages", err)
 		return nil, err
 	}
 
@@ -583,4 +583,34 @@ func GetChatMessagesFromDb(user1, user2 int) ([]helpers.ChatMessage, error) {
 
 	}
 	return messages, nil
+}
+
+/*
+func AddChatMessageIntoDb(user1, user2, content string) error {
+	query := `
+        INSERT INTO messages (sender_id, receiver_id, content)
+        VALUES (?, ?, ?)`
+	_, err := DB.Exec(query, user1, user2, content)
+
+	if err != nil {
+		return fmt.Errorf("Failed to insert message into DB with error: %w", err)
+	}
+
+	fmt.Println("Messaged user", user2, "as", user1, "with message: '", content, "'.")
+	return nil
+}
+*/
+
+func AddChatMessageIntoDb(privateMessageContent helpers.PrivateMessage) error {
+	query := `
+        INSERT INTO messages (sender_id, receiver_id, content) 
+        VALUES (?, ?, ?)`
+	_, err := DB.Exec(query, privateMessageContent.FromUserId, privateMessageContent.ToUserId, privateMessageContent.Content)
+
+	if err != nil {
+		return fmt.Errorf("Failed to insert message into DB with error: %w", err)
+	}
+
+	fmt.Println("Messaged user", privateMessageContent.FromUserId, "as", privateMessageContent.ToUserId, "with message: '", privateMessageContent.Content, "'.")
+	return nil
 }

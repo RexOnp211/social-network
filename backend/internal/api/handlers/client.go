@@ -132,12 +132,16 @@ var (
 	Follow_request_status = "follow_request_status"
 	RemoveFollowRequest   = "remove_follow_request"
 	ErrorEvent            = "error"
+
+	CreatePrivateMessage = "send_message"
 )
 
 func (m *Manager) setupEventHandlers() {
 	m.handlers[SendFollowRequest] = SendFollowRequestHandler
 	m.handlers[FollowRequestList] = GetFollowRequestsHandler
 	m.handlers[Follow_request_status] = AcceptOrDeclineFollowRequest
+
+	m.handlers[CreatePrivateMessage] = PrivateMessageHandler
 }
 
 func (m *Manager) routeEvent(event Event, c *Client) error {
