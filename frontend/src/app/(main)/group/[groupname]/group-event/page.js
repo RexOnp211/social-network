@@ -13,6 +13,9 @@ export default function Group({ params }) {
   const { groupname, postId } = params;
   const router = useRouter();
   const decodedGroupname = decodeURIComponent(groupname);
+  const [loggedInUserID, setLoggedInUserID] = useState(
+    localStorage.getItem("userID")
+  );
   const [loggedInUsername, setLoggedInUsername] = useState(
     localStorage.getItem("user")
   );
@@ -97,6 +100,7 @@ export default function Group({ params }) {
 
               {/* Group Post Form */}
               <GroupEvent
+                loggedInUserID={loggedInUserID}
                 loggedInUsername={loggedInUsername}
                 groupTitle={decodedGroupname}
                 showPopup={showPopup}

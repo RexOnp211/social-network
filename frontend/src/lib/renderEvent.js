@@ -2,8 +2,13 @@
 import { useEffect, useState } from "react";
 import formatDate from "@/lib/formatDate";
 import FetchFromBackend from "@/lib/fetch";
+import ProfileImage from "@/components/profileImage";
 
-export default function RenderEvent({ loggedInUsername, event }) {
+export default function RenderEvent({ event }) {
+  const [loggedInUsername, setLoggedInUsername] = useState(
+    localStorage.getItem("user")
+  );
+  console.log(loggedInUsername, event);
   const [isGoing, setIsGoing] = useState(false);
 
   useEffect(() => {
@@ -53,7 +58,18 @@ export default function RenderEvent({ loggedInUsername, event }) {
   return (
     <div>
       <div key={event.Id} className="bg-secondary p-4 rounded-lg m-4">
-        <a className="flex flex-row items-center">
+        <a
+          className="flex flex-row items-center"
+          href={`/profile/${event.nickname}`}
+        >
+          <ProfileImage
+            alt={event.subject}
+            width={100}
+            height={100}
+            size={40}
+            avatar={"http://localhost:8080/avatar/" + event.userId}
+            className={"rounded-full mr-3 w-auto h-16"}
+          />
           {event.nickname || "loading..."}
         </a>
         <h1 className="text-xl font-bold">{event.title}</h1>

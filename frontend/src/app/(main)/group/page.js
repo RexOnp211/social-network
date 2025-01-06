@@ -23,8 +23,8 @@ export default function GroupMenu() {
   const [requestsLoading, setRequestsLoading] = useState(true);
   
   useEffect(() => {
-  const nick = localStorage.getItem("user")
-  setLoggedInUsername(nick)
+      const nick = localStorage.getItem("user")
+      setLoggedInUsername(nick)
   })
   // fetch all groups
   async function fetchGroups(loggedInUsername) {
@@ -64,6 +64,7 @@ export default function GroupMenu() {
         `/fetch_memberships/${loggedInUsername}`,
         {
           method: "GET",
+          credentials: "include"
         }
       );
       if (!response.ok) {
@@ -98,12 +99,35 @@ export default function GroupMenu() {
     }
   }
 
+  // fetch all groups
+  async function fetchGroups(loggedInUsername) {
+    const response = await FetchFromBackend(`/groups`, {
+      method: "GET",
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch groups`);
+    }
+    const data = await response.json();
+    console.log(data.groups);
+    setGroups(data.groups);
+
+    // Filter groups the user made
+    const userMadeGroups = data.groups.filter((group) => {
+      return group.creatorName === loggedInUsername;
+    });
+    setGroupUserMade(userMadeGroups);
+    console.log(userMadeGroups);
+
+    FetchRequests(userMadeGroups);
+  }
+
+  // fetch group request for your group
   async function FetchRequests(userMadeGroups) {
     console.log("fetch_your_requests");
-    // fetch group request for your group
     try {
       const response = await FetchFromBackend(`/fetch_your_requests`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -183,18 +207,18 @@ export default function GroupMenu() {
           requests.length != 0 && (
             <GroupRequests
               requests={requests}
-              onAcceptOrReject={async (requestTitle, status) => {
+              onAcceptOrReject={async (request, status) => {
                 setRequestsLoading(true);
                 if (status == "approve") {
                   showPopup(
                     false,
-                    `You are now a member of "${requestTitle}"!`,
+                    `"${request.username}" is now a member of "${request.title}"!`,
                     3000
                   );
                 } else if (status == "reject") {
                   showPopup(
                     true,
-                    `Reject invitation from "${requestTitle}".`,
+                    `Reject request from "${request.username}".`,
                     3000
                   );
                 }
@@ -215,22 +239,21 @@ export default function GroupMenu() {
           invitations.length != 0 && (
             <GroupInvitation
               invitations={invitations}
-              onAcceptOrReject={async (invitation, status) => {
+              onAcceptOrReject={async (invitationTitle, status) => {
                 setMembershipsLoading(true);
                 if (status == "approve") {
                   showPopup(
                     false,
-                    `${invitation.username} is now a member of "${invitation.title}"!`,
+                    `You are now a member of "${invitationTitle}"!`,
                     3000
                   );
                 } else if (status == "reject") {
                   showPopup(
                     true,
-                    `Reject request from "${invitation.username}".`,
+                    `Reject invitation from "${invitationTitle}".`,
                     3000
                   );
                 }
-
                 console.log("updating dates...");
                 setTimeout(async () => {
                   await fetchMemberships(loggedInUsername);

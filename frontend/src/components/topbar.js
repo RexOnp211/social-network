@@ -11,7 +11,6 @@ import fetchCredential from "@/lib/fetchCredential";
 import FetchFromBackend from "@/lib/fetch";
 import { useRouter } from "next/navigation";
 
-
 const links = [
   { name: "Home", href: "/", icon: IoHomeOutline },
   { name: "Groups", href: "/group", icon: MdOutlineGroups },
@@ -29,20 +28,16 @@ const links = [
 ];
 
 export default function TopBar() {
-  // fetch login username and use it for profile link
-  const [loggedInUsername, setLoggedInUsername] = useState("");
+  const router = useRouter();
+  const [loggedInUsername, setLoggedInUsername] = useState("")
 
   useEffect(() => {
-    const checklogin = async () => {
-      const res = await fetchCredential()
-      const data = await res.username
-      setLoggedInUsername(data)
+    const GetLocalStorage = async () => {
+      const nick = localStorage.getItem("user")
+      setLoggedInUsername(nick)
     }
-    checklogin()
-
-  }, []);
-
-  const router = useRouter();
+    GetLocalStorage()
+  })
 
   const Logout = async () => {
     try {
@@ -53,9 +48,8 @@ export default function TopBar() {
       if (res.status === 200) {
         console.log("Logout successful");
 
-        // clear login info from local storage
-        localStorage.removeItem("userID");
-        localStorage.removeItem("user");
+        // clear userdata from localStorage
+        localStorage.clear();
 
         router.push("/login");
       } else {

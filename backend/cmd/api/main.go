@@ -67,10 +67,10 @@ func main() {
 		return
 	}
 
-	// if err := m.Down(); err != nil && err != migrate.ErrNoChange {
-	// 	fmt.Println("Migration Down Error:", err)
-	// 	return
-	// }
+	if err := m.Down(); err != nil && err != migrate.ErrNoChange {
+	fmt.Println("Migration Down Error:", err)
+	return
+	}
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		fmt.Println("Migration Up Error:", err)
@@ -106,10 +106,12 @@ func main() {
 	r.AddRoute("POST", "/invite_member", http.HandlerFunc(handlers.InviteMemberHandler))
 	r.AddRoute("POST", "/update_membership", http.HandlerFunc(handlers.UpdateMemberStatusHandler))
 	r.AddRoute("POST", "/create_group_post", http.HandlerFunc(handlers.CreateGroupPostHandler))
+	r.AddRoute("GET", "/group-post-image/", http.HandlerFunc(handlers.GetGroupImageHandler))
 	r.AddRoute("POST", "/fetch_your_requests", http.HandlerFunc(handlers.FetchYourRequestsHandler))
 	r.AddRoute("GET", "/fetch_group_posts/", http.HandlerFunc(handlers.GroupPostsHandler))
 	r.AddRoute("GET", "/fetch_group_post/", http.HandlerFunc(handlers.GroupPostHandler))
 	r.AddRoute("GET", "/fetch_group_post_comment/", http.HandlerFunc(handlers.GroupPostCommentsHandler))
+	r.AddRoute("GET", "/group-post-comment-image/", http.HandlerFunc(handlers.GetGroupCommentImageHandler))
 	r.AddRoute("POST", "/create_group_post_comment", http.HandlerFunc(handlers.CreateGroupPostCommentHandler))
 	r.AddRoute("GET", "/fetch_group_events/", http.HandlerFunc(handlers.FetchGroupEventsHandler))
 	r.AddRoute("POST", "/create_group_event", http.HandlerFunc(handlers.CreateGroupEventHandler))

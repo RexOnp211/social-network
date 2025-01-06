@@ -175,7 +175,7 @@ func GetMembershipsFromDb(nickname string) ([]helpers.Membership, error) {
 
 func AddGroupPostToDb(data []interface{}) error {
 	log.Println("grouppost DB", data)
-	stmt, err := DB.Prepare("INSERT INTO group_posts (group_title, nickname, subject, content, image) VALUES (?, ?, ?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO group_posts (group_title, user_id, nickname, subject, content, image) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Prepare statement error:", err)
 		return err
@@ -201,7 +201,7 @@ func GetGroupPostsFromDb(groupname string) ([]helpers.GroupPost, error) {
 	defer rows.Close()
 	for rows.Next() {
 		post := helpers.GroupPost{}
-		err := rows.Scan(&post.Id, &post.GroupTitle, &post.Nickname, &post.Subject, &post.Content, &post.Image, &post.CreationDate)
+		err := rows.Scan(&post.Id, &post.GroupTitle, &post.UserID, &post.Nickname, &post.Subject, &post.Content, &post.Image, &post.CreationDate)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return posts, err
@@ -222,7 +222,7 @@ func GetGroupPostFromDb(postID int) (helpers.GroupPost, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&post.Id, &post.GroupTitle, &post.Nickname, &post.Subject, &post.Content, &post.Image, &post.CreationDate)
+		err := rows.Scan(&post.Id, &post.GroupTitle, &post.UserID, &post.Nickname, &post.Subject, &post.Content, &post.Image, &post.CreationDate)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return post, err
@@ -232,8 +232,8 @@ func GetGroupPostFromDb(postID int) (helpers.GroupPost, error) {
 	return post, nil
 }
 
-func GetGroupPostCommentsFromDb(postID int) ([]helpers.Comment, error) {
-	comments := []helpers.Comment{}
+func GetGroupPostCommentsFromDb(postID int) ([]helpers.GroupComment, error) {
+	comments := []helpers.GroupComment{}
 
 	rows, err := DB.Query("SELECT * FROM group_comments WHERE post_id = ?", postID)
 	if err != nil {
@@ -242,8 +242,8 @@ func GetGroupPostCommentsFromDb(postID int) ([]helpers.Comment, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		comment := helpers.Comment{}
-		err := rows.Scan(&comment.CommentId, &comment.PostId, &comment.UserId, &comment.Content, &comment.Image, &comment.CreationDate)
+		comment := helpers.GroupComment{}
+		err := rows.Scan(&comment.CommentId, &comment.PostId, &comment.UserID, &comment.Nickname, &comment.Content, &comment.Image, &comment.CreationDate)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return comments, err
@@ -256,7 +256,7 @@ func GetGroupPostCommentsFromDb(postID int) ([]helpers.Comment, error) {
 
 func AddGroupPostCommentToDb(data []interface{}) error {
 	log.Println("comment DB", data)
-	stmt, err := DB.Prepare("INSERT INTO group_comments (post_id, nickname, content, image) VALUES (?, ?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO group_comments (post_id, user_id, nickname, content, image) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Prepare statement error:", err)
 		return err
@@ -282,7 +282,7 @@ func GetGroupEventsFromDb(groupname string) ([]helpers.GroupEvent) {
 	defer rows.Close()
 	for rows.Next() {
 		event := helpers.GroupEvent{}
-		err := rows.Scan(&event.Id, &event.GroupTitle, &event.Nickname, &event.Title, &event.Description, &event.EventDate)
+		err := rows.Scan(&event.Id, &event.GroupTitle, &event.UserID, &event.Nickname, &event.Title, &event.Description, &event.EventDate)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return nil
@@ -295,7 +295,7 @@ func GetGroupEventsFromDb(groupname string) ([]helpers.GroupEvent) {
 
 func AddGroupEventToDb(data []interface{}) error {
 	log.Println("groupevent DB", data)
-	stmt, err := DB.Prepare("INSERT INTO group_events (group_title, nickname, title, description, event_date) VALUES (?, ?, ?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO group_events (group_title, user_id, nickname, title, description, event_date) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Prepare statement error:", err)
 		return err

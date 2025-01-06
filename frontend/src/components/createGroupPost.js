@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import FetchFromBackend from "@/lib/fetch";
 
-export default function GroupPost({
+export default function CreateGroupPost({
   loggedInUsername,
+  loggedInUserID,
   groupTitle,
   onPostSubmit,
   showPopup,
@@ -18,6 +19,7 @@ export default function GroupPost({
     try {
       const form = new FormData(e.target);
       form.append("groupname", groupTitle);
+      form.append("user_id", loggedInUserID);
       form.append("nickname", loggedInUsername);
 
       console.log([...form.entries()]);
@@ -104,6 +106,7 @@ export default function GroupPost({
             type="file"
             id="image"
             name="image"
+            accept=".png, .jpg, .jpeg, .gif"
             className="mb-4 w-full p-2 border border-gray-300 rounded-md focus:bg-primary"
           />
 

@@ -4,8 +4,10 @@ VALUES
 -- password "pr"
 ('publicuser', 'public@example.com', '$2y$10$yXTT5adkZxaWM6Xd7NTAlOYqJvfqT/pBjIsH.cHbF1xBWdD6FlT3a', 'Public', 'User', '1990-01-01', 'This is a public user.', 1, ''),
 -- password "pu"
-('pu2', 'pu2@example.com', '$2y$10$sGvVL63Ve8IWC7DPe3MDPuC6sjMODPL6OZmZ/4xv4TAStxkkkcMee', 'Public', 'User', '1990-01-01', 'This is another public user.', 1, '');
+('pu2', 'pu2@example.com', '$2y$10$sGvVL63Ve8IWC7DPe3MDPuC6sjMODPL6OZmZ/4xv4TAStxkkkcMee', 'Public', 'User', '1990-01-01', 'This is another public user.', 1, ''),
 -- password "pu2"
+('test', 'test@mail.com', '$2a$10$eJifNO6XKlkTKJLs.21UBuCmcuYx0kQvf99nfXuoCs2S2d6Ip2rBS', 'test', 'test', '2025-01-30', 'This is test.', 1, '1_test.png');
+-- password "test"
 
 INSERT INTO posts (user_id, subject, content, privacy) VALUES
   ('1', 'My First Post', 'This is the content of my first post.', 'public'),
@@ -37,7 +39,7 @@ INSERT INTO groups (creator_name, title, description) VALUES
 
 INSERT INTO memberships (title, nickname, status) VALUES
   ('test group', 'publicuser', 'invited'),
-  ('test group', 'privateuser', 'required'),
+  ('test group', 'privateuser', 'requested'),
   ('test group 2', 'publicuser', 'invited'),
   ('test group 3', 'publicuser', 'invited'),
   ('test group 4', 'publicuser', 'invited'),

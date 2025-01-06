@@ -19,6 +19,9 @@ export default function GroupPost({ params }) {
   const [memberStatus, setMemberStatus] = useState("none");
   const [post, setPost] = useState();
   const [comments, setComments] = useState({});
+  const [loggedInUserID, setLoggedInUserID] = useState(
+    localStorage.getItem("userID")
+  );
   const [loggedInUsername, setLoggedInUsername] = useState(
     localStorage.getItem("user")
   );
@@ -119,7 +122,7 @@ export default function GroupPost({ params }) {
           <p>{post.content}</p>
           {post.image ? (
             <UploadImage
-              upload={"/image/" + post.image}
+              upload={"/group-post-image/" + post.image}
               alt="post image"
               width={500}
               height={500}
@@ -132,6 +135,7 @@ export default function GroupPost({ params }) {
       )}
       <CreateGroupPostComment
         postId={postID}
+        loggedInUserID={loggedInUserID}
         loggedInUsername={loggedInUsername}
         onCommentSubmit={updateComments}
         showPopup={showPopup}
@@ -146,7 +150,7 @@ export default function GroupPost({ params }) {
           >
             <a
               className="flex flex-row items-center"
-              href={`/profile/${comment.userId}`}
+              href={`/profile/${comment.nickname}`}
             >
               <ProfileImage
                 alt={comment.subject}
@@ -156,12 +160,12 @@ export default function GroupPost({ params }) {
                 avatar={"/avatar/" + comment.userId}
                 className={"rounded-full mr-3 w-auto h-16"}
               />
-              {comment.userId || "loading..."}
+              {comment.nickname || "loading..."}
             </a>
             <p>{comment.content}</p>
             {comment.image ? (
               <UploadImage
-                upload={"/image/" + comment.image}
+                upload={"/group-post-comment-image/" + comment.image}
                 alt="comment image"
                 width={500}
                 height={500}

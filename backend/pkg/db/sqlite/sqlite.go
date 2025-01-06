@@ -552,3 +552,35 @@ func GetPostPrivacy(postId, postUserId, userId int) (bool, error) {
 
 	return true, nil
 }
+
+func GetChatMessagesFromDb(user1, user2 int) ([]helpers.ChatMessage, error) {
+	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
+	if err != nil {
+		log.Println("DB open Error in GetPostPrivacy")
+		return nil, err
+	}
+	defer DB.Close()
+
+	rows, err := DB.Query("SELECT sender_id, receiver_id, content FROM messages WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND reciver_id = ?)",
+		user1, user2, user2, user1)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		fmt.Println("Error finding messages in GetChatMEssages", err)
+		return nil, err
+	}
+
+	messages := []helpers.ChatMessage{}
+	for rows.Next() {
+		message := helpers.ChatMessage{}
+		err = rows.Scan(&message.From_id, &message.To_id, &message.Message)
+		if err != nil {
+			fmt.Println("error scanning for messages", err)
+			return nil, err
+		}
+		messages = append(messages, message)
+
+	}
+	return messages, nil
+}

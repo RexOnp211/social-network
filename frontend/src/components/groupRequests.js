@@ -20,7 +20,7 @@ const GroupRequests = ({ requests, onAcceptOrReject }) => {
         status
       );
 
-      onAcceptOrReject(request.title, status);
+      onAcceptOrReject(request, status);
     } catch (error) {
       console.error(`Error updating status ${status}:`, error);
     }
@@ -44,16 +44,23 @@ const GroupRequests = ({ requests, onAcceptOrReject }) => {
   return (
     <div className="bg-orange-100 p-4 mb-4 rounded-lg">
       <h2 className="text-lg text-accent font-bold mb-2">
-        You have received group requests:
+        You have received join group requests:
       </h2>
       <div>
         {requests.length !== 0 && (
           <ul className="list-disc pl-5 marker:text-txtColor">
             {requests.map((request) => (
-              <li className="ml-2 text-gray-600 mb-2" key={request.title}>
+              <li className="ml-2 text-gray-600 mb-2" key={request.username}>
+                <Link
+                  href={`/profile/${request.username}`}
+                  className="text-txtColor hover:underline font-bold mr-1"
+                >
+                  {request.username}
+                </Link>
+                {"sent join request for "}
                 <Link
                   href={`/group/${request.title}`}
-                  className="text-txtColor hover:underline mr-4"
+                  className="text-txtColor hover:underline font-bold mr-4"
                 >
                   {request.title}
                 </Link>

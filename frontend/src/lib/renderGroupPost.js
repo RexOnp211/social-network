@@ -4,8 +4,8 @@ import ProfileImage from "@/components/profileImage";
 import { IoChatboxOutline } from "react-icons/io5";
 import UploadImage from "@/components/images";
 
-export default function RenderPost(post, groupData) {
-  console.log("THIS IS GROUP POST", post);
+export default function RenderGroupPost(post, groupData) {
+  console.log(post);
   return (
     <div>
       <div key={post.Id} className="bg-secondary p-4 rounded-lg m-4">
@@ -27,7 +27,7 @@ export default function RenderPost(post, groupData) {
         <p>{post.content}</p>
         {post.image ? (
           <UploadImage
-            src={"/image/" + post.image}
+            upload={"/group-post-image/" + post.image}
             alt="post image"
             width={500}
             height={500}

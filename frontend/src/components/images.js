@@ -14,6 +14,7 @@ export default function UploadImage({
   className,
 }) {
   const [url, setUrl] = useState("")
+  console.log("UPLOAD", upload)
   useEffect(() => {
   FetchFromBackend(upload, {
     credentials: "include"

@@ -17,6 +17,7 @@ const GroupInvitation = ({ invitations, onAcceptOrReject }) => {
         loggedInUsername,
         status
       );
+      console.log(invitation);
 
       onAcceptOrReject(invitation.title, status);
     } catch (error) {
@@ -51,7 +52,7 @@ const GroupInvitation = ({ invitations, onAcceptOrReject }) => {
               <li className="ml-2 text-gray-600 mb-2" key={invitation.title}>
                 <Link
                   href={`/group/${invitation.title}`}
-                  className="text-txtColor hover:underline mr-4"
+                  className="text-txtColor hover:underline font-bold mr-4"
                 >
                   {invitation.title}
                 </Link>
