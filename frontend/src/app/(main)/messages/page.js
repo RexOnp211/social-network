@@ -56,16 +56,6 @@ export default function Messages() {
   return (
     <div class="flex flex-col justify-center border border-gray-300 p-6 rounded-lg shadow-md bg-white">
       <div>
-        <h1>Users</h1>
-        {users.length === 0 ? (
-          <p>No users found</p>
-        ) : (
-          users.map((user) => (
-            <a>user</a>
-          ))
-        )}
-      </div>
-      <div>
         <h1>Chat</h1>
         {messages.length === 0 ? (
           <p>No messages found, start one!</p>
@@ -78,7 +68,21 @@ export default function Messages() {
           <input type="text" id="message"></input>
           <button class="bg-accent w-full text-white rounded-lg p-3 transition-colors hover:bg-accentDark" onClick={sendMessage}>Send</button>
         </form>
+      <div className="w-64 h-auto m-3 bg-primary text-txtColor flex flex-col p-2 rounded-lg shadow-lg absolute inset-y-0 right-0">
+      <nav className="x-auto flex flex-col space-y-4 overflow-y-auto">
+        <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
+          <h1 className="text-lg text-accent font-bold">Users</h1>
+          {users.length === 0 ? (
+          <p>No users found</p>
+        ) : (
+          users.map((user) => (
+            <a>user</a>
+          ))
+        )}
+        </div>
+      </nav>
       </div>
+    </div>
     </div>
   );
 }
