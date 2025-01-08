@@ -159,13 +159,15 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY(sender_id) REFERENCES users(user_id),
     FOREIGN KEY(receiver_id) REFERENCES users(user_id)
 );
+
 CREATE TABLE IF NOT EXISTS chatRoom (
     group_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
-)
+);
+
 CREATE TABLE IF NOT EXISTS chatRoomMembers (
     group_id INTEGER NOT NULL,
     user_designation TEXT NOT NULL,
-)
+);
 
 CREATE TABLE IF NOT EXISTS user_status (
     user_id UUID PRIMARY KEY NOT NULL,
