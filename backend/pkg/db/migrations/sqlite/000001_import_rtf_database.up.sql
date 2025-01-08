@@ -155,9 +155,7 @@ CREATE TABLE IF NOT EXISTS messages (
     message_from INTEGER NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_read BOOLEAN NOT NULL DEFAULT 0,
-    FOREIGN KEY(sender_id) REFERENCES users(user_id),
-    FOREIGN KEY(receiver_id) REFERENCES users(user_id)
+    is_read BOOLEAN NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS chatRoom (
@@ -166,7 +164,7 @@ CREATE TABLE IF NOT EXISTS chatRoom (
 
 CREATE TABLE IF NOT EXISTS chatRoomMembers (
     group_id INTEGER NOT NULL,
-    user_designation TEXT NOT NULL,
+    user_designation TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_status (
