@@ -87,22 +87,6 @@ func SendFollowRequestHandler(event Event, c *Client) error {
 	return nil
 }
 
-func PrivateMessageHandler(event Event, c *Client) error {
-	var privateMessage helpers.PrivateMessage
-	if err := json.Unmarshal(event.Payload, &privateMessage); err != nil {
-		return fmt.Errorf("bad payload in request: %v", err)
-	}
-
-	fmt.Println("PrivateMessageHandler print ", privateMessage)
-	err := db.AddChatMessageIntoDb(privateMessage)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
-	return nil
-}
-
 /*
 Add event handlers down here
 the functions should send event structs to the client's egress channel

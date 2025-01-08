@@ -62,9 +62,18 @@ type FollowRequest struct {
 	CreationDate string `json:"creationDate"`
 }
 
+type ChatRoom struct {
+	GroupId string `json:"groupId"`
+}
+
+type ChatRoomMembers struct {
+	GroupId  string `json:"groupid"`
+	Username string `json:"username"`
+}
+
 type PrivateMessage struct {
+	GroupId    int    `json:"groupId"`
 	FromUserId string `json:"fromUserId"`
-	ToUserId   string `json:"toUserId"`
 	Content    string `json:"content"`
 }
 

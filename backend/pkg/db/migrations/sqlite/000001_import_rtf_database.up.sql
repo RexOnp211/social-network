@@ -151,15 +151,22 @@ CREATE TABLE IF NOT EXISTS sessions (
 ----------------------- MESSAGE DATA
 
 CREATE TABLE IF NOT EXISTS messages (
-    message_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    sender_id INTEGER NOT NULL,
-    receiver_id INTEGER NOT NULL,
+    group_id INTEGER NOT NULL,
+    message_from INTEGER NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_read BOOLEAN NOT NULL DEFAULT 0,
     FOREIGN KEY(sender_id) REFERENCES users(user_id),
     FOREIGN KEY(receiver_id) REFERENCES users(user_id)
 );
+CREATE TABLE IF NOT EXISTS chatRoom (
+    group_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+)
+CREATE TABLE IF NOT EXISTS chatRoomMembers (
+    group_id INTEGER NOT NULL,
+    user_designation TEXT NOT NULL,
+)
+
 CREATE TABLE IF NOT EXISTS user_status (
     user_id UUID PRIMARY KEY NOT NULL,
     is_online BOOLEAN NOT NULL DEFAULT 0,

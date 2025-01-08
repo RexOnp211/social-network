@@ -553,7 +553,7 @@ func GetPostPrivacy(postId, postUserId, userId int) (bool, error) {
 	return true, nil
 }
 
-func GetChatMessagesFromDb(user1, user2 int) ([]helpers.ChatMessage, error) {
+func GetChatMessagesFromDb(groupID int) ([]helpers.ChatMessage, error) {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
 		log.Println("DB open Error in GetPostPrivacy")
@@ -561,8 +561,10 @@ func GetChatMessagesFromDb(user1, user2 int) ([]helpers.ChatMessage, error) {
 	}
 	defer DB.Close()
 
-	rows, err := DB.Query("SELECT sender_id, receiver_id, content FROM messages WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND reciver_id = ?)",
-		user1, user2, user2, user1)
+	rows, err := DB.Query(
+		"SELECT groupID, content FROM messages WHERE groupID = ?",
+		groupID,
+	)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -585,32 +587,83 @@ func GetChatMessagesFromDb(user1, user2 int) ([]helpers.ChatMessage, error) {
 	return messages, nil
 }
 
-/*
-func AddChatMessageIntoDb(user1, user2, content string) error {
-	query := `
-        INSERT INTO messages (sender_id, receiver_id, content)
-        VALUES (?, ?, ?)`
-	_, err := DB.Exec(query, user1, user2, content)
-
-	if err != nil {
-		return fmt.Errorf("Failed to insert message into DB with error: %w", err)
-	}
-
-	fmt.Println("Messaged user", user2, "as", user1, "with message: '", content, "'.")
-	return nil
-}
-*/
-
 func AddChatMessageIntoDb(privateMessageContent helpers.PrivateMessage) error {
 	query := `
-        INSERT INTO messages (sender_id, receiver_id, content) 
+        INSERT INTO messages (group_id, message_from, content) 
         VALUES (?, ?, ?)`
-	_, err := DB.Exec(query, privateMessageContent.FromUserId, privateMessageContent.ToUserId, privateMessageContent.Content)
+	_, err := DB.Exec(query, privateMessageContent.GroupId, privateMessageContent.FromUserId, privateMessageContent.Content)
 
 	if err != nil {
 		return fmt.Errorf("Failed to insert message into DB with error: %w", err)
 	}
 
-	fmt.Println("Messaged user", privateMessageContent.FromUserId, "as", privateMessageContent.ToUserId, "with message: '", privateMessageContent.Content, "'.")
 	return nil
+}
+
+func AddChatRoomIntoDb(chatRoomInstance helpers.ChatRoom) error {
+	query := `
+	INSERT INTO chatRoom DEFAULT VALUES`
+	_, err := DB.Exec(query)
+
+	if err != nil {
+		return fmt.Errorf("Failed to insert chatroom into DB with error: %w", err)
+	}
+
+	return nil
+}
+
+func AddUserIntoChatRoom(chatRoomMembersContent helpers.ChatRoomMembers) error {
+	query := `
+	INSERT INTO chatRoomMembers (group_id, user_designation) 
+	VALUES (?, ?)`
+	_, err := DB.Exec(query, chatRoomMembersContent.GroupId, chatRoomMembersContent.Username)
+
+	if err != nil {
+		return fmt.Errorf("Could not properly insert %s into chat room group ID of %i", chatRoomMembersContent.Username, chatRoomMembersContent.GroupId)
+	}
+
+	return nil
+}
+
+/* haphazardly put together. sorry. */
+func LoadChatRoomMessages(groupID int) ([]helpers.PrivateMessage, error) {
+	checkQuery := `
+	SELECT COUNT(1) 
+	FROM chatRoom 
+	WHERE group_id = ?`
+	var count int
+
+	err := DB.QueryRow(checkQuery, groupID).Scan(&count)
+	if err != nil {
+		return nil, fmt.Errorf("Error checking for group_id in chatRoom: %w", err)
+	}
+	if count == 0 {
+		return nil, fmt.Errorf("group_id %s does not exist in chatRoom", groupID)
+	}
+
+	query := `
+	SELECT fromUserId, content 
+	FROM messages 
+	WHERE group_id = ?`
+	rows, err := DB.Query(query, groupID)
+	if err != nil {
+		return nil, fmt.Errorf("Error retrieving messages for group_id %s: %w", groupID, err)
+	}
+	defer rows.Close()
+
+	var messages []helpers.PrivateMessage
+	for rows.Next() {
+		var message helpers.PrivateMessage
+		message.GroupId = groupID
+		if err := rows.Scan(&message.FromUserId, &message.Content); err != nil {
+			return nil, fmt.Errorf("Error scanning message row: %w", err)
+		}
+		messages = append(messages, message)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("Error iterating over message rows: %w", err)
+	}
+
+	return messages, nil
 }
