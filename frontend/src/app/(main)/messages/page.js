@@ -7,10 +7,41 @@ import fetchCredential from "@/lib/fetchCredential";
 
 export default function Messages() {
   const [userData, setUserData] = useState(null);
-
-  const users = [];
-  const messages = [];
+  const [friends, setFriends] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(1)
+  const [messages, setMessages] = useState([])
   const ws = useRef(null);
+
+  useEffect(() => {
+    const GetFriends = async () => {
+
+    const user = await fetchCredential()
+
+    const FolowersRes = await FetchFromBackend(`/followers/${user.username}`, {
+      method: "GET",
+      credentials: "include"
+    })
+    const followers = await FolowersRes.json()
+
+    const followingRes = await FetchFromBackend(`/following/${user.username}`, {
+      method: "GET",
+      credentials: "include"
+    })
+    const following = await followingRes.json()
+    const mergedUsers = [
+      ...followers,
+      ...following.filter(user => !followers.some(follower => follower.username === user.username))
+      ]; 
+    setFriends(mergedUsers)
+    }
+   GetFriends()
+  }, [])
+
+  const switchChat = async (e) => {
+    setSelectedUser(e.target.id)
+    // add logic here when backend part is done
+    fetchMessages(selectedUser)
+  }
 
   const sendMessage = async (e) => {
     if (ws.current) {
@@ -42,12 +73,16 @@ export default function Messages() {
     load();
   }, []);
 
-  const fetchMessages = async (e) => {
+  const fetchMessages = async (userId) => {
     try {
       const path = ``;
-      const res = await FetchFromBackend(path, 
-        {method: "GET"}
+      const res = await FetchFromBackend(path, {
+        method: "GET",
+        credentials: "include"
+      }
       )
+      const msg = res.json()
+      setMessages(msg)
     } catch (error) {
       console.error(error);
     }
@@ -91,7 +126,7 @@ export default function Messages() {
             className="flex-1 border border-gray-300 rounded p-2"
             placeholder="Type your message..."
           />
-          <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          <button onClick={sendMessage} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             Send
           </button>
         </div>
@@ -101,11 +136,15 @@ export default function Messages() {
       <aside className="w-1/4 bg-gray-100 p-4 border-l border-gray-200">
         <h2 className="text-xl font-bold mb-4">Friends</h2>
         <ul className="space-y-2">
-          {users.length === 0 ? (
+          {friends.length === 0 ? (
             <li className="p-2 bg-gray-200 rounded hover:bg-gray-300">No Users Found</li>
           ) : (
-            users.map((user) => (
-              <li className="p-2 bg-gray-200 rounded hover:bg-gray-300">user</li>
+            friends.map((user) => (
+              <li className="p-2 bg-gray-200 rounded hover:bg-gray-300" key={user.id}>
+              <button key={user.id} id={user.id} onClick={switchChat} >
+                {user.nickname}
+              </button>
+              </li>
             ))
           )}
         </ul>

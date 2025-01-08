@@ -39,3 +39,9 @@ export class FollowRequest {
     this.followsBack = followsBack;
   }
 }
+
+export class ChatMessage {
+  constructor() {
+    
+  }
+}
