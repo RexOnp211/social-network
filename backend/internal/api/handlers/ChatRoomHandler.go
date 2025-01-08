@@ -9,23 +9,23 @@ import (
 	"social-network/pkg/helpers"
 )
 
-func ChatRoomHandler(w http.ResponseWriter, r *http.Request) {
-	var event Event
-	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
-		return
-	}
+// func ChatRoomHandler(w http.ResponseWriter, r *http.Request) {
+// 	var event Event
+// 	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
+// 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+// 		return
+// 	}
 
-	client := &Client{}
+// 	client := &Client{}
 
-	if err := CreateChatRoom(event, client); err != nil {
-		http.Error(w, fmt.Sprintf("Handler error: %v", err), http.StatusInternalServerError)
-		return
-	}
+// 	if err := CreateChatRoom(event, client); err != nil {
+// 		http.Error(w, fmt.Sprintf("Handler error: %v", err), http.StatusInternalServerError)
+// 		return
+// 	}
 
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("Chat room created successfully"))
-}
+// 	w.WriteHeader(http.StatusOK)
+// 	_, _ = w.Write([]byte("Chat room created successfully"))
+// }
 
 func PrivateMessageHandler(w http.ResponseWriter, r *http.Request) {
 	var event Event
@@ -62,22 +62,22 @@ func CreateMessage(event Event, c *Client) error {
 	return nil
 }
 
-/* use this function to add a new chatroom entry */
-func CreateChatRoom(event Event, c *Client) error {
-	var chatRoom helpers.ChatRoom
-	if err := json.Unmarshal(event.Payload, &chatRoom); err != nil {
-		return fmt.Errorf("bad payload in request: %v", err)
-	}
+// /* use this function to add a new chatroom entry */
+// func CreateChatRoom(event Event, c *Client) error {
+// 	var chatRoom helpers.ChatRoom
+// 	if err := json.Unmarshal(event.Payload, &chatRoom); err != nil {
+// 		return fmt.Errorf("bad payload in request: %v", err)
+// 	}
 
-	fmt.Println("ChatRoomHandler print ", chatRoom)
-	err := db.AddChatRoomIntoDb(chatRoom)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
+// 	fmt.Println("ChatRoomHandler print ", chatRoom)
+// 	err := db.AddChatRoomIntoDb(chatRoom)
+// 	if err != nil {
+// 		log.Println(err)
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 /* use this function to add users to a chat room (group_id, user) */
 func AddUserToChatRoom(event Event, c *Client) error {

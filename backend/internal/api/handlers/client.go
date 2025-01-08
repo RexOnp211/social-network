@@ -132,6 +132,7 @@ var (
 	Follow_request_status = "follow_request_status"
 	RemoveFollowRequest   = "remove_follow_request"
 	ErrorEvent            = "error"
+	CreateChatRoomEvent   = "createNewChatRoom"
 )
 
 func (m *Manager) setupEventHandlers() {

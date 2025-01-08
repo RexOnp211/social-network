@@ -134,3 +134,8 @@ type ChatMessage struct {
 	To_id   int    `json:"to"`
 	Message string `json:"message"`
 }
+
+type ChatRoom struct {
+	ChatId  int   `json:"chatId`
+	Members []int `json:"members"`
+}

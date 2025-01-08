@@ -126,3 +126,11 @@ func AcceptOrDeclineFollowRequest(event Event, c *Client) error {
 
 	return nil
 }
+
+func CreateChatRoom(event Event, c *Client) {
+	var ChatRoomMembers helpers.ChatRoomMembers
+	err := json.Unmarshal(event.Payload, &ChatRoomMembers)
+	if err != nil {
+		return fmt.Errorf("bad payload in request in CreateChatRoom: %v", err)
+	}
+}
