@@ -158,15 +158,11 @@ CREATE TABLE IF NOT EXISTS messages (
     is_read BOOLEAN NOT NULL DEFAULT 0
 );
 
-CREATE TABLE IF NOT EXISTS chatRoom (
-    group_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS chatRoomMembers (
-    group_id INTEGER NOT NULL
+    group_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     FOREIGN KEY (group_id) REFERENCES chatRoom(group_id),
     user_designation TEXT NOT NULL
-    FOREIGN KEY (user_designation) REFERENCES users(user_id)
+    FOREIGN KEY (user_designation)
 );
 
 CREATE TABLE IF NOT EXISTS user_status (

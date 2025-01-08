@@ -67,8 +67,8 @@ type ChatRoom struct {
 }
 
 type ChatRoomMembers struct {
-	GroupId  string `json:"groupid"`
-	Username string `json:"username"`
+	GroupId  string   `json:"groupid"`
+	Username []string `json:"username"`
 }
 
 type PrivateMessage struct {
@@ -133,9 +133,4 @@ type ChatMessage struct {
 	From_id int    `json:"from"`
 	To_id   int    `json:"to"`
 	Message string `json:"message"`
-}
-
-type ChatRoom struct {
-	ChatId  int   `json:"chatId`
-	Members []int `json:"members"`
 }
