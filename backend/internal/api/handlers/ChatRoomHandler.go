@@ -4,12 +4,49 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	db "social-network/pkg/db/sqlite"
 	"social-network/pkg/helpers"
 )
 
+func ChatRoomHandler(w http.ResponseWriter, r *http.Request) {
+	var event Event
+	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	client := &Client{}
+
+	if err := CreateChatRoom(event, client); err != nil {
+		http.Error(w, fmt.Sprintf("Handler error: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("Chat room created successfully"))
+}
+
+func PrivateMessageHandler(w http.ResponseWriter, r *http.Request) {
+	var event Event
+	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	client := &Client{}
+
+	if err := CreateMessage(event, client); err != nil {
+		http.Error(w, fmt.Sprintf("Handler error: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("Private message created successfully"))
+}
+
 /* use this function to send any messages to the chat room (group_id, from_which_user, message_content) */
-func PrivateMessageHandler(event Event, c *Client) error {
+func CreateMessage(event Event, c *Client) error {
 	var privateMessage helpers.PrivateMessage
 	if err := json.Unmarshal(event.Payload, &privateMessage); err != nil {
 		return fmt.Errorf("bad payload in request: %v", err)
@@ -26,7 +63,7 @@ func PrivateMessageHandler(event Event, c *Client) error {
 }
 
 /* use this function to add a new chatroom entry */
-func ChatRoomHandler(event Event, c *Client) error {
+func CreateChatRoom(event Event, c *Client) error {
 	var chatRoom helpers.ChatRoom
 	if err := json.Unmarshal(event.Payload, &chatRoom); err != nil {
 		return fmt.Errorf("bad payload in request: %v", err)
