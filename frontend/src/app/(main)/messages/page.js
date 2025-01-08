@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { useRef } from "react";
 import WsClient from "@/lib/wsClient";
 import fetchCredential from "@/lib/fetchCredential";
+import { FetchGroupPost } from "@/lib/fetchGroupPosts";
 
 export default function Messages() {
   const [userData, setUserData] = useState(null);
   const [friends, setFriends] = useState([]);
   const [selectedUser, setSelectedUser] = useState(1)
   const [messages, setMessages] = useState([])
+  const [groupChats, setGroupChats] = useState([])
   const ws = useRef(null);
 
   useEffect(() => {
@@ -37,16 +39,54 @@ export default function Messages() {
    GetFriends()
   }, [])
 
+  useEffect(() => {
+    const Groups = async () => {
+      const user = await fetchCredential()
+      const membersRes = await FetchFromBackend(`/fetch_memberships/${user.username}`, {
+        method: "GET",
+        credentials: "include"
+      })
+      const members = await membersRes.json()
+      const { invitedMemberships, approvedMemberships} =
+      members.memberships.reduce(
+        (acc, membership) => {
+          if (membership.status === "invited") {
+            acc.invitedMemberships.push(membership)
+          } else if (membership.status === "approved") {
+            acc.approvedMemberships.push(membership)
+          }
+          return acc
+        },
+        {invitedMemberships: [], approvedMemberships: []}
+      )
+
+      const GroupsRes = await FetchFromBackend(`/groups`, {
+        method: "GET",
+        credentials: "include"
+      })
+      const Groups = await GroupsRes.json()
+
+      const userMadeGroups = Groups.groups.filter((group) => {
+        return group.creatorName === user.username
+      })
+      console.log("USER MAD GROUPS", userMadeGroups)
+      approvedMemberships.push(...userMadeGroups)
+      console.log("MEMBERS", approvedMemberships)
+      setGroupChats(approvedMemberships)
+    }
+    Groups()
+  }, [])
+
   const switchChat = async (e) => {
     setSelectedUser(e.target.id)
     // add logic here when backend part is done
     fetchMessages(selectedUser)
   }
 
-  const sendMessage = async (e) => {
+  const sendMessage = async () => {
     if (ws.current) {
       const user = await fetchCredential();
-      const otherUserId = await userData.id;
+      const otherUserId = selectedUser
 
       ws.current.send(
         JSON.stringify({
@@ -120,8 +160,10 @@ export default function Messages() {
         </div>
 
         {/* Message input */}
+        <form id="">
         <div className="mt-4 flex items-center space-x-2">
           <input
+            id="message"
             type="text"
             className="flex-1 border border-gray-300 rounded p-2"
             placeholder="Type your message..."
@@ -130,6 +172,7 @@ export default function Messages() {
             Send
           </button>
         </div>
+        </form>
       </main>
 
       {/* Sidebar for friends */}
@@ -147,6 +190,22 @@ export default function Messages() {
               </li>
             ))
           )}
+        </ul>
+        <h2 className="text-xl font-bold mb-4">Groups</h2>
+        <ul className="space-y-2">
+          {groupChats.length === 0 ? (
+            <li className="p-2 bg-gray-200 rounded hover:bg-gray-300">No Groups found</li>
+          ) : (
+            groupChats.map((group, index) => (
+              <li className="p-2 bg-gray-200 rounded hover:bg-gray-300" key={index}>
+              <button key={index} id={index} onClick={switchChat} >
+                {group.title}
+              </button>
+              </li>
+            ))
+          )
+        
+        }
         </ul>
       </aside>
     </div>

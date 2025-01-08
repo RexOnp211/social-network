@@ -41,7 +41,9 @@ export class FollowRequest {
 }
 
 export class ChatMessage {
-  constructor() {
-    
+  constructor(from, to, content) {
+    this.from = from
+    this.to = to
+    this.content = content
   }
 }
