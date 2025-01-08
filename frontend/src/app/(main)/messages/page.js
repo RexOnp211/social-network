@@ -63,15 +63,25 @@ export default function Messages() {
 
         {/* Messages container */}
         <div className="flex flex-col space-y-4 overflow-y-auto h-[calc(80vh-120px)]">
-          <div className="bg-blue-100 p-3 rounded self-start max-w-md">
-            Hello! How are you?
-          </div>
-          <div className="bg-green-100 p-3 rounded self-end max-w-md">
+          {messages.length === 0 ? (
+            <div className="bg-blue-100 p-3 rounded self-start max-w-md">
+              No Messages Found - Start one!
+            </div>
+          ) : (
+            messages.map((message) => (
+              <div className="bg-blue-100 p-3 rounded self-start max-w-md">
+                message
+              </div>
+            ))
+          )}
+          
+          {/*<div className="bg-blue-100 p-3 rounded self-start max-w-md">Hello! How are you?</div>
+           <div className="bg-green-100 p-3 rounded self-end max-w-md">
             I'm good, thanks! How about you?
           </div>
           <div className="bg-blue-100 p-3 rounded self-start max-w-md">
             Doing great! Let’s catch up soon.
-          </div>
+          </div> */}
         </div>
 
         {/* Message input */}
@@ -91,12 +101,42 @@ export default function Messages() {
       <aside className="w-1/4 bg-gray-100 p-4 border-l border-gray-200">
         <h2 className="text-xl font-bold mb-4">Friends</h2>
         <ul className="space-y-2">
-          <li className="p-2 bg-gray-200 rounded hover:bg-gray-300">John Doe</li>
-          <li className="p-2 bg-gray-200 rounded hover:bg-gray-300">Jane Smith</li>
-          <li className="p-2 bg-gray-200 rounded hover:bg-gray-300">Alice Brown</li>
-          {/* Add more friends here */}
+          {users.length === 0 ? (
+            <li className="p-2 bg-gray-200 rounded hover:bg-gray-300">No Users Found</li>
+          ) : (
+            users.map((user) => (
+              <li className="p-2 bg-gray-200 rounded hover:bg-gray-300">user</li>
+            ))
+          )}
         </ul>
       </aside>
     </div>
   );
 }
+/*
+
+return (
+  <div class="flex flex-col justify-center border border-gray-300 p-6 rounded-lg shadow-md bg-white">
+    <div>
+      <h1>Chat</h1>
+      {messages.length === 0 ? (
+        <p>No messages found, start one!</p>
+      ) : (
+        messages.map((message) => (
+          <a>message</a>
+        ))
+      )}
+      <form>
+        <input type="text" id="message"></input>
+        <button class="bg-accent w-full text-white rounded-lg p-3 transition-colors hover:bg-accentDark" onClick={sendMessage}>Send</button>
+      </form>
+    <div className="w-64 h-auto m-3 bg-primary text-txtColor flex flex-col p-2 rounded-lg shadow-lg absolute inset-y-0 right-0">
+    <nav className="x-auto flex flex-col space-y-4 overflow-y-auto">
+      </div>
+    </nav>
+    </div>
+  </div>
+  </div>
+);
+
+*/
