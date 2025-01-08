@@ -13,16 +13,11 @@ CREATE TABLE IF NOT EXISTS users (
     public INTEGER DEFAULT 1, -- profile public status: 1 = public, 0 = private
     avatar TEXT
 );
-CREATE TABLE IF NOT EXISTS user_status (
-    user_id INTEGER PRIMARY KEY NOT NULL,
-    is_online BOOLEAN NOT NULL DEFAULT 0,
-    last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(user_id) REFERENCES users(user_id)
-);
 
 ----------------------- GROUP DATA
 
 CREATE TABLE IF NOT EXISTS groups (
+    chatId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     creator_name TEXT NOT NULL,
     title TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL,
@@ -46,7 +41,7 @@ CREATE TABLE IF NOT EXISTS group_posts (
     content TEXT NOT NULL,
     image TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(group_title) REFERENCES groups(title)
+    FOREIGN KEY(group_title) REFERENCES groups(title),
     FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(nickname) REFERENCES users(nickname)
 );
@@ -70,7 +65,7 @@ CREATE TABLE IF NOT EXISTS group_events (
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     event_date TIMESTAMP NOT NULL,
-    FOREIGN KEY(group_title) REFERENCES groups(title)
+    FOREIGN KEY(group_title) REFERENCES groups(title),
     FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(nickname) REFERENCES users(nickname)
 );
@@ -158,11 +153,16 @@ CREATE TABLE IF NOT EXISTS messages (
     is_read BOOLEAN NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS chatRoom (
+    group_id INTEGER NOT NULL,
+    FOREIGN KEY (group_id) REFERENCES groups(chatId)
+);
+
 CREATE TABLE IF NOT EXISTS chatRoomMembers (
-    group_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+    group_id INTEGER NOT NULL,
+    user_designation TEXT NOT NULL,
     FOREIGN KEY (group_id) REFERENCES chatRoom(group_id),
-    user_designation TEXT NOT NULL
-    FOREIGN KEY (user_designation)
+    FOREIGN KEY (user_designation) REFERENCES users(nickname)
 );
 
 CREATE TABLE IF NOT EXISTS user_status (

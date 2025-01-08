@@ -600,26 +600,28 @@ func AddChatMessageIntoDb(privateMessageContent helpers.PrivateMessage) error {
 	return nil
 }
 
-func AddChatRoomIntoDb(chatRoomInstance helpers.ChatRoom) error {
+func AddChatRoomIntoDb() (int, error) {
 	query := `
 	INSERT INTO chatRoom DEFAULT VALUES`
 	_, err := DB.Exec(query)
 
 	if err != nil {
-		return fmt.Errorf("Failed to insert chatroom into DB with error: %w", err)
+		return 0, fmt.Errorf("Failed to insert chatroom into DB with error: %w", err)
+	}
+	var groupId int
+	err = DB.QueryRow("SELECT COUNT(*) FROM chatRoom").Scan(&groupId)
+	if err != nil {
+		return 0, err
 	}
 
-	return nil
+	return groupId, nil
 }
 
-func AddUserIntoChatRoom(chatRoomMembersContent helpers.ChatRoomMembers) error {
-	query := `
-	INSERT INTO chatRoomMembers (group_id, user_designation) 
-	VALUES (?, ?)`
-	_, err := DB.Exec(query, chatRoomMembersContent.GroupId, chatRoomMembersContent.Username)
-
+func AddUserIntoChatRoom(userId, chatId int) error {
+	query := `INSERT INTO chatRoomMembers (group_id, user_designation) VALUES (?, ?);`
+	_, err := DB.Exec(query, chatId, userId)
 	if err != nil {
-		return fmt.Errorf("Could not properly insert %s into chat room group ID of %i", chatRoomMembersContent.Username, chatRoomMembersContent.GroupId)
+		return fmt.Errorf("Could not properly insert %i into chat room group ID of %i", userId, chatId)
 	}
 
 	return nil
@@ -666,4 +668,16 @@ func LoadChatRoomMessages(groupID int) ([]helpers.PrivateMessage, error) {
 	}
 
 	return messages, nil
+}
+
+func GetGroupIdWithCreatorName(nickname, title string) (int, error) {
+	querry := "SELECT chatId FROM groups WHERE creator_name = ? AND title = ?"
+	var chatId int
+	err := DB.QueryRow(querry, nickname, title).Scan(&chatId)
+	if err != nil {
+		fmt.Println("ERROR getting chatid from db", err)
+		return 0, err
+	}
+
+	return chatId, nil
 }

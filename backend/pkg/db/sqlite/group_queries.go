@@ -63,6 +63,7 @@ func CreateGroupDB(data []interface{}) error {
 		log.Println("Exec statement error:", err)
 		return err
 	}
+
 	return nil
 }
 
@@ -97,26 +98,27 @@ func InviteMemberDB(groupname string, username string) (string, bool) {
 		default:
 			log.Println("Unexpected status encountered")
 			return "Unexpected status.", true
-		}}
-
-		// make new data
-		stmt, err := DB.Prepare("INSERT INTO memberships (title, nickname, status) VALUES (?, ?, ?)")
-		if err != nil {
-			log.Println("Prepare statement error:", err)
-			return fmt.Sprintln("Prepare statement error:", err), true
 		}
-		defer stmt.Close()
-		_, err = stmt.Exec(groupname, username, "invited")
+	}
 
-		// the user does not exist
-		if err != nil {
-			if err.Error() == "FOREIGN KEY constraint failed" {
-				return fmt.Sprintf(`Invitation unsent: user "%s" does not exist`, username), true
-			}
-			return fmt.Sprintln("Exac statement error:", err), true
+	// make new data
+	stmt, err := DB.Prepare("INSERT INTO memberships (title, nickname, status) VALUES (?, ?, ?)")
+	if err != nil {
+		log.Println("Prepare statement error:", err)
+		return fmt.Sprintln("Prepare statement error:", err), true
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(groupname, username, "invited")
+
+	// the user does not exist
+	if err != nil {
+		if err.Error() == "FOREIGN KEY constraint failed" {
+			return fmt.Sprintf(`Invitation unsent: user "%s" does not exist`, username), true
 		}
+		return fmt.Sprintln("Exac statement error:", err), true
+	}
 
-		return "", false
+	return "", false
 }
 
 func UpdateMemberStatus(id int, groupname string, username string, status string) {
@@ -271,7 +273,7 @@ func AddGroupPostCommentToDb(data []interface{}) error {
 	return nil
 }
 
-func GetGroupEventsFromDb(groupname string) ([]helpers.GroupEvent) {
+func GetGroupEventsFromDb(groupname string) []helpers.GroupEvent {
 	events := []helpers.GroupEvent{}
 
 	rows, err := DB.Query("SELECT * FROM group_events WHERE group_title = ?", groupname)

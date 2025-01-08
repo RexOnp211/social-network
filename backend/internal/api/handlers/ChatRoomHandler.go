@@ -80,18 +80,18 @@ func CreateMessage(event Event, c *Client) error {
 // }
 
 /* use this function to add users to a chat room (group_id, user) */
-func AddUserToChatRoom(event Event, c *Client) error {
-	var chatRoomMembers helpers.ChatRoomMembers
-	if err := json.Unmarshal(event.Payload, &chatRoomMembers); err != nil {
-		return fmt.Errorf("bad payload in request: %v", err)
-	}
+// func AddUserToChatRoom(event Event, c *Client) error {
+// 	var chatRoomMembers helpers.ChatRoomMembers
+// 	if err := json.Unmarshal(event.Payload, &chatRoomMembers); err != nil {
+// 		return fmt.Errorf("bad payload in request: %v", err)
+// 	}
 
-	fmt.Println("ChatRoomHandler print ", chatRoomMembers)
-	err := db.AddUserIntoChatRoom(chatRoomMembers)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
+// 	fmt.Println("ChatRoomHandler print ", chatRoomMembers)
+// 	err := db.AddUserIntoChatRoom(chatRoomMembers)
+// 	if err != nil {
+// 		log.Println(err)
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

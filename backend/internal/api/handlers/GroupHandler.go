@@ -124,6 +124,28 @@ func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, err := db.GetUserFromDb(creator)
+	if err != nil {
+		fmt.Println("Error Getting user from db")
+		return
+	}
+	chatId, err := db.GetGroupIdWithCreatorName(creator, title)
+	if err != nil {
+		fmt.Println("Error getting chatid from db")
+		return
+	}
+
+	err = db.AddUserIntoChatRoom(user.Id, chatId)
+	if err != nil {
+		fmt.Println("error adding chat creator into chat", err)
+		return
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println("ERROR getting user from db", err)
+	}
+
 	log.Printf("User %s created group %s", creator, title)
 
 	w.WriteHeader(http.StatusOK)

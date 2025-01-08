@@ -63,12 +63,12 @@ type FollowRequest struct {
 }
 
 type ChatRoom struct {
-	GroupId string `json:"groupId"`
+	GroupId int `json:"groupId"`
 }
 
 type ChatRoomMembers struct {
-	GroupId  string   `json:"groupid"`
-	Username []string `json:"username"`
+	GroupId int `json:"groupId"`
+	UserId  int `json:"userId"`
 }
 
 type PrivateMessage struct {

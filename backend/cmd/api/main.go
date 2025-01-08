@@ -97,8 +97,8 @@ func main() {
 	r.AddRoute("GET", "/followers/", http.HandlerFunc(handlers.GetFollowers))
 	r.AddRoute("POST", "/unfollow", http.HandlerFunc(handlers.GetUnfollowing))
 	r.AddRoute("GET", "/ws", http.HandlerFunc(handlers.WsHandler))
-	r.AddRoute("POST", "/create_chat_room", http.HandlerFunc(handlers.ChatRoomHandler))
-	r.AddRoute("POST", "/create_private_message", http.HandlerFunc(handlers.PrivateMessageHandler))
+	// r.AddRoute("POST", "/create_chat_room", http.HandlerFunc(handlers.ChatRoomHandler))
+	// r.AddRoute("POST", "/create_private_message", http.HandlerFunc(handlers.PrivateMessageHandler))
 
 	// group-related handlers
 	r.AddRoute("GET", "/fetch_memberships/", http.HandlerFunc(handlers.MembershipsHandler))
