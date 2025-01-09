@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS memberships (
     title TEXT NOT NULL,
     nickname TEXT NOT NULL,
     status TEXT NOT NULL,  -- status ('requested', 'invited', 'approved')
+    chatId INTEGER NOT NULL,
     FOREIGN KEY(title) REFERENCES groups(title),
     FOREIGN KEY(nickname) REFERENCES users(nickname),
     UNIQUE (title, nickname)
@@ -163,6 +164,18 @@ CREATE TABLE IF NOT EXISTS chatRoomMembers (
     user_designation INTEGER NOT NULL,
     FOREIGN KEY (group_id) REFERENCES groups(chatId),
     FOREIGN KEY (user_designation) REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS privateChatRoom (
+    id  INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    user1 INTEGER NOT NULL,
+    user2 INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS privateChatRoomMessages(
+    id INTEGER NOT NULL,
+    fromId INTEGER NOT NULL,
+    content TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_status (

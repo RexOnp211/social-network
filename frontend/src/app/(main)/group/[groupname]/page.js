@@ -50,14 +50,15 @@ export default function Group({ params }) {
 
       // fetch group information from database
       const groupInfo = await FetchGroupInfo(decodedGroupname);
-      console.log(groupInfo);
+      console.log("GROUP INFO", groupInfo);
       setGroupData(groupInfo);
 
       // fetch login user's member status
       const membership = await FetchGroupMembership(
         loggedInUsername,
         decodedGroupname,
-        groupInfo.creatorName
+        groupInfo.creatorName,
+        groupInfo.chatId
       );
       console.log(membership);
       if (membership == "owner" || membership == "approved") {
@@ -82,7 +83,7 @@ export default function Group({ params }) {
 
   // sent request to join this group
   async function requestToJoin() {
-    UpdateMembership(0, decodedGroupname, loggedInUsername, "requested");
+    UpdateMembership(0, decodedGroupname, loggedInUsername, "requested", groupData.chatId);
     setMemberStatus("requested");
     showPopup(
       false,

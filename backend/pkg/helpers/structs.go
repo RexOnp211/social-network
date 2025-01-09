@@ -74,7 +74,7 @@ type ChatRoomMembers struct {
 
 type PrivateMessage struct {
 	GroupId    int    `json:"groupId"`
-	FromUserId string `json:"fromUserId"`
+	FromUserId int    `json:"fromUserId"`
 	Content    string `json:"content"`
 }
 
@@ -89,6 +89,7 @@ type Membership struct {
 	Title    string `json:"title"`
 	Username string `json:"username"`
 	Status   string `json:"status"`
+	ChatId   int    `json:"chatId"`
 }
 
 type GroupPost struct {

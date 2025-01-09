@@ -75,7 +75,7 @@ func (e *MembershipExistsError) Error() string {
 	return fmt.Sprintf("Membership already exists with status: %s", e.Status)
 }
 
-func InviteMemberDB(groupname string, username string) (string, bool) {
+func InviteMemberDB(groupname string, username string, chatId int) (string, bool) {
 
 	var existingStatus string
 	err := DB.QueryRow("SELECT status FROM memberships WHERE title = ? AND nickname = ?", groupname, username).Scan(&existingStatus)
@@ -102,13 +102,13 @@ func InviteMemberDB(groupname string, username string) (string, bool) {
 	}
 
 	// make new data
-	stmt, err := DB.Prepare("INSERT INTO memberships (title, nickname, status) VALUES (?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO memberships (title, nickname, status, chatId) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Prepare statement error:", err)
 		return fmt.Sprintln("Prepare statement error:", err), true
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(groupname, username, "invited")
+	_, err = stmt.Exec(groupname, username, "invited", chatId)
 
 	// the user does not exist
 	if err != nil {
@@ -121,15 +121,15 @@ func InviteMemberDB(groupname string, username string) (string, bool) {
 	return "", false
 }
 
-func UpdateMemberStatus(id int, groupname string, username string, status string) {
+func UpdateMemberStatus(id int, groupname string, username string, status string, chatId int) {
 	log.Println("updating member stat... ", id, groupname, username, status)
 
 	var err error
 
 	if status == "requested" && id == 0 {
-		log.Println("requested", id, groupname, username, status)
-		query := `INSERT INTO memberships (title, nickname, status) VALUES (?, ?, ?)`
-		_, err = DB.Exec(query, groupname, username, "requested")
+		log.Println("requested in updateMembership", id, groupname, username, status, chatId)
+		query := `INSERT INTO memberships (title, nickname, status, chatId) VALUES (?, ?, ?, ?)`
+		_, err = DB.Exec(query, groupname, username, "requested", chatId)
 	}
 
 	if status == "approve" {
@@ -186,7 +186,31 @@ func GetMembershipsFromDb(nickname string) ([]helpers.Membership, error) {
 	memberships := []helpers.Membership{}
 	for rows.Next() {
 		membership := helpers.Membership{}
-		err := rows.Scan(&membership.Id, &membership.Title, &membership.Username, &membership.Status)
+		err := rows.Scan(&membership.Id, &membership.Title, &membership.Username, &membership.Status, &membership.ChatId)
+		if err != nil {
+			log.Println("Scan error:", err)
+			return nil, err
+		}
+		memberships = append(memberships, membership)
+	}
+
+	log.Println(memberships)
+
+	return memberships, nil
+}
+
+func GetApprovedMembershipsFromDb(title string) ([]helpers.Membership, error) {
+	rows, err := DB.Query("SELECT * FROM memberships WHERE title = ? AND status = ?", title, "approved")
+	if err != nil {
+		log.Println("Query error:", err)
+		return nil, err
+	}
+
+	defer rows.Close()
+	memberships := []helpers.Membership{}
+	for rows.Next() {
+		membership := helpers.Membership{}
+		err := rows.Scan(&membership.Id, &membership.Title, &membership.Username, &membership.Status, &membership.ChatId)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return nil, err
@@ -393,7 +417,7 @@ func GetYourRequestsFromDb(groups []helpers.Membership) []helpers.Membership {
 	memberships := []helpers.Membership{}
 	for rows.Next() {
 		membership := helpers.Membership{}
-		err := rows.Scan(&membership.Id, &membership.Title, &membership.Username, &membership.Status)
+		err := rows.Scan(&membership.Id, &membership.Title, &membership.Username, &membership.Status, &membership.ChatId)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return nil
@@ -403,4 +427,25 @@ func GetYourRequestsFromDb(groups []helpers.Membership) []helpers.Membership {
 
 	log.Println(memberships)
 	return memberships
+}
+
+func GetGroupWithChatId(ChatId int) (string, string, error) {
+	var title string
+	var creatorName string
+	err := DB.QueryRow("SELECT title, creator_name FROM groups WHERE chatId = ?", ChatId).Scan(&title, &creatorName)
+	if err != nil {
+		fmt.Println("Error getting title and creator from groups", err)
+		return "", "", err
+	}
+	return title, creatorName, nil
+}
+
+func GetChatIdFromGroup(title string) (int, error) {
+	var chatId int
+	err := DB.QueryRow("SELECT chatId FROM groups WHERE title = ?", title).Scan(&chatId)
+	if err != nil {
+		fmt.Println("Error getting chatId form group title", err)
+		return 0, err
+	}
+	return chatId, nil
 }

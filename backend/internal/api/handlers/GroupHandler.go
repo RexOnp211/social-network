@@ -176,7 +176,7 @@ func MembershipsHandler(w http.ResponseWriter, r *http.Request) {
 		Memberships: memberships,
 	}
 
-	log.Println("response", response)
+	log.Println("response from fetch memberships", response)
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
@@ -202,8 +202,12 @@ func InviteMemberHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println("inviting member...", invitation)
-
-	errorMessage, isError := db.InviteMemberDB(invitation.Groupname, invitation.Username)
+	chatId, err := db.GetChatIdFromGroup(invitation.Groupname)
+	if err != nil {
+		fmt.Println("Error getting chatid from group", err)
+		return
+	}
+	errorMessage, isError := db.InviteMemberDB(invitation.Groupname, invitation.Username, chatId)
 	fmt.Println("TEST", errorMessage, isError)
 	if isError {
 		if errorMessage != "" {
@@ -239,6 +243,7 @@ func UpdateMemberStatusHandler(w http.ResponseWriter, r *http.Request) {
 		Groupname string
 		Username  string
 		Status    string
+		ChatId    int
 	}{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
@@ -248,7 +253,7 @@ func UpdateMemberStatusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("changing member stat... 3", data)
 
-	db.UpdateMemberStatus(data.ID, data.Groupname, data.Username, data.Status)
+	db.UpdateMemberStatus(data.ID, data.Groupname, data.Username, data.Status, data.ChatId)
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Member status changed successfully"))

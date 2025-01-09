@@ -67,10 +67,10 @@ func main() {
 		return
 	}
 
-	if err := m.Down(); err != nil && err != migrate.ErrNoChange {
-		fmt.Println("Migration Down Error:", err)
-		return
-	}
+	// if err := m.Down(); err != nil && err != migrate.ErrNoChange {
+	// 	fmt.Println("Migration Down Error:", err)
+	// 	return
+	// }
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		fmt.Println("Migration Up Error:", err)
@@ -97,6 +97,7 @@ func main() {
 	r.AddRoute("GET", "/followers/", http.HandlerFunc(handlers.GetFollowers))
 	r.AddRoute("POST", "/unfollow", http.HandlerFunc(handlers.GetUnfollowing))
 	r.AddRoute("GET", "/ws", http.HandlerFunc(handlers.WsHandler))
+	r.AddRoute("POST", "/chatId", http.HandlerFunc(handlers.GetChatIdFromUsers))
 	// r.AddRoute("POST", "/create_chat_room", http.HandlerFunc(handlers.ChatRoomHandler))
 	// r.AddRoute("POST", "/create_private_message", http.HandlerFunc(handlers.PrivateMessageHandler))
 

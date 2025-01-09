@@ -2,17 +2,22 @@
 import FetchFromBackend from "@/lib/fetch";
 import { useEffect, useState } from "react";
 import { useRef } from "react";
-import WsClient from "@/lib/wsClient";
+import WsClient, { ChatMessage } from "@/lib/wsClient";
 import fetchCredential from "@/lib/fetchCredential";
 import { FetchGroupPost } from "@/lib/fetchGroupPosts";
+import Fetchnickname from "@/lib/fetchNickName";
 
 export default function Messages() {
   const [userData, setUserData] = useState(null);
   const [friends, setFriends] = useState([]);
   const [selectedUser, setSelectedUser] = useState(1)
+  const [selectedPrivateUser, setSelectedPrivateUser] = useState(1)
   const [messages, setMessages] = useState([])
   const [groupChats, setGroupChats] = useState([])
+  const [nickname, setNickname] = useState({})
+  const [chatType, setChatType] = useState("")
   const ws = useRef(null);
+  const [loggedInUserId, setLoggedInUserId] = useState(null);
 
   useEffect(() => {
     const GetFriends = async () => {
@@ -33,11 +38,59 @@ export default function Messages() {
     const mergedUsers = [
       ...followers,
       ...following.filter(user => !followers.some(follower => follower.username === user.username))
-      ]; 
-    setFriends(mergedUsers)
+      ];
+
+      Promise.all(
+        mergedUsers.map(user2 => {
+          console.log("USER1", user.id, "USER2", user2.id);
+          return FetchFromBackend("/chatId", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user1: user.id,
+              user2: user2.id,
+            }),
+          })
+            .then(res => res.text())
+            .then(id => {
+              user2.chatId = Number(id);
+              return user2; // Return updated user2
+            })
+            .catch(err => {
+              console.log(err);
+              return user2; // Return user2 even if the request fails
+            });
+        })
+      ).then(updatedUsers => {
+        setFriends(updatedUsers)
+      });
     }
    GetFriends()
   }, [])
+
+useEffect(() => {
+  const findNickname = async () => {
+    const ids = [...new Set(messages.map((m) => m.fromUserId))]
+    const nicknameMap = {};
+
+    for (const userId of ids) {
+      try {
+        const res = await Fetchnickname(userId)
+        const textData = await res.text()
+        nicknameMap[userId] = textData
+      } catch(error) {
+        console.error("Error fetching nicknames in messages", error)
+      }
+    }
+    setNickname(nicknameMap)
+  }
+  if (messages.length > 0) {
+    findNickname()
+  }
+}, [messages])
 
   useEffect(() => {
     const Groups = async () => {
@@ -78,29 +131,41 @@ export default function Messages() {
   }, [])
 
   const switchChat = async (e) => {
-    setSelectedUser(e.target.id)
+    setSelectedUser(Number(e.target.id))
+    setChatType("group")
     console.log("TARGET", e.target.id)
     console.log("SELECTED USER", selectedUser)
     // add logic here when backend part is done
-    fetchMessages(e.target.id)
+    fetchMessages("group", Number(e.target.id))
   }
 
-  const sendMessage = async () => {
+  const switchPrivateChat = async (e) => {
+    setSelectedPrivateUser(Number(e.target.id))
+    setChatType("user")
+    console.log("TARGET", e.target.id)
+    console.log("SELECTED USER", selectedPrivateUser)
+    // add logic here when backend part is done
+    fetchMessages("user", Number(e.target.id))
+  }
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
     if (ws.current) {
       const user = await fetchCredential();
       const otherUserId = selectedUser
-
+      const form = new FormData(e.target)
+      const content = form.get("message")
+      console.log("form message", content)
       ws.current.send(
         JSON.stringify({
           type: "message_send",
-          payload: new MessageSend(
-            user.id, otherUserId, content
+          payload: new ChatMessage(
+             chatType, user.id, otherUserId, content
           )
         })
       );
     }
-    // i think this payload is where the problem is or maybe its selected user
-    // its saving the messages into the database but its saving empty messages into the database because i think the payload that its sending im maybe not recieving correctly or something
+    
   };
 
   useEffect(() => {
@@ -109,26 +174,41 @@ export default function Messages() {
       ws.current = wsClient;
 
       ws.current.onmessage = (event) => {
-        if (event.type === "messages") {
-          alert("messages", event.payload)
+        const eventData = event.data
+        console.log("EVENT", event)
+        const parsedData = JSON.parse(eventData)
+        console.log("eventData", parsedData)
+        console.log("type", parsedData.type)
+        if (parsedData.type === "messages") {
+          console.log("true")
+          setMessages(parsedData.payload)
         }
       };
     };
     load();
   }, []);
 
-  const fetchMessages = async (chatId) => {
+  const fetchMessages = async (type, chatId) => {
+    console.log('TYPE', type, "CHATID", chatId)
     try {
       ws.current.send(
         JSON.stringify({
           type: "get_chat_messages",
-          payload: {chatId: chatId}
+          payload: {chatType: type, groupId: chatId}
         })
       )
     } catch (error) {
       console.error(error);
     }
   }
+
+  useEffect(() => {
+    const fetchLoggedInUser = async () => {
+      const usr = await fetchCredential(); // Assumes this fetches the logged-in user's data
+      setLoggedInUserId(usr.username);
+    };
+    fetchLoggedInUser();
+  }, []);
 
   return (
     <div className="flex h-[80vh]">
@@ -140,17 +220,26 @@ export default function Messages() {
 
         {/* Messages container */}
         <div className="flex flex-col space-y-4 overflow-y-auto h-[calc(80vh-120px)]">
-          {messages.length === 0 ? (
-            <div className="bg-blue-100 p-3 rounded self-start max-w-md">
-              No Messages Found - Start one!
-            </div>
-          ) : (
-            messages.map((message) => (
-              <div className="bg-blue-100 p-3 rounded self-start max-w-md">
-                message
-              </div>
-            ))
-          )}
+        {messages.length === 0 ? (
+  <div className="bg-blue-100 p-3 rounded self-start max-w-md">
+    click on a friend on the right to start messaging
+  </div>
+) : (
+  messages.map((message, index) => (
+        <div
+          key={index}
+          className={`p-3 rounded max-w-md ${
+            loggedInUserId === nickname[message.fromUserId]
+              ? "bg-green-100 self-end"
+              : "bg-blue-100 self-start"
+          }`}
+        >
+          <p>{nickname[message.fromUserId]}</p>
+          <p>{message.content}</p>
+        </div>
+  ))
+)}
+
           
           {/*<div className="bg-blue-100 p-3 rounded self-start max-w-md">Hello! How are you?</div>
            <div className="bg-green-100 p-3 rounded self-end max-w-md">
@@ -162,15 +251,17 @@ export default function Messages() {
         </div>
 
         {/* Message input */}
-        <form id="">
+        <form id="msg" onSubmit={sendMessage}>
         <div className="mt-4 flex items-center space-x-2">
           <input
+            name="message"
             id="message"
             type="text"
             className="flex-1 border border-gray-300 rounded p-2"
             placeholder="Type your message..."
           />
-          <button onClick={sendMessage} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          <div></div>
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             Send
           </button>
         </div>
@@ -186,7 +277,7 @@ export default function Messages() {
           ) : (
             friends.map((user) => (
               <li className="p-2 bg-gray-200 rounded hover:bg-gray-300" key={user.id}>
-              <button key={user.id} id={user.id} onClick={switchChat} >
+              <button key={user.id} id={user.chatId} onClick={switchPrivateChat} >
                 {user.nickname}
               </button>
               </li>

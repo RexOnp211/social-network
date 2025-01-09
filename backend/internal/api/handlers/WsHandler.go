@@ -127,20 +127,132 @@ func AcceptOrDeclineFollowRequest(event Event, c *Client) error {
 	return nil
 }
 
-func GetGroupChatMessagesWs(event Event, c *Client) error {
-	var ChatMsg helpers.PrivateMessage
+func AddMessageIntoDb(event Event, c *Client) error {
+	ChatMsg := struct {
+		ChatType   string `json:"chatType"`
+		GroupId    int    `json:"groupId"`
+		FromUserId int    `json:"fromUserId"`
+		Content    string `json:"content"`
+	}{}
 
-	fmt.Println("This is the event Payload that i just sent to backend",event.Payload)
+	fmt.Println("This is the event Payload that i just sent to backend", event.Payload)
 
 	err := json.Unmarshal(event.Payload, &ChatMsg)
 	if err != nil {
+		fmt.Println("ERROR IN UNMARSHALING?", err)
 		return fmt.Errorf("bad payload in WS GetChatMessagesWS: %v", err)
 	}
 	fmt.Println("this is the payload after unmarshaling it in getgroupchatmessagesws", ChatMsg)
+	if ChatMsg.ChatType == "group" {
+		err2 := db.AddChatMessageIntoDb(ChatMsg.GroupId, ChatMsg.FromUserId, ChatMsg.Content)
+		if err2 != nil {
+			fmt.Println("Error adding message to db", err2)
+			return fmt.Errorf("error in GetGroupCatMessagesWs: %v", err)
+		}
+	} else if ChatMsg.ChatType == "user" {
+		err2 := db.AddPrivateChatMessageIntoDb(ChatMsg.GroupId, ChatMsg.FromUserId, ChatMsg.Content)
+		if err2 != nil {
+			fmt.Println("Error adding private message to db")
+		}
+	}
 
-	err2 := db.AddChatMessageIntoDb(ChatMsg)
-	if err2 != nil {
-		return fmt.Errorf("error in GetGroupCatMessagesWs: %v", err)
+	GetChatMessagesWs(event, c)
+
+	return nil
+}
+
+func GetChatMessagesWs(event Event, c *Client) error {
+	msg := struct {
+		MsgType string `json:"chatType"`
+		GroupId int    `json:"groupId"`
+	}{}
+
+	err := json.Unmarshal(event.Payload, &msg)
+	if err != nil {
+		fmt.Println("Error unmarshaling in GetChatMessages", err)
+		return fmt.Errorf("bad payload in GetChatMessagesWs: %v", err)
+	}
+
+	fmt.Println("MSG", msg)
+	var messagePayload []byte
+	membersIds := []int{}
+
+	switch msg.MsgType {
+	case "user":
+		// Fetch private messages
+		privateMessages, err := db.GetChatMessagesFromDb(msg.GroupId) // Returns []PrivateMessage
+		if err != nil {
+			fmt.Println("Error getting private messages from DB", err)
+			return fmt.Errorf("Error getting private messages: %v", err)
+		}
+		messagePayload, err = json.Marshal(privateMessages)
+		if err != nil {
+			fmt.Println("Error marshaling private messages in GetChatMessages", err)
+			return fmt.Errorf("Error marshaling private messages: %v", err)
+		}
+		// Add private chat members
+		fromUserIds := map[int]struct{}{}
+		for _, pm := range privateMessages {
+			fromUserIds[pm.FromUserId] = struct{}{}
+		}
+		for userId := range fromUserIds {
+			membersIds = append(membersIds, userId)
+		}
+
+	case "group":
+		// Fetch group chat messages
+		chatMessages, err := db.LoadChatRoomMessages(msg.GroupId) // Returns []ChatMessage
+		if err != nil {
+			fmt.Println("Error getting group chat messages from DB", err)
+			return fmt.Errorf("Error getting group chat messages: %v", err)
+		}
+		messagePayload, err = json.Marshal(chatMessages)
+		if err != nil {
+			fmt.Println("Error marshaling group chat messages in GetChatMessages", err)
+			return fmt.Errorf("Error marshaling group chat messages: %v", err)
+		}
+
+		// Fetch members in the group
+		title, creatorName, err := db.GetGroupWithChatId(msg.GroupId)
+		if err != nil {
+			fmt.Println("Error getting group title and creator", err)
+			return fmt.Errorf("Error getting group title and creator: %v", err)
+		}
+		creator, err := db.GetUserFromDb(creatorName)
+		if err != nil {
+			fmt.Println("Error getting creator info", err)
+			return fmt.Errorf("Error getting creator info: %v", err)
+		}
+		membersIds = append(membersIds, creator.Id)
+
+		groupMembers, err := db.GetApprovedMembershipsFromDb(title)
+		if err != nil {
+			fmt.Println("Error getting approved memberships from DB", err)
+			return fmt.Errorf("Error getting approved memberships: %v", err)
+		}
+		for _, member := range groupMembers {
+			user, err := db.GetUserFromDb(member.Username)
+			if err != nil {
+				fmt.Println("Error getting user info", err)
+				return fmt.Errorf("Error getting user info: %v", err)
+			}
+			membersIds = append(membersIds, user.Id)
+		}
+
+	default:
+		return fmt.Errorf("unknown MsgType: %s", msg.MsgType)
+	}
+
+	// Send the payload to the relevant clients
+	for client := range c.manager.clients {
+		for _, userId := range membersIds {
+			if client.user.Id == userId {
+				client.egress <- Event{
+					Type:    "messages",
+					Payload: messagePayload,
+				}
+			}
+		}
 	}
 
 	return nil

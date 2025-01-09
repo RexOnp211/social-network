@@ -95,6 +95,7 @@ func (c *Client) Write() {
 	for {
 		select {
 		case event := <-c.egress:
+			fmt.Println("THIS IS JSON EVENT", event)
 			if err := c.connection.WriteJSON(event); err != nil {
 				log.Printf("Error writing JSON event: %v", err)
 				return
@@ -133,14 +134,16 @@ var (
 	RemoveFollowRequest   = "remove_follow_request"
 	ErrorEvent            = "error"
 	CreateChatRoomEvent   = "createNewChatRoom"
-	GetGroupChatMessages       = "get_chat_messages"
+	GetGroupChatMessages  = "get_chat_messages"
+	SendGroupChatMessage  = "message_send"
 )
 
 func (m *Manager) setupEventHandlers() {
 	m.handlers[SendFollowRequest] = SendFollowRequestHandler
 	m.handlers[FollowRequestList] = GetFollowRequestsHandler
 	m.handlers[Follow_request_status] = AcceptOrDeclineFollowRequest
-	m.handlers[GetGroupChatMessages] = GetGroupChatMessagesWs
+	m.handlers[SendGroupChatMessage] = AddMessageIntoDb
+	m.handlers[GetGroupChatMessages] = GetChatMessagesWs
 }
 
 func (m *Manager) routeEvent(event Event, c *Client) error {
