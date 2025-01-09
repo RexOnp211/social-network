@@ -7,23 +7,7 @@ import { useEffect, useState } from "react";
 
 export default function SideBar() {
   const [showMoreFollowing, setShowMoreFollowing] = useState(false);
-  const [showMoreGroups, setShowMoreGroups] = useState(false);
-  const [showMoreEvents, setShowMoreEvents] = useState(false);
   const [following, setFollowing] = useState([])
-
-  const groups = ["Group 1", "Group 2", "Group 3", "Group 4", "Group 5"];
-  const events = [
-    "Event 1",
-    "Event 2",
-    "Event 3",
-    "Event 4",
-    "Event 5",
-    "Event 6",
-    "Event 7",
-    "Event 8",
-    "Event 9",
-    "Event 10",
-  ];
   
   useEffect(() => {
     const getFollowing = async () => {
@@ -51,27 +35,9 @@ export default function SideBar() {
           />
         </div>
         <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
-          <h1 className="text-lg text-accent font-bold">Browse Groups</h1>
-          <RenderList
-            items={groups}
-            showMoreState={showMoreGroups}
-            setShowMoreState={setShowMoreGroups}
-            type="group"
-          />
-        </div>
-        <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
           <a href="/group" className="text-txtColor hover:underline">
             <h1 className="text-lg text-accent font-bold">Create Group</h1>
           </a>
-        </div>
-        <div className="transition-colors hover:bg-secondary ease-in p-2 rounded">
-          <h1 className="text-lg text-accent font-bold">Upcoming Events</h1>
-          <RenderList
-            items={events}
-            showMoreState={showMoreEvents}
-            setShowMoreState={setShowMoreEvents}
-            type="event"
-          />
         </div>
       </nav>
     </div>
