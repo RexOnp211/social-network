@@ -53,6 +53,7 @@ type Group struct {
 	CreatorName string `json:"creatorName"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	ChatId      int    `json:"chatId"`
 }
 
 type FollowRequest struct {
@@ -60,6 +61,21 @@ type FollowRequest struct {
 	ToUserId     string `json:"toUserId"`
 	FollowsBack  bool   `json:"followsBack"`
 	CreationDate string `json:"creationDate"`
+}
+
+type ChatRoom struct {
+	GroupId int `json:"groupId"`
+}
+
+type ChatRoomMembers struct {
+	GroupId int `json:"groupId"`
+	UserId  int `json:"userId"`
+}
+
+type PrivateMessage struct {
+	GroupId    int    `json:"groupId"`
+	FromUserId int    `json:"fromUserId"`
+	Content    string `json:"content"`
 }
 
 type GroupMembers struct {
@@ -73,6 +89,7 @@ type Membership struct {
 	Title    string `json:"title"`
 	Username string `json:"username"`
 	Status   string `json:"status"`
+	ChatId   int    `json:"chatId"`
 }
 
 type GroupPost struct {

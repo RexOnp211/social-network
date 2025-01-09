@@ -39,3 +39,12 @@ export class FollowRequest {
     this.followsBack = followsBack;
   }
 }
+
+export class ChatMessage {
+  constructor(chatType, from, groupId, content) {
+    this.chatType = chatType
+    this.groupId = groupId
+    this.fromUserId = from
+    this.content = content
+  }
+}

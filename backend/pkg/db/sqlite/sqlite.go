@@ -314,6 +314,25 @@ func AddFollowRequestToDb(Fr helpers.FollowRequest) error {
 		log.Println("Exec error in AddFollowRequestToDb:", err)
 		return err
 	}
+	fmt.Println("UPDATEFOLLOWREQUST")
+	if Fr.FollowsBack {
+		fmt.Println("CREATING PRIVATE CHATROOM FOR", Fr.FromUserId, Fr.ToUserId)
+		user1, err := strconv.Atoi(Fr.FromUserId)
+		if err != nil {
+			fmt.Println("error converting from into int", err)
+			return err
+		}
+		user2, err := strconv.Atoi(Fr.ToUserId)
+		if err != nil {
+			fmt.Println("error converting To into int", err)
+			return err
+		}
+		err = CreatePrivateChatRoom(user1, user2)
+		if err != nil {
+			fmt.Println("Error creating private chatroom", err)
+			return err
+		}
+	}
 	return nil
 }
 
@@ -371,6 +390,26 @@ func UpdateFollowRequestStatusDB(from, to string, status bool) error {
 	if err2 != nil {
 		log.Println("Error executing followRequest Accept in db", err)
 		return err
+	}
+
+	fmt.Println("UPDATEFOLLOWREQUST")
+	if status {
+		fmt.Println("CREATING PRIVATE CHATROOM FOR", from, to)
+		user1, err := strconv.Atoi(from)
+		if err != nil {
+			fmt.Println("error converting from into int", err)
+			return err
+		}
+		user2, err := strconv.Atoi(to)
+		if err != nil {
+			fmt.Println("error converting To into int", err)
+			return err
+		}
+		err = CreatePrivateChatRoom(user1, user2)
+		if err != nil {
+			fmt.Println("Error creating private chatroom", err)
+			return err
+		}
 	}
 
 	return nil
@@ -553,7 +592,7 @@ func GetPostPrivacy(postId, postUserId, userId int) (bool, error) {
 	return true, nil
 }
 
-func GetChatMessagesFromDb(user1, user2 int) ([]helpers.ChatMessage, error) {
+func GetChatMessagesFromDb(groupID int) ([]helpers.PrivateMessage, error) {
 	DB, err := sql.Open("sqlite3", "../../pkg/db/database.db")
 	if err != nil {
 		log.Println("DB open Error in GetPostPrivacy")
@@ -561,20 +600,22 @@ func GetChatMessagesFromDb(user1, user2 int) ([]helpers.ChatMessage, error) {
 	}
 	defer DB.Close()
 
-	rows, err := DB.Query("SELECT sender_id, receiver_id, content FROM messages WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND reciver_id = ?)",
-		user1, user2, user2, user1)
+	rows, err := DB.Query(
+		"SELECT id, fromId, content FROM privateChatRoomMessages WHERE id = ?",
+		groupID,
+	)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		fmt.Println("Error finding messages in GetChatMEssages", err)
+		fmt.Println("Error finding messages in GetChatMessages", err)
 		return nil, err
 	}
 
-	messages := []helpers.ChatMessage{}
+	messages := []helpers.PrivateMessage{}
 	for rows.Next() {
-		message := helpers.ChatMessage{}
-		err = rows.Scan(&message.From_id, &message.To_id, &message.Message)
+		message := helpers.PrivateMessage{}
+		err = rows.Scan(&message.GroupId, &message.FromUserId, &message.Content)
 		if err != nil {
 			fmt.Println("error scanning for messages", err)
 			return nil, err
@@ -583,4 +624,146 @@ func GetChatMessagesFromDb(user1, user2 int) ([]helpers.ChatMessage, error) {
 
 	}
 	return messages, nil
+}
+
+func AddChatMessageIntoDb(GroupId, FromUserId int, Content string) error {
+	query := `
+        INSERT INTO messages (group_id, message_from, content) 
+        VALUES (?, ?, ?)`
+	_, err := DB.Exec(query, GroupId, FromUserId, Content)
+
+	if err != nil {
+		return fmt.Errorf("Failed to insert message into DB with error: %w", err)
+	}
+
+	return nil
+}
+
+func AddChatRoomIntoDb() (int, error) {
+	query := `
+	INSERT INTO chatRoom DEFAULT VALUES`
+	_, err := DB.Exec(query)
+
+	if err != nil {
+		return 0, fmt.Errorf("Failed to insert chatroom into DB with error: %w", err)
+	}
+	var groupId int
+	err = DB.QueryRow("SELECT COUNT(*) FROM chatRoom").Scan(&groupId)
+	if err != nil {
+		return 0, err
+	}
+
+	return groupId, nil
+}
+
+func AddUserIntoChatRoom(userId, chatId int) error {
+	query := `INSERT INTO chatRoomMembers (group_id, user_designation) VALUES (?, ?);`
+	_, err := DB.Exec(query, chatId, userId)
+	if err != nil {
+		fmt.Println("COULD NOT INSERT USER INTO CHAT ROOM", err)
+		return fmt.Errorf("Could not properly insert %i into chat room group ID of %i", userId, chatId)
+	}
+
+	return nil
+}
+
+/* haphazardly put together. sorry. */
+func LoadChatRoomMessages(groupID int) ([]helpers.PrivateMessage, error) {
+	checkQuery := `
+	SELECT COUNT(1) 
+	FROM groups
+	WHERE chatId = ?`
+	var count int
+
+	err := DB.QueryRow(checkQuery, groupID).Scan(&count)
+	if err != nil {
+		return nil, fmt.Errorf("Error checking for group_id in chatRoom: %w", err)
+	}
+	if count == 0 {
+		return nil, fmt.Errorf("group_id %s does not exist in chatRoom", groupID)
+	}
+
+	query := `
+	SELECT message_from, content 
+	FROM messages 
+	WHERE group_id = ?`
+	rows, err := DB.Query(query, groupID)
+	if err != nil {
+		return nil, fmt.Errorf("Error retrieving messages for group_id %s: %w", groupID, err)
+	}
+	defer rows.Close()
+
+	messages := []helpers.PrivateMessage{}
+	for rows.Next() {
+		var message helpers.PrivateMessage
+		message.GroupId = groupID
+		if err := rows.Scan(&message.FromUserId, &message.Content); err != nil {
+			return nil, fmt.Errorf("Error scanning message row: %w", err)
+		}
+		messages = append(messages, message)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("Error iterating over message rows: %w", err)
+	}
+
+	return messages, nil
+}
+
+func GetGroupIdWithCreatorName(nickname, title string) (int, error) {
+	querry := "SELECT chatId FROM groups WHERE creator_name = ? AND title = ?"
+	var chatId int
+	err := DB.QueryRow(querry, nickname, title).Scan(&chatId)
+	if err != nil {
+		fmt.Println("ERROR getting chatid from db", err)
+		return 0, err
+	}
+
+	return chatId, nil
+}
+
+func CreatePrivateChatRoom(user1, user2 int) error {
+	count := 0
+	err := DB.QueryRow("SELECT COUNT(*) FROM privateChatRoom WHERE (user1 = ? AND user2 = ?) OR (user1 = ? AND user2 = ?)", user1, user2, user2, user1).Scan(
+		&count)
+	if err != nil {
+		fmt.Println("Error checking if private chat already exists", err)
+		return err
+	}
+
+	fmt.Println("COUNT ", count)
+
+	if count == 0 {
+		stmt2 := "INSERT INTO privateChatRoom (user1, user2) VALUES (?, ?)"
+		_, err := DB.Exec(stmt2, user1, user2)
+		if err != nil {
+			fmt.Println("Error creating new chatroom", err)
+			return err
+		}
+	}
+	return nil
+}
+
+func AddPrivateChatMessageIntoDb(GroupId, FromUserId int, Content string) error {
+	query := `
+        INSERT INTO privateChatRoomMessages (id, fromId, content) 
+        VALUES (?, ?, ?)`
+	_, err := DB.Exec(query, GroupId, FromUserId, Content)
+
+	if err != nil {
+		return fmt.Errorf("Failed to insert message into DB with error: %w", err)
+	}
+
+	return nil
+}
+
+func GetChatIdFromUsers(user1, user2 int) (int, error) {
+	querry := "SELECT id FROM privateChatRoom WHERE (user1 = ? AND user2 = ?) OR (user1 = ? AND user2 = ?)"
+	id := 0
+	err := DB.QueryRow(querry, user1, user2, user2, user1).Scan(&id)
+	if err != nil {
+		fmt.Println("ERROR finding chatid from db", err)
+		return 0, err
+	}
+	return id, nil
 }

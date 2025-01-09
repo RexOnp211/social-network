@@ -26,24 +26,24 @@ INSERT INTO comments (post_id, user_id, content) VALUES
   ('5', '3', 'What book did you read?'),
   ('6', '1', 'I understand the need to write down your thoughts.');
 
-INSERT INTO groups (creator_name, title, description) VALUES
-  ('pu2', 'test group', 'this is group description'),
-  ('pu2', 'test group 2', 'this is group description'),
-  ('pu2', 'test group 3', 'this is group description'),
-  ('pu2', 'test group 4', 'this is group description'),
-  ('pu2', 'test group long name', 'this is group description'),
-  ('pu2', 'test group 5', 'this is group description'),
-  ('publicuser', 'publicuser made', 'this is group description'),
-  ('publicuser', 'publicuser made 2', 'this is group description');
+INSERT INTO groups (chatId, creator_name, title, description) VALUES
+  (1, 'pu2', 'test group', 'this is group description'),
+  (2, 'pu2', 'test group 2', 'this is group description'),
+  (3, 'pu2', 'test group 3', 'this is group description'),
+  (4, 'pu2', 'test group 4', 'this is group description'),
+  (5, 'pu2', 'test group long name', 'this is group description'),
+  (6, 'pu2', 'test group 5', 'this is group description'),
+  (7, 'publicuser', 'publicuser made', 'this is group description'),
+  (8, 'publicuser', 'publicuser made 2', 'this is group description');
 
 
-INSERT INTO memberships (title, nickname, status) VALUES
-  ('test group', 'publicuser', 'invited'),
-  ('test group', 'privateuser', 'requested'),
-  ('test group 2', 'publicuser', 'invited'),
-  ('test group 3', 'publicuser', 'invited'),
-  ('test group 4', 'publicuser', 'invited'),
-  ('test group long name', 'publicuser', 'invited'),
-  ('publicuser made', 'privateuser', 'requested'),
-  ('publicuser made 2', 'pu2', 'requested'),
-  ('publicuser made', 'pu2', 'invited');
+INSERT INTO memberships (title, nickname, status, chatId) VALUES
+  ('test group', 'publicuser', 'invited', 1),
+  ('test group', 'privateuser', 'requested', 1),
+  ('test group 2', 'publicuser', 'invited', 2),
+  ('test group 3', 'publicuser', 'invited', 3),
+  ('test group 4', 'publicuser', 'invited', 4),
+  ('test group long name', 'publicuser', 'invited', 5),
+  ('publicuser made', 'privateuser', 'requested', 7),
+  ('publicuser made 2', 'pu2', 'requested', 8),
+  ('publicuser made', 'pu2', 'invited', 7);

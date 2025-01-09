@@ -5,7 +5,8 @@ export default async function UpdateMembership(
   id,
   groupname,
   username,
-  status
+  status,
+  chatId
 ) {
   console.log("updating membership", id, groupname, username, status);
   try {
@@ -16,6 +17,7 @@ export default async function UpdateMembership(
         groupname: groupname,
         username: username,
         status: status,
+        chatId: Number(chatId)
       }),
     });
     if (!response.ok) {
