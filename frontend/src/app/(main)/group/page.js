@@ -5,6 +5,7 @@ import RenderList from "@/components/renderList";
 import GroupInvitation from "@/components/groupInvitation";
 import GroupRequests from "@/components/groupRequests";
 import Popup from "@/components/popup";
+import fetchCredential from "@/lib/fetchCredential";
 
 export default function GroupMenu() {
   const [loggedInUsername, setLoggedInUsername] = useState(null);
@@ -51,8 +52,9 @@ export default function GroupMenu() {
   // load necessary data when the page is accessed
   useEffect(() => {
     const GetGroupInfo = async () => {
-      await fetchMemberships(loggedInUsername);
-      await fetchGroups(loggedInUsername);
+      const user = await fetchCredential()
+      await fetchMemberships(user.username);
+      await fetchGroups(user.username);
     }
     GetGroupInfo()
   }, [loggedInUsername]);

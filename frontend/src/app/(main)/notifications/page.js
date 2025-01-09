@@ -7,6 +7,7 @@ import WsClient, { FollowRequest } from "@/lib/wsClient";
 import { useState, useEffect, useRef } from "react";
 
 export default function Notifications() {
+
   const [notifications, setNotifications] = useState([]);
   const [nickname, setNickname] = useState({})
   const ws = useRef(null);

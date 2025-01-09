@@ -257,3 +257,37 @@ func GetChatMessagesWs(event Event, c *Client) error {
 
 	return nil
 }
+
+func InviteMemberWs(event Event, c *Client) error {
+	invitation := struct {
+		Groupname string `json:"groupname"`
+		Username  string `json:"username"`
+	}{}
+	err := json.Unmarshal(event.Payload, &invitation)
+	if err != nil {
+		log.Println("Failed to decode JSON")
+		return err
+	}
+	log.Println("inviting member...", invitation)
+	chatId, err := db.GetChatIdFromGroup(invitation.Groupname)
+	if err != nil {
+		fmt.Println("Error getting chatid from group", err)
+		return err
+	}
+	errorMessage, isError := db.InviteMemberDB(invitation.Groupname, invitation.Username, chatId)
+	fmt.Println("TEST", errorMessage, isError)
+	if isError {
+		if errorMessage != "" {
+			fmt.Println("ERROR in INVIVTE MEMBER", errorMessage)
+		}
+	}
+	for client := range c.manager.clients {
+		if client.user.Nickname == invitation.Username {
+			client.egress <- Event{
+				Type:    "group_invite",
+				Payload: event.Payload,
+			}
+		}
+	}
+	return nil
+}

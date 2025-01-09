@@ -29,7 +29,11 @@ export default function Home() {
       ws.current = wsClient;
 
       ws.current.onmessage = (event) => {
-        alert(`Message received: ${event.type}, ${event.data}`);
+        const eventData = event.data
+        const parsedData = JSON.parse(eventData)
+        if (parsedData.type === "group_invite") {
+          alert(`New invite to group, go to groups page to see it`)
+        }
       };
     };
     load();

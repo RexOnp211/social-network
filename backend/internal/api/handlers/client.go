@@ -136,6 +136,7 @@ var (
 	CreateChatRoomEvent   = "createNewChatRoom"
 	GetGroupChatMessages  = "get_chat_messages"
 	SendGroupChatMessage  = "message_send"
+	sendGroupInvite       = "group_invite"
 )
 
 func (m *Manager) setupEventHandlers() {
@@ -144,6 +145,7 @@ func (m *Manager) setupEventHandlers() {
 	m.handlers[Follow_request_status] = AcceptOrDeclineFollowRequest
 	m.handlers[SendGroupChatMessage] = AddMessageIntoDb
 	m.handlers[GetGroupChatMessages] = GetChatMessagesWs
+	m.handlers[sendGroupInvite] = InviteMemberWs
 }
 
 func (m *Manager) routeEvent(event Event, c *Client) error {

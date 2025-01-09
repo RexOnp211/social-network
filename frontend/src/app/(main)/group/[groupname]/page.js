@@ -90,6 +90,8 @@ export default function Group({ params }) {
       `Request successfully sent to "${decodedGroupname}".`,
       5000
     );
+
+    
   }
 
   // send invitation to other user
