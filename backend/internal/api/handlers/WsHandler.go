@@ -127,6 +127,21 @@ func AcceptOrDeclineFollowRequest(event Event, c *Client) error {
 	return nil
 }
 
-func GetChatMessagesWs(event Event, c *Client) error {
+func GetGroupChatMessagesWs(event Event, c *Client) error {
+	var ChatMsg helpers.PrivateMessage
 
+	fmt.Println("This is the event Payload that i just sent to backend",event.Payload)
+
+	err := json.Unmarshal(event.Payload, &ChatMsg)
+	if err != nil {
+		return fmt.Errorf("bad payload in WS GetChatMessagesWS: %v", err)
+	}
+	fmt.Println("this is the payload after unmarshaling it in getgroupchatmessagesws", ChatMsg)
+
+	err2 := db.AddChatMessageIntoDb(ChatMsg)
+	if err2 != nil {
+		return fmt.Errorf("error in GetGroupCatMessagesWs: %v", err)
+	}
+
+	return nil
 }

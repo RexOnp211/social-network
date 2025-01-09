@@ -99,6 +99,8 @@ export default function Messages() {
         })
       );
     }
+    // i think this payload is where the problem is or maybe its selected user
+    // its saving the messages into the database but its saving empty messages into the database because i think the payload that its sending im maybe not recieving correctly or something
   };
 
   useEffect(() => {

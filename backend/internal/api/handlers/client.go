@@ -133,14 +133,14 @@ var (
 	RemoveFollowRequest   = "remove_follow_request"
 	ErrorEvent            = "error"
 	CreateChatRoomEvent   = "createNewChatRoom"
-	GetChatMessages       = "get_chat_messages"
+	GetGroupChatMessages       = "get_chat_messages"
 )
 
 func (m *Manager) setupEventHandlers() {
 	m.handlers[SendFollowRequest] = SendFollowRequestHandler
 	m.handlers[FollowRequestList] = GetFollowRequestsHandler
 	m.handlers[Follow_request_status] = AcceptOrDeclineFollowRequest
-	m.handlers[GetChatMessages] = GetChatMessagesWs
+	m.handlers[GetGroupChatMessages] = GetGroupChatMessagesWs
 }
 
 func (m *Manager) routeEvent(event Event, c *Client) error {
