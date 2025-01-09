@@ -310,7 +310,7 @@ func GroupPostsHandler(w http.ResponseWriter, r *http.Request) {
 	posts, err := db.GetGroupPostsFromDb(path)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Error getting groups", err)
+		fmt.Println("Error getting groups 1", err)
 		return
 	}
 

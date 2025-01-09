@@ -160,9 +160,9 @@ CREATE TABLE IF NOT EXISTS chatRoom (
 
 CREATE TABLE IF NOT EXISTS chatRoomMembers (
     group_id INTEGER NOT NULL,
-    user_designation TEXT NOT NULL,
-    FOREIGN KEY (group_id) REFERENCES chatRoom(group_id),
-    FOREIGN KEY (user_designation) REFERENCES users(nickname)
+    user_designation INTEGER NOT NULL,
+    FOREIGN KEY (group_id) REFERENCES groups(chatId),
+    FOREIGN KEY (user_designation) REFERENCES users(user_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_status (

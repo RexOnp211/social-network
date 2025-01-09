@@ -17,7 +17,7 @@ func GetGroupFromDb(groupname string) (helpers.Group, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&group.CreatorName, &group.Title, &group.Description)
+		err := rows.Scan(&group.ChatId, &group.CreatorName, &group.Title, &group.Description)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return group, err
@@ -38,7 +38,7 @@ func GetGroupsFromDb() ([]helpers.Group, error) {
 	defer rows.Close()
 	for rows.Next() {
 		group := helpers.Group{}
-		err := rows.Scan(&group.CreatorName, &group.Title, &group.Description)
+		err := rows.Scan(&group.ChatId, &group.CreatorName, &group.Title, &group.Description)
 		if err != nil {
 			log.Println("Scan error:", err)
 			return groups, err
@@ -136,6 +136,30 @@ func UpdateMemberStatus(id int, groupname string, username string, status string
 		log.Println("approved", id, groupname, username, status)
 		query := `UPDATE memberships SET status = ? WHERE id = ?`
 		_, err = DB.Exec(query, "approved", id)
+		group, err := GetGroupFromDb(groupname)
+		if err != nil {
+			fmt.Println("Error getting group in updateMemberstatus", err)
+			return
+		}
+
+		query = "SELECT nickname FROM memberships WHERE id = ? "
+		var nickname string
+		err = DB.QueryRow(query, id).Scan(&nickname)
+		if err != nil {
+			fmt.Println("ERROR getting nickname from membership id", err)
+			return
+		}
+
+		user, err := GetUserFromDb(nickname)
+		if err != nil {
+			fmt.Println("Error getting user from db in updateMemberStatus", err)
+			return
+		}
+		err = AddUserIntoChatRoom(user.Id, group.ChatId)
+		if err != nil {
+			fmt.Println("Error adding user to chat in updateMemberStatus", err)
+			return
+		}
 	}
 
 	if status == "reject" {

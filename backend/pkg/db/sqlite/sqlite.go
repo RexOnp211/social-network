@@ -621,6 +621,7 @@ func AddUserIntoChatRoom(userId, chatId int) error {
 	query := `INSERT INTO chatRoomMembers (group_id, user_designation) VALUES (?, ?);`
 	_, err := DB.Exec(query, chatId, userId)
 	if err != nil {
+		fmt.Println("COULD NOT INSERT USER INTO CHAT ROOM", err)
 		return fmt.Errorf("Could not properly insert %i into chat room group ID of %i", userId, chatId)
 	}
 

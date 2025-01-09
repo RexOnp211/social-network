@@ -103,6 +103,7 @@ export default function GroupMenu() {
   async function fetchGroups(loggedInUsername) {
     const response = await FetchFromBackend(`/groups`, {
       method: "GET",
+      credentials: "include"
     });
     if (!response.ok) {
       throw new Error(`Failed to fetch groups`);

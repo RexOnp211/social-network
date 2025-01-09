@@ -126,3 +126,7 @@ func AcceptOrDeclineFollowRequest(event Event, c *Client) error {
 
 	return nil
 }
+
+func GetChatMessagesWs(event Event, c *Client) error {
+
+}

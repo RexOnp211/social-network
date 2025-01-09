@@ -79,8 +79,10 @@ export default function Messages() {
 
   const switchChat = async (e) => {
     setSelectedUser(e.target.id)
+    console.log("TARGET", e.target.id)
+    console.log("SELECTED USER", selectedUser)
     // add logic here when backend part is done
-    fetchMessages(selectedUser)
+    fetchMessages(e.target.id)
   }
 
   const sendMessage = async () => {
@@ -105,24 +107,22 @@ export default function Messages() {
       ws.current = wsClient;
 
       ws.current.onmessage = (event) => {
-        if (event.type === "message_send") {
-          alert(`Message received: ${event.data}`);
+        if (event.type === "messages") {
+          alert("messages", event.payload)
         }
       };
     };
     load();
   }, []);
 
-  const fetchMessages = async (userId) => {
+  const fetchMessages = async (chatId) => {
     try {
-      const path = ``;
-      const res = await FetchFromBackend(path, {
-        method: "GET",
-        credentials: "include"
-      }
+      ws.current.send(
+        JSON.stringify({
+          type: "get_chat_messages",
+          payload: {chatId: chatId}
+        })
       )
-      const msg = res.json()
-      setMessages(msg)
     } catch (error) {
       console.error(error);
     }
@@ -198,7 +198,7 @@ export default function Messages() {
           ) : (
             groupChats.map((group, index) => (
               <li className="p-2 bg-gray-200 rounded hover:bg-gray-300" key={index}>
-              <button key={index} id={index} onClick={switchChat} >
+              <button key={index} id={group.chatId} onClick={switchChat} >
                 {group.title}
               </button>
               </li>

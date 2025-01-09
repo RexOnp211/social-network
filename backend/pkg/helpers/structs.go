@@ -53,6 +53,7 @@ type Group struct {
 	CreatorName string `json:"creatorName"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	ChatId      int    `json:"chatId"`
 }
 
 type FollowRequest struct {
