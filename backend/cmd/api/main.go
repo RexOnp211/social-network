@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"social-network/internal/api"
 	"social-network/internal/api/handlers"
 	db "social-network/pkg/db/sqlite"
@@ -19,7 +21,10 @@ var DB *sql.DB
 
 func main() {
 
-	dbPath := "../../pkg/db/database.db"
+	// dbPath := "../../pkg/db/database.db"
+	// for Render
+	dbPath := filepath.Join("..", "..", "pkg", "db", "database.db")
+
 	// Correct database path
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		_, err := os.Create(dbPath)
@@ -121,9 +126,22 @@ func main() {
 	r.AddRoute("GET", "/fetch_user_event_status/", http.HandlerFunc(handlers.FetchUserEventStatusHandler))
 	r.AddRoute("POST", "/update_event_status", http.HandlerFunc(handlers.UpdateEventStatusHandler))
 
-	fmt.Println("Starting Go server")
-	err = http.ListenAndServe(":8080", r)
-	if err != nil {
-		fmt.Println("Server Error:", err)
+	/*
+		fmt.Println("Starting Go server")
+		err = http.ListenAndServe(":8080", r)
+		if err != nil {
+			fmt.Println("Server Error:", err)
+		}
+	*/
+
+	// for Render
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // for local fallback
+	}
+	log.Printf("Starting Go server on port %s", port)
+	// Start the server
+	if err := http.ListenAndServe(":"+port, r); err != nil {
+		log.Fatalf("Server Error: %v", err)
 	}
 }
