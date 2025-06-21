@@ -53,6 +53,7 @@ func corsHandler(next http.Handler) http.Handler {
 		allowedOrigins := map[string]bool{
 			"http://localhost:3000": true,
 			"http://app:3000":       true,
+			"https://social-network-frontend-4ub2.onrender.com": true,
 		}
 
 		if allowedOrigins[origin] {
