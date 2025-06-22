@@ -9,8 +9,8 @@ import (
 )
 
 type LoginResponse struct {
-	Id int `json:"id"`
-    Username string `json:"username"`
+	Id       int    `json:"id"`
+	Username string `json:"username"`
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,12 +40,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("TEST", user)
-/* 	userID, err := db.GetUserIDByUsernameOrEmail(username)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to get user ID"))
-		return
-	} */
+	/* 	userID, err := db.GetUserIDByUsernameOrEmail(username)
+	   	if err != nil {
+	   		w.WriteHeader(http.StatusInternalServerError)
+	   		w.Write([]byte("Failed to get user ID"))
+	   		return
+	   	} */
 	token, err := NewSession(w, user.Username, user.UserId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -55,17 +55,24 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("User %s logged in with session token %s", user.Username, token)
 
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	origin := r.Header.Get("Origin")
+	allowedOrigins := map[string]bool{
+		"https://social-network-frontend-4ub2.onrender.com": true,
+	}
+
+	if allowedOrigins[origin] {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+	}
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-    response := LoginResponse{
-		Id: user.UserId,
-        Username: user.Username,
-    }
+	response := LoginResponse{
+		Id:       user.UserId,
+		Username: user.Username,
+	}
 
-    w.Header().Set("Content-Type", "application/json")
-    if err := json.NewEncoder(w).Encode(response); err != nil {
-        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-        return
-    }
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }

@@ -85,7 +85,7 @@ export default function Posts({ params }) {
               width={100}
               height={100}
               size={40}
-              avatar={"http://localhost:8080/avatar/" + post.userId}
+              avatar={`${process.env.NEXT_PUBLIC_API_URL}/avatar/${post.userId}`}
               className={"rounded-full mr-3 w-auto h-16"}
             />
             {nickname || "loading..."}
@@ -94,7 +94,7 @@ export default function Posts({ params }) {
           <p>{post.content}</p>
           {post.image ? (
             <Image
-              src={"http://localhost:8080/image/" + post.image}
+              src={`${process.env.NEXT_PUBLIC_API_URL}/image/ + post.image`}
               alt="post image"
               width={500}
               height={500}
@@ -122,7 +122,7 @@ export default function Posts({ params }) {
                 width={100}
                 height={100}
                 size={40}
-                avatar={"http://localhost:8080/avatar/" + comment.userId}
+                avatar={`${process.env.NEXT_PUBLIC_API_URL}/avatar/" + comment.userId`}
                 className={"rounded-full mr-3 w-auto h-16"}
               />
               {commentNN[comment.userId] || "loading..."}
@@ -130,7 +130,7 @@ export default function Posts({ params }) {
             <p>{comment.content}</p>
             {comment.image ? (
               <Image
-                src={"http://localhost:8080/image/" + comment.image}
+                src={`${process.env.NEXT_PUBLIC_API_URL}/image/" + comment.image`}
                 alt="comment image"
                 width={500}
                 height={500}

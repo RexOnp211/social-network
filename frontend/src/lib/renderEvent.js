@@ -67,7 +67,7 @@ export default function RenderEvent({ event }) {
             width={100}
             height={100}
             size={40}
-            avatar={"http://localhost:8080/avatar/" + event.userId}
+            avatar={`${process.env.NEXT_PUBLIC_API_URL}/avatar/" + event.userId`}
             className={"rounded-full mr-3 w-auto h-16"}
           />
           {event.nickname || "loading..."}

@@ -1,18 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['churchthemes.com'],
+    domains: ['churchthemes.com', 'social-network-backend.onrender.com'],
     remotePatterns: [
       {
-        protocol: "http",
-        hostname: "api",
-        port: "8080",
-        pathname: "/**",
-      },
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "8080",
+        protocol: "https",
+        hostname: "social-network-backend.onrender.com",
         pathname: "/**",
       },
     ],

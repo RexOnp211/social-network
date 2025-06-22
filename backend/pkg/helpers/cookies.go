@@ -8,17 +8,18 @@ import (
 )
 
 func SetCookie(w http.ResponseWriter, value string) {
-	domain := "localhost:3000"
-	if os.Getenv("FE_URL") != "" {
-		domain = os.Getenv("FE_URL")
-	}
 	cookie := http.Cookie{
-		Name:     "session_Id",
+		Name:     "session_id",
 		Value:    value,
 		Path:     "/",
 		Expires:  time.Now().Add(time.Hour),
-		Domain:   domain,
 		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+	}
+	feDomain := os.Getenv("FE_DOMAIN")
+	if feDomain != "" {
+		cookie.Domain = feDomain // ex: "social-network-frontend-4ub2.onrender.com"
 	}
 	http.SetCookie(w, &cookie)
 }
@@ -33,16 +34,18 @@ func GetCookie(r *http.Request, userId string) string {
 }
 
 func DeleteCookie(w http.ResponseWriter, r *http.Request) {
-	domain := "localhost:3000"
-	if os.Getenv("FE_URL") != "" {
-		domain = os.Getenv("FE_URL")
-	}
 	cookie := &http.Cookie{
-		Name:    "session_id",
-		Value:   "",
-		Path:    "/",
-		Domain:  domain,
-		Expires: time.Unix(0, 0),
+		Name:     "session_id",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+	}
+	feDomain := os.Getenv("FE_DOMAIN")
+	if feDomain != "" {
+		cookie.Domain = feDomain
 	}
 	http.SetCookie(w, cookie)
 }

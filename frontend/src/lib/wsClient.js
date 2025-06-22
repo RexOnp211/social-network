@@ -6,7 +6,8 @@ export default async function WsClient() {
     ws.readyState === WebSocket.CLOSING ||
     ws.readyState === WebSocket.CLOSED
   ) {
-    ws = new WebSocket("ws://localhost:8080/ws");
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+    ws = new WebSocket(wsUrl);
 
     ws.onopen = async () => {
       console.log("ws connected");

@@ -115,7 +115,6 @@ func CloseSession(w http.ResponseWriter, r *http.Request) {
 		cookie := http.Cookie{
 			Name:   "session_token",
 			Value:  "",
-			Domain: "localhost",
 			MaxAge: -1,
 			Path:   "/",
 		}
