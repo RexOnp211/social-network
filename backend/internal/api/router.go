@@ -51,8 +51,6 @@ func corsHandler(next http.Handler) http.Handler {
 		origin := r.Header.Get("Origin")
 		// You can customize the list of allowed origins
 		allowedOrigins := map[string]bool{
-			"http://localhost:3000": true,
-			"http://app:3000":       true,
 			"https://social-network-frontend-4ub2.onrender.com": true,
 		}
 
