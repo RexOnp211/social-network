@@ -40,10 +40,11 @@ func NewSession(w http.ResponseWriter, username string, userID int) (string, err
 	cookie := http.Cookie{
 		Name:     "session_token",
 		Value:    session.SessionToken,
-		Domain:   "localhost",
 		Expires:  expiration,
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
 	}
 	http.SetCookie(w, &cookie)
 
